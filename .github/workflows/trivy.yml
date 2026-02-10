@@ -27,7 +27,7 @@ jobs:
       - name: Build images
         run: |
           set -euo pipefail
-          CONTAINER_COMMAND=podman make build
+          CONTAINER_COMMAND=podman make all
       - name: Install Trivy
         run: |
           set -euo pipefail
