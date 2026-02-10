@@ -22,6 +22,11 @@ def main() -> None:
         "--input-shape", required=True, help="Input shape (comma-separated, e.g., 1,3,224,224)"
     )
     pytorch_parser.add_argument("--opset-version", type=int, default=14, help="ONNX opset version")
+    pytorch_parser.add_argument(
+        "--allow-pickle",
+        action="store_true",
+        help="Allow unsafe pickle-based loading for PyTorch models",
+    )
 
     tf_parser = subparsers.add_parser("tensorflow", help="Convert TensorFlow/Keras model to ONNX")
     tf_parser.add_argument("model_path", help="Path to model (SavedModel directory or .h5 file)")
@@ -32,6 +37,11 @@ def main() -> None:
     sklearn_parser.add_argument("model_path", help="Path to pickled sklearn model")
     sklearn_parser.add_argument("output_path", help="Output path for ONNX model")
     sklearn_parser.add_argument("--n-features", type=int, required=True, help="Number of input features")
+    sklearn_parser.add_argument(
+        "--allow-pickle",
+        action="store_true",
+        help="Allow unsafe pickle-based loading for sklearn models",
+    )
 
     args = parser.parse_args()
 
@@ -44,6 +54,12 @@ def main() -> None:
             import torch
 
             from onnx_converter import convert_pytorch_to_onnx
+
+            if not args.allow_pickle:
+                print(
+                    "Warning: torch.load uses pickle under the hood and can execute arbitrary code. "
+                    "Only load models from trusted sources or pass --allow-pickle to acknowledge this risk."
+                )
 
             model = torch.load(args.model_path)
             if isinstance(model, dict) and "model_state_dict" in model:
@@ -84,6 +100,12 @@ def main() -> None:
             from skl2onnx.common.data_types import FloatTensorType
 
             from onnx_converter import convert_sklearn_to_onnx
+
+            if not args.allow_pickle:
+                print(
+                    "Warning: pickle can execute arbitrary code when loading untrusted files. "
+                    "Only load models from trusted sources or pass --allow-pickle to acknowledge this risk."
+                )
 
             with open(args.model_path, "rb") as f:
                 model = pickle.load(f)
