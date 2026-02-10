@@ -1,0 +1,23 @@
+FROM ffreis/base
+
+USER root
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --no-cache-dir uv
+
+RUN uv venv /opt/venv --python python3 \
+    && chown -R appuser:appgroup /opt/venv
+
+ENV PYTHONUNBUFFERED=1
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:${PATH}"
+
+USER appuser:appgroup
+WORKDIR /app
