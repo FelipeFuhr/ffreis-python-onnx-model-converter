@@ -99,9 +99,9 @@ build-cli: build-base-runner build-package ## Build CLI image
 	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.cli -t $(CLI_IMAGE) $(BASE_DIR) \
 		--build-arg PACKAGE_IMAGE="$(PACKAGE_IMAGE)"
 
-.PHONY: build-converter-images
+.PHONY: build build-converter-images
+build: build-converter-images ## Build all converter images (alias used by CI)
 build-converter-images: build-uv-venv build-package build-cli ## Build all converter images
-
 .PHONY: run-cli
 run-cli: ## Run converter CLI image (use RUN_ARGS=...)
 	$(CONTAINER_COMMAND) run --rm $(CLI_IMAGE) $(RUN_ARGS)
