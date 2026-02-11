@@ -1,132 +1,294 @@
 #!/usr/bin/env python3
 """
-ONNX Model Converter CLI
-Command-line interface for converting ML models to ONNX format.
+onnx_converter.cli.app
+
+Typer-based CLI for converting models to ONNX with optional dependencies.
+
+This CLI is designed to keep the core library lightweight while allowing users
+to install only the framework extras they need.
+
+Examples
+--------
+Install core + CLI only:
+
+    uv pip install -e ".[cli]"
+
+Install CLI + sklearn support:
+
+    uv pip install -e ".[cli,sklearn]"
+
+Install everything:
+
+    uv pip install -e ".[cli,sklearn,torch,tensorflow,runtime]"
 """
-import argparse
-import os
-import sys
+
+from __future__ import annotations
+
+import traceback
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Iterable, Optional, Sequence
+
+import typer
+
+from onnx_converter.errors import ConversionError
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Convert ML models from PyTorch, TensorFlow/Keras, or Scikit-learn to ONNX format"
+app = typer.Typer(
+    name="convert-to-onnx",
+    help="Convert ML models (PyTorch / TensorFlow / sklearn) to ONNX.",
+    no_args_is_help=True,
+)
+
+
+# -----------------------------
+# Dependency checks / utilities
+# -----------------------------
+@dataclass(frozen=True)
+class MissingDep:
+    """Represents a missing optional dependency."""
+
+    import_name: str
+    extra_name: str
+    purpose: str
+
+
+def _is_importable(module: str) -> bool:
+    """Return True if `module` can be imported (without importing it)."""
+    try:
+        import importlib.util
+
+        return importlib.util.find_spec(module) is not None
+    except Exception:
+        # Extremely defensive: if spec resolution fails, treat as missing.
+        return False
+
+
+def _require_deps(missing: Sequence[MissingDep]) -> None:
+    """Raise a Typer error if any required deps are missing.
+
+    Parameters
+    ----------
+    missing:
+        A list of MissingDep requirements for a given command.
+    """
+    not_found = [d for d in missing if not _is_importable(d.import_name)]
+    if not not_found:
+        return
+
+    # Build a helpful message with uv extras
+    extras = sorted({d.extra_name for d in not_found})
+    details = "\n".join(
+        f"- Missing '{d.import_name}' ({d.purpose}). Install extra: [bold].[{d.extra_name}][/bold]"
+        for d in not_found
     )
 
-    subparsers = parser.add_subparsers(dest="framework", help="Framework to convert from")
+    uv_hint = f'uv pip install -e ".[cli,{",".join(extras)}]"'
+    pip_hint = f'pip install "onnx-model-converter[cli,{",".join(extras)}]"'
 
-    pytorch_parser = subparsers.add_parser("pytorch", help="Convert PyTorch model to ONNX")
-    pytorch_parser.add_argument("model_path", help="Path to PyTorch model (.pt or .pth file)")
-    pytorch_parser.add_argument("output_path", help="Output path for ONNX model")
-    pytorch_parser.add_argument(
-        "--input-shape", required=True, help="Input shape (comma-separated, e.g., 1,3,224,224)"
+    msg = (
+        "[red]Missing optional dependencies for this command.[/red]\n\n"
+        f"{details}\n\n"
+        "Install with uv (recommended):\n"
+        f"  {uv_hint}\n\n"
+        "Or with pip:\n"
+        f"  {pip_hint}\n"
     )
-    pytorch_parser.add_argument("--opset-version", type=int, default=14, help="ONNX opset version")
-    pytorch_parser.add_argument(
-        "--allow-pickle",
-        action="store_true",
-        help="Allow unsafe pickle-based loading for PyTorch models",
+    raise typer.BadParameter(msg)
+
+
+def _print_conversion_error(exc: Exception, debug: bool) -> int:
+    """Print a user-friendly error, optionally including tracebacks."""
+    typer.echo(f"[red]✗ {type(exc).__name__}:[/red] {exc}", err=True)
+    if debug:
+        typer.echo("\n[dim]Traceback:[/dim]", err=True)
+        typer.echo("".join(traceback.format_exception(type(exc), exc, exc.__traceback__)), err=True)
+    return 1
+
+
+def _validate_if_requested(output_path: Path, validate: bool) -> None:
+    """Validate ONNX output if requested.
+
+    Notes
+    -----
+    - Validation requires `onnx` (core) and `onnxruntime` (runtime extra).
+    """
+    if not validate:
+        return
+
+    _require_deps(
+        [
+            MissingDep("onnxruntime", "runtime", "runtime loading / inference validation"),
+        ]
     )
 
-    tf_parser = subparsers.add_parser("tensorflow", help="Convert TensorFlow/Keras model to ONNX")
-    tf_parser.add_argument("model_path", help="Path to model (SavedModel directory or .h5 file)")
-    tf_parser.add_argument("output_path", help="Output path for ONNX model")
-    tf_parser.add_argument("--opset-version", type=int, default=14, help="ONNX opset version")
+    from onnx_converter.validate import validate_onnx_if_requested
 
-    sklearn_parser = subparsers.add_parser("sklearn", help="Convert Scikit-learn model to ONNX")
-    sklearn_parser.add_argument("model_path", help="Path to pickled sklearn model")
-    sklearn_parser.add_argument("output_path", help="Output path for ONNX model")
-    sklearn_parser.add_argument("--n-features", type=int, required=True, help="Number of input features")
-    sklearn_parser.add_argument(
-        "--allow-pickle",
-        action="store_true",
-        help="Allow unsafe pickle-based loading for sklearn models",
+    validate_onnx_if_requested(output_path, validate=True)
+
+
+# -----------------------------
+# Global options
+# -----------------------------
+@app.callback()
+def _main(
+    ctx: typer.Context,
+    debug: bool = typer.Option(False, "--debug", help="Show full tracebacks on error."),
+) -> None:
+    """Entry point for shared CLI state."""
+    ctx.obj = {"debug": debug}
+
+
+# -----------------------------
+# Commands
+# -----------------------------
+@app.command("pytorch")
+def pytorch_cmd(
+    ctx: typer.Context,
+    model_path: Path = typer.Argument(..., exists=True, readable=True, help="Path to a .pt/.pth model."),
+    output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
+    input_shape: list[int] = typer.Option(
+        ...,
+        "--input-shape",
+        help="Input shape as repeated ints. Example: --input-shape 1 3 224 224",
+    ),
+    opset_version: int = typer.Option(14, "--opset-version", help="ONNX opset version."),
+    allow_unsafe: bool = typer.Option(
+        False,
+        "--allow-unsafe",
+        help="Allow unsafe pickle-based loading for PyTorch models (torch.load fallback).",
+    ),
+    validate: bool = typer.Option(
+        False,
+        "--validate",
+        help="Validate resulting ONNX with onnx + onnxruntime.",
+    ),
+) -> None:
+    """Convert a PyTorch model to ONNX.
+
+    Notes
+    -----
+    - Requires the `torch` extra.
+    - If your model file is TorchScript, your loader should prefer `torch.jit.load`.
+    - If it falls back to `torch.load`, that is pickle-based and unsafe unless trusted.
+    """
+    debug: bool = bool(ctx.obj.get("debug", False))
+
+    _require_deps(
+        [
+            MissingDep("torch", "torch", "PyTorch model loading/export"),
+        ]
     )
-
-    args = parser.parse_args()
-
-    if not args.framework:
-        parser.print_help()
-        sys.exit(1)
 
     try:
-        if args.framework == "pytorch":
-            import torch
+        from onnx_converter.api import convert_torch_file_to_onnx
 
-            from onnx_converter import convert_pytorch_to_onnx
-
-            if not args.allow_pickle:
-                print(
-                    "Warning: torch.load uses pickle under the hood and can execute arbitrary code. "
-                    "Only load models from trusted sources or pass --allow-pickle to acknowledge this risk."
-                )
-
-            model = torch.load(args.model_path)
-            if isinstance(model, dict) and "model_state_dict" in model:
-                print(
-                    "Warning: Model appears to be a checkpoint. "
-                    "Please load the model architecture separately."
-                )
-                sys.exit(1)
-
-            input_shape = tuple(map(int, args.input_shape.split(",")))
-
-            convert_pytorch_to_onnx(
-                model,
-                args.output_path,
-                input_shape,
-                opset_version=args.opset_version,
-            )
-
-        elif args.framework == "tensorflow":
-            import tensorflow as tf
-
-            from onnx_converter import convert_tensorflow_to_onnx
-
-            if os.path.isdir(args.model_path):
-                model = args.model_path
-            else:
-                model = tf.keras.models.load_model(args.model_path)
-
-            convert_tensorflow_to_onnx(
-                model,
-                args.output_path,
-                opset_version=args.opset_version,
-            )
-
-        elif args.framework == "sklearn":
-            import pickle
-
-            from skl2onnx.common.data_types import FloatTensorType
-
-            from onnx_converter import convert_sklearn_to_onnx
-
-            if not args.allow_pickle:
-                print(
-                    "Warning: pickle can execute arbitrary code when loading untrusted files. "
-                    "Only load models from trusted sources or pass --allow-pickle to acknowledge this risk."
-                )
-
-            with open(args.model_path, "rb") as f:
-                model = pickle.load(f)
-
-            initial_types = [("input", FloatTensorType([None, args.n_features]))]
-
-            convert_sklearn_to_onnx(
-                model,
-                args.output_path,
-                initial_types=initial_types,
-            )
-
-        print(f"\n✓ Conversion complete! ONNX model saved to: {args.output_path}")
-
+        out = convert_torch_file_to_onnx(
+            model_path=model_path,
+            output_path=output_path,
+            input_shape=tuple(input_shape),
+            opset_version=opset_version,
+            allow_unsafe=allow_unsafe,
+        )
+        _validate_if_requested(out, validate)
+        typer.echo(f"[green]✓ Saved:[/green] {out}")
+    except ConversionError as exc:
+        raise typer.Exit(code=_print_conversion_error(exc, debug))
     except Exception as exc:
-        print(f"\n✗ Error during conversion: {exc}", file=sys.stderr)
-        import traceback
+        # Unexpected crash: still show a clean message; debug prints traceback.
+        raise typer.Exit(code=_print_conversion_error(exc, debug))
 
-        traceback.print_exc()
-        sys.exit(1)
+
+@app.command("tensorflow")
+def tensorflow_cmd(
+    ctx: typer.Context,
+    model_path: Path = typer.Argument(
+        ...,
+        exists=True,
+        help="Path to a SavedModel directory or a Keras .h5 file.",
+    ),
+    output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
+    opset_version: int = typer.Option(14, "--opset-version", help="ONNX opset version."),
+    validate: bool = typer.Option(False, "--validate", help="Validate resulting ONNX with onnx + onnxruntime."),
+) -> None:
+    """Convert a TensorFlow/Keras model to ONNX.
+
+    Notes
+    -----
+    - Requires the `tensorflow` extra (and typically `tf2onnx`).
+    """
+    debug: bool = bool(ctx.obj.get("debug", False))
+
+    _require_deps(
+        [
+            MissingDep("tensorflow", "tensorflow", "TensorFlow/Keras model loading"),
+            MissingDep("tf2onnx", "tensorflow", "TensorFlow → ONNX conversion"),
+        ]
+    )
+
+    try:
+        from onnx_converter.api import convert_tf_path_to_onnx
+
+        out = convert_tf_path_to_onnx(
+            model_path=model_path,
+            output_path=output_path,
+            opset_version=opset_version,
+        )
+        _validate_if_requested(out, validate)
+        typer.echo(f"[green]✓ Saved:[/green] {out}")
+    except ConversionError as exc:
+        raise typer.Exit(code=_print_conversion_error(exc, debug))
+    except Exception as exc:
+        raise typer.Exit(code=_print_conversion_error(exc, debug))
+
+
+@app.command("sklearn")
+def sklearn_cmd(
+    ctx: typer.Context,
+    model_path: Path = typer.Argument(..., exists=True, readable=True, help="Path to .joblib/.skops/.pkl model."),
+    output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
+    n_features: int = typer.Option(..., "--n-features", min=1, help="Number of input features."),
+    allow_unsafe: bool = typer.Option(
+        False,
+        "--allow-unsafe",
+        help="Allow unsafe pickle-based loading for sklearn (.pkl). Prefer .joblib or .skops.",
+    ),
+    validate: bool = typer.Option(False, "--validate", help="Validate resulting ONNX with onnx + onnxruntime."),
+) -> None:
+    """Convert a Scikit-learn model to ONNX.
+
+    Notes
+    -----
+    - Requires the `sklearn` extra (scikit-learn + skl2onnx + joblib + skops).
+    - `.skops` is preferred for safer loading when available.
+    """
+    debug: bool = bool(ctx.obj.get("debug", False))
+
+    _require_deps(
+        [
+            MissingDep("sklearn", "sklearn", "Scikit-learn model support"),
+            MissingDep("skl2onnx", "sklearn", "Sklearn → ONNX conversion"),
+            MissingDep("joblib", "sklearn", "Joblib model loading"),
+            MissingDep("skops", "sklearn", "Safer sklearn serialization (.skops)"),
+        ]
+    )
+
+    try:
+        from onnx_converter.api import convert_sklearn_file_to_onnx
+
+        out = convert_sklearn_file_to_onnx(
+            model_path=model_path,
+            output_path=output_path,
+            n_features=n_features,
+            allow_unsafe=allow_unsafe,
+        )
+        _validate_if_requested(out, validate)
+        typer.echo(f"[green]✓ Saved:[/green] {out}")
+    except ConversionError as exc:
+        raise typer.Exit(code=_print_conversion_error(exc, debug))
+    except Exception as exc:
+        raise typer.Exit(code=_print_conversion_error(exc, debug))
 
 
 if __name__ == "__main__":
-    main()
+    app()
