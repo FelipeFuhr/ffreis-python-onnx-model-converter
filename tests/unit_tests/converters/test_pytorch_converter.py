@@ -143,7 +143,7 @@ def test_convert_torch_file_requires_allow_unsafe(tmp_path, monkeypatch) -> None
                         ) from safe_exc
                     raise
 
-    with pytest.raises((ConversionError, UnsafeLoadError)):
+    with pytest.raises(UnsafeLoadError, match="TorchScript loading failed"):
         convert_torch_file(
             model_path=model_path,
             output_path=output_path,
