@@ -84,7 +84,7 @@ def _converter(scope: Any, operator: Any, container: Any) -> None:
     """
     op = operator.raw_operator
     factor = np.array([op.factor], dtype=np.float32)
-    onnx_op = OnnxMul(operator.inputs[0], factor, op_version=container.target_opset)
+    onnx_op = OnnxMul(operator.inputs[0], factor, output_names=[operator.outputs[0].full_name], op_version=container.target_opset)
     onnx_op.add_to(scope, container)
 
 

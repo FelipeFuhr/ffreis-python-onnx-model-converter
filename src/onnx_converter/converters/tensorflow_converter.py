@@ -56,6 +56,11 @@ def convert_tensorflow_to_onnx(
             **kwargs
         )
     elif isinstance(model, tf.keras.Model):
+        # Keras 3 removed ``output_names`` on some model classes while older
+        # tf2onnx paths still expect it.
+        if not hasattr(model, "output_names") and hasattr(model, "outputs"):
+            model.output_names = [tensor.name.split(":")[0] for tensor in model.outputs]
+
         if input_signature is None:
             if hasattr(model, "input_shape"):
                 input_shape = model.input_shape
@@ -77,5 +82,4 @@ def convert_tensorflow_to_onnx(
     else:
         raise ValueError(f"Unsupported model type: {type(model)}")
 
-    print(f"✓ TensorFlow/Keras model successfully converted to ONNX: {output_path}")
     return output_path

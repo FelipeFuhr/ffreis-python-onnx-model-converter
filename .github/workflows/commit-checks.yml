@@ -38,7 +38,7 @@ jobs:
       - name: Install deps
         run: |
           set -euo pipefail
-          uv sync --group dev
+          uv sync --extra dev
 
       # install pre-commit itself (if not already in dev deps)
       - name: Install pre-commit

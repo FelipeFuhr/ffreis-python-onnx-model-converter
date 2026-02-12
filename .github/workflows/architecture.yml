@@ -1,0 +1,44 @@
+name: Architecture
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  architecture:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Require lock
+        run: test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
+
+      - name: Install deps
+        run: uv sync --extra dev
+
+      - name: Dependency sync check
+        run: uv run python scripts/check_dependencies_sync.py
+
+      - name: Architecture boundaries check
+        run: uv run python scripts/check_architecture.py
+
+      - name: Application mypy strict
+        run: uv run mypy src/onnx_converter/application
+
+      - name: Orchestrator complexity check
+        run: uv run python scripts/check_orchestrator_complexity.py

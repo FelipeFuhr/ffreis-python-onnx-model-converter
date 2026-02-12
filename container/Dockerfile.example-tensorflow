@@ -1,0 +1,7 @@
+FROM onnx-converter/examples-base
+
+RUN uv pip install --system --editable ".[runtime]" && \
+    uv pip install --system "tensorflow-cpu>=2.13.0" "tf2onnx>=1.16.0"
+
+USER appuser:appgroup
+ENTRYPOINT ["python3.11", "examples/tensorflow_example.py"]

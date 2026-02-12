@@ -3,7 +3,7 @@
 SHELL := /usr/bin/env bash
 
 CONTAINER_COMMAND ?= podman
-PYTHON_VERSION ?= 3.10
+PYTHON_VERSION ?= 3.12
 VENV_DIR ?= .venv
 
 PREFIX ?= ffreis
@@ -42,8 +42,7 @@ install: ## Install runtime dependencies
 .PHONY: install-dev
 install-dev: ## Install dev tooling
 	$(VENV_DIR)/bin/pip install --upgrade pip
-	$(VENV_DIR)/bin/pip install -e "./[${EXTRAS}]"
-	$(VENV_DIR)/bin/pip install ruff black isort flake8 mypy pytest
+	$(VENV_DIR)/bin/pip install -e "./[all,dev]"
 
 .PHONY: format
 format: ## Format code (ruff + black + isort)
@@ -61,13 +60,38 @@ lint: ## Lint code (ruff + flake8 + mypy)
 test: ## Run tests
 	$(VENV_DIR)/bin/pytest -q
 
+.PHONY: test-unit
+test-unit: ## Run unit tests only
+	$(VENV_DIR)/bin/pytest -q -m "not integration"
+
+.PHONY: test-integration
+test-integration: ## Run integration tests only
+	$(VENV_DIR)/bin/pytest -q -m integration
+
 .PHONY: check
-check: lint test ## Run lint and tests
+check: lint test-unit ## Run lint and fast tests
 
 .PHONY: coverage
 coverage: ## Generate coverage report
 	mkdir -p coverage
-	$(VENV_DIR)/bin/pytest --cov=src --cov-report=xml:coverage/cobertura.xml --cov-report=html:coverage/html --cov-report=term
+	$(VENV_DIR)/bin/pytest -m "not integration" --cov=onnx_converter --cov-report=xml:coverage.xml --cov-report=html:coverage/html --cov-report=term
+
+.PHONY: deps-sync-check
+deps-sync-check: ## Verify requirements.txt is synced with pyproject.toml
+	$(VENV_DIR)/bin/python scripts/check_dependencies_sync.py
+
+.PHONY: deps-sync-generate
+deps-sync-generate: ## Regenerate requirements.txt from pyproject.toml
+	$(VENV_DIR)/bin/python scripts/generate_requirements.py
+
+.PHONY: architecture-check
+architecture-check: ## Run architecture and complexity checks
+	$(VENV_DIR)/bin/python scripts/check_architecture.py
+	$(VENV_DIR)/bin/python scripts/check_orchestrator_complexity.py
+	$(VENV_DIR)/bin/mypy src/onnx_converter/application
+
+.PHONY: ci-local
+ci-local: deps-sync-check architecture-check lint test-unit coverage ## Approximate default CI checks locally
 
 .PHONY: clean
 clean: ## Remove caches and venv

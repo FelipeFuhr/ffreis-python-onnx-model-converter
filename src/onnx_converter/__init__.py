@@ -133,8 +133,16 @@ def convert_sklearn_to_onnx(
         **kwargs,
     )
 
+
+def convert_custom_file_to_onnx(**kwargs: Any) -> Any:
+    """Convert model artifact through plugin-based adapter resolution."""
+    from .api import convert_custom_file_to_onnx as _impl
+
+    return _impl(**kwargs)
+
 __all__ = [
     "convert_pytorch_to_onnx",
     "convert_tensorflow_to_onnx",
     "convert_sklearn_to_onnx",
+    "convert_custom_file_to_onnx",
 ]
