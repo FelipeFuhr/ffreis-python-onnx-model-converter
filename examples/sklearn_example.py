@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-Example: Convert Scikit-learn models and pipelines to ONNX
-This example demonstrates how to convert various sklearn models to ONNX format.
-"""
+"""Example script for converting scikit-learn models and pipelines to ONNX."""
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
@@ -16,8 +13,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-def example_simple_classifier():
-    """Example 1: Simple Random Forest Classifier"""
+def example_simple_classifier() -> None:
+    """Run a RandomForest scikit-learn conversion example."""
     print("\n" + "=" * 60)
     print("Example 1: Random Forest Classifier")
     print("=" * 60)
@@ -56,8 +53,8 @@ def example_simple_classifier():
     print(f"\n   SUCCESS! Model saved to: {output_path}")
 
 
-def example_pipeline():
-    """Example 2: Sklearn Pipeline with Preprocessing"""
+def example_pipeline() -> None:
+    """Run a pipeline conversion example with preprocessing."""
     print("\n" + "=" * 60)
     print("Example 2: Pipeline (Scaler + Random Forest)")
     print("=" * 60)
@@ -101,7 +98,8 @@ def example_pipeline():
     print(f"\n   SUCCESS! Pipeline saved to: {output_path}")
 
 
-def main():
+def main() -> None:
+    """Run all scikit-learn conversion examples."""
     print("=" * 60)
     print("Scikit-learn to ONNX Conversion Examples")
     print("=" * 60)

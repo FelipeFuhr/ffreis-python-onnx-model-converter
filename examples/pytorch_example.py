@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-Example: Convert a PyTorch model to ONNX
-This example demonstrates how to convert a pretrained ResNet18 model to ONNX format.
-"""
+"""Example script for converting a pretrained PyTorch model to ONNX."""
 import torch
 import torchvision.models as models
 from onnx_converter import convert_pytorch_to_onnx
@@ -13,7 +10,8 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-def main():
+def main() -> None:
+    """Run the PyTorch-to-ONNX conversion example."""
     print("=" * 60)
     print("PyTorch to ONNX Conversion Example")
     print("=" * 60)

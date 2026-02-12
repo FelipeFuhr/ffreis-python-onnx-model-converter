@@ -88,7 +88,7 @@ convert_sklearn_to_onnx(
 
 ```bash
 # PyTorch
-convert-to-onnx pytorch model.pt output.onnx --input-shape 1,3,224,224
+convert-to-onnx pytorch model.pt output.onnx --input-shape 1 3 224 224
 
 # TensorFlow/Keras
 convert-to-onnx tensorflow saved_model_dir output.onnx
@@ -110,6 +110,9 @@ python examples/tensorflow_example.py
 
 # Scikit-learn example (Random Forest + Pipelines)
 python examples/sklearn_example.py
+
+# Scikit-learn example with custom transformer + CLI
+python examples/sklearn_custom_cli_example.py
 ```
 
 ## API Reference

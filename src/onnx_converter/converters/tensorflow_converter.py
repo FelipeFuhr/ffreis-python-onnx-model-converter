@@ -1,39 +1,51 @@
-"""
-TensorFlow/Keras to ONNX Converter
-"""
+"""TensorFlow/Keras-to-ONNX conversion utilities."""
+
+from __future__ import annotations
+
 import os
-from typing import List, Optional
+from typing import Any
+from typing import Optional
 
 import tensorflow as tf
 import tf2onnx
 
 
 def convert_tensorflow_to_onnx(
-    model,
+    model: str | tf.keras.Model,
     output_path: str,
-    input_signature: Optional[List[tf.TensorSpec]] = None,
+    input_signature: Optional[list[tf.TensorSpec]] = None,
     opset_version: int = 14,
-    **kwargs
+    **kwargs: Any,
 ) -> str:
+    """Convert a TensorFlow or Keras model to ONNX format.
+
+    Parameters
+    ----------
+    model
+        TensorFlow/Keras model instance or SavedModel path.
+    output_path : str
+        Path where the ONNX model will be written.
+    input_signature : list[tf.TensorSpec], optional
+        Input tensor signature passed to ``tf2onnx``.
+    opset_version : int, default=14
+        ONNX opset version used by ``tf2onnx``.
+    **kwargs
+        Additional keyword arguments forwarded to ``tf2onnx.convert``.
+
+    Returns
+    -------
+    str
+        Path to the saved ONNX model.
+
+    Raises
+    ------
+    ValueError
+        If ``model`` is neither a SavedModel path nor a ``tf.keras.Model``.
     """
-    Convert a TensorFlow or Keras model to ONNX format.
-
-    Args:
-        model: TensorFlow/Keras model to convert (can be tf.keras.Model or path to SavedModel)
-        output_path: Path where the ONNX model will be saved
-        input_signature: List of TensorSpec defining input shapes and dtypes
-        opset_version: ONNX opset version (default: 14)
-        **kwargs: Additional arguments to pass to tf2onnx.convert
-
-    Returns:
-        Path to the saved ONNX model
-
-    Example:
-        >>> model = tf.keras.applications.MobileNetV2(weights='imagenet')
-        >>> input_spec = [tf.TensorSpec((None, 224, 224, 3), tf.float32, name="input")]
-        >>> convert_tensorflow_to_onnx(model, "mobilenet.onnx", input_signature=input_spec)
-    """
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+    os.makedirs(
+        os.path.dirname(output_path) if os.path.dirname(output_path) else ".",
+        exist_ok=True,
+    )
 
     if isinstance(model, str):
         tf2onnx.convert.from_saved_model(

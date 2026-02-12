@@ -46,7 +46,7 @@ app = typer.Typer(
 # -----------------------------
 @dataclass(frozen=True)
 class MissingDep:
-    """Represents a missing optional dependency."""
+    """Represent a missing optional dependency."""
 
     import_name: str
     extra_name: str
@@ -54,7 +54,18 @@ class MissingDep:
 
 
 def _is_importable(module: str) -> bool:
-    """Return True if `module` can be imported (without importing it)."""
+    """Check whether a module can be resolved.
+
+    Parameters
+    ----------
+    module : str
+        Module name to resolve.
+
+    Returns
+    -------
+    bool
+        ``True`` if the module can be imported, otherwise ``False``.
+    """
     try:
         import importlib.util
 
@@ -69,8 +80,8 @@ def _require_deps(missing: Sequence[MissingDep]) -> None:
 
     Parameters
     ----------
-    missing:
-        A list of MissingDep requirements for a given command.
+    missing : Sequence[MissingDep]
+        Missing dependency requirements for a command.
     """
     not_found = [d for d in missing if not _is_importable(d.import_name)]
     if not not_found:
@@ -97,8 +108,54 @@ def _require_deps(missing: Sequence[MissingDep]) -> None:
     raise typer.BadParameter(msg)
 
 
+def _import_custom_module(module_or_path: str) -> None:
+    """Import a module by name or file path to register custom converters.
+
+    Parameters
+    ----------
+    module_or_path : str
+        Import path or filesystem path to a Python module.
+
+    Raises
+    ------
+    typer.BadParameter
+        If the module cannot be loaded or imported.
+    """
+    import importlib
+    import importlib.util
+
+    candidate = Path(module_or_path)
+    if candidate.exists():
+        spec = importlib.util.spec_from_file_location(candidate.stem, candidate)
+        if spec is None or spec.loader is None:
+            raise typer.BadParameter(f"Unable to load module from {candidate}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return
+
+    try:
+        importlib.import_module(module_or_path)
+    except Exception as exc:
+        raise typer.BadParameter(
+            f"Unable to import module '{module_or_path}': {exc}"
+        ) from exc
+
+
 def _print_conversion_error(exc: Exception, debug: bool) -> int:
-    """Print a user-friendly error, optionally including tracebacks."""
+    """Print a user-friendly conversion error.
+
+    Parameters
+    ----------
+    exc : Exception
+        Exception raised during conversion.
+    debug : bool
+        Whether to include traceback details.
+
+    Returns
+    -------
+    int
+        Process exit code.
+    """
     typer.echo(f"[red]✗ {type(exc).__name__}:[/red] {exc}", err=True)
     if debug:
         typer.echo("\n[dim]Traceback:[/dim]", err=True)
@@ -108,6 +165,13 @@ def _print_conversion_error(exc: Exception, debug: bool) -> int:
 
 def _validate_if_requested(output_path: Path, validate: bool) -> None:
     """Validate ONNX output if requested.
+
+    Parameters
+    ----------
+    output_path : Path
+        Path to the generated ONNX file.
+    validate : bool
+        Whether runtime validation should be executed.
 
     Notes
     -----
@@ -135,7 +199,15 @@ def _main(
     ctx: typer.Context,
     debug: bool = typer.Option(False, "--debug", help="Show full tracebacks on error."),
 ) -> None:
-    """Entry point for shared CLI state."""
+    """Initialize shared CLI state.
+
+    Parameters
+    ----------
+    ctx : typer.Context
+        Typer context object used to store shared state.
+    debug : bool, default=False
+        Whether to enable debug error output.
+    """
     ctx.obj = {"debug": debug}
 
 
@@ -165,6 +237,23 @@ def pytorch_cmd(
     ),
 ) -> None:
     """Convert a PyTorch model to ONNX.
+
+    Parameters
+    ----------
+    ctx : typer.Context
+        Typer context containing global options.
+    model_path : Path
+        Path to a ``.pt`` or ``.pth`` model file.
+    output_path : Path
+        Destination path for the ONNX output.
+    input_shape : list[int]
+        Input tensor shape passed to the exporter.
+    opset_version : int, default=14
+        ONNX opset version used for export.
+    allow_unsafe : bool, default=False
+        Whether to allow pickle-based fallback loading.
+    validate : bool, default=False
+        Whether to validate the generated ONNX model.
 
     Notes
     -----
@@ -213,6 +302,19 @@ def tensorflow_cmd(
 ) -> None:
     """Convert a TensorFlow/Keras model to ONNX.
 
+    Parameters
+    ----------
+    ctx : typer.Context
+        Typer context containing global options.
+    model_path : Path
+        Path to a SavedModel directory or a Keras ``.h5`` file.
+    output_path : Path
+        Destination path for the ONNX output.
+    opset_version : int, default=14
+        ONNX opset version used for export.
+    validate : bool, default=False
+        Whether to validate the generated ONNX model.
+
     Notes
     -----
     - Requires the `tensorflow` extra (and typically `tf2onnx`).
@@ -248,6 +350,11 @@ def sklearn_cmd(
     model_path: Path = typer.Argument(..., exists=True, readable=True, help="Path to .joblib/.skops/.pkl model."),
     output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
     n_features: int = typer.Option(..., "--n-features", min=1, help="Number of input features."),
+    custom_converter_module: Optional[str] = typer.Option(
+        None,
+        "--custom-converter-module",
+        help="Python module or file path that registers custom skl2onnx converters.",
+    ),
     allow_unsafe: bool = typer.Option(
         False,
         "--allow-unsafe",
@@ -256,6 +363,23 @@ def sklearn_cmd(
     validate: bool = typer.Option(False, "--validate", help="Validate resulting ONNX with onnx + onnxruntime."),
 ) -> None:
     """Convert a Scikit-learn model to ONNX.
+
+    Parameters
+    ----------
+    ctx : typer.Context
+        Typer context containing global options.
+    model_path : Path
+        Path to a serialized scikit-learn model artifact.
+    output_path : Path
+        Destination path for the ONNX output.
+    n_features : int
+        Number of model input features.
+    custom_converter_module : str | None, default=None
+        Optional module path for custom ``skl2onnx`` converter registration.
+    allow_unsafe : bool, default=False
+        Whether to allow loading pickle-based ``.pkl`` artifacts.
+    validate : bool, default=False
+        Whether to validate the generated ONNX model.
 
     Notes
     -----
@@ -272,6 +396,9 @@ def sklearn_cmd(
             MissingDep("skops", "sklearn", "Safer sklearn serialization (.skops)"),
         ]
     )
+
+    if custom_converter_module:
+        _import_custom_module(custom_converter_module)
 
     try:
         from onnx_converter.api import convert_sklearn_file_to_onnx
