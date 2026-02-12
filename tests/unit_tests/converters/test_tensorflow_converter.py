@@ -37,7 +37,8 @@ def test_convert_tf_path_uses_savedmodel_dir(tmp_path, monkeypatch) -> None:
 
     # Mock the converter to avoid importing real tf2onnx
     def fake_convert(**kwargs: Any) -> str:
-        # For SavedModel directories, the model parameter should be the path
+        # For SavedModel directories, the model parameter should be the path string
+        assert kwargs["model"] == str(model_path)
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_tensorflow_to_onnx", fake_convert)
@@ -61,7 +62,8 @@ def test_convert_tf_path_loads_file(tmp_path, monkeypatch) -> None:
 
     # Mock the converter to avoid importing real tf2onnx
     def fake_convert(**kwargs: Any) -> str:
-        # For regular files, the loader should load the model
+        # For regular files, the loader should load the model (checking for "loaded:" prefix)
+        assert kwargs["model"] == f"loaded:{model_path}"
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_tensorflow_to_onnx", fake_convert)
