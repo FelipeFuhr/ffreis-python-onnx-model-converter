@@ -6,33 +6,15 @@ from typing import Any
 from typing import Callable
 
 import pytest
-
+import onnx_converter
 from onnx_converter import api as api_module
 from onnx_converter.errors import ConversionError
+
+from .conftest import mock_converter_dependencies
 
 
 class _DummyModel:
     pass
-
-
-class _FakeParityChecker:
-    """Fake parity checker for testing."""
-    def check(self, *args, **kwargs):
-        pass
-
-
-def _mock_converter_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Mock converter, postprocessor, and parity checker dependencies."""
-    import onnx_converter
-    import onnx_converter.postprocess
-    import onnx_converter.adapters.parity_checkers
-    
-    # Mock postprocess functions to avoid loading ONNX files
-    monkeypatch.setattr(onnx_converter.postprocess, "add_standard_metadata", lambda **kwargs: None)
-    monkeypatch.setattr(onnx_converter.postprocess, "add_onnx_metadata", lambda *args, **kwargs: None)
-    
-    # Mock parity checker to avoid dependencies
-    monkeypatch.setattr(onnx_converter.adapters.parity_checkers, "TorchParityChecker", _FakeParityChecker)
 
 
 def _install_dummy_torch(
@@ -58,8 +40,6 @@ def _install_dummy_torch(
 
 
 def test_convert_torch_file_prefers_torchscript(tmp_path, monkeypatch) -> None:
-    import onnx_converter
-    
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")
     output_path = tmp_path / "out.onnx"
@@ -78,7 +58,7 @@ def test_convert_torch_file_prefers_torchscript(tmp_path, monkeypatch) -> None:
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
-    _mock_converter_dependencies(monkeypatch)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
     out = api_module.convert_torch_file_to_onnx(
         model_path=model_path,
@@ -92,8 +72,6 @@ def test_convert_torch_file_prefers_torchscript(tmp_path, monkeypatch) -> None:
 
 
 def test_convert_torch_file_requires_allow_unsafe(tmp_path, monkeypatch) -> None:
-    import onnx_converter
-    
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")
     output_path = tmp_path / "out.onnx"
@@ -111,7 +89,7 @@ def test_convert_torch_file_requires_allow_unsafe(tmp_path, monkeypatch) -> None
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
-    _mock_converter_dependencies(monkeypatch)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
     with pytest.raises(ConversionError):
         api_module.convert_torch_file_to_onnx(
@@ -124,8 +102,6 @@ def test_convert_torch_file_requires_allow_unsafe(tmp_path, monkeypatch) -> None
 
 
 def test_convert_torch_file_uses_torch_load_when_allowed(tmp_path, monkeypatch) -> None:
-    import onnx_converter
-    
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")
     output_path = tmp_path / "out.onnx"
@@ -146,7 +122,7 @@ def test_convert_torch_file_uses_torch_load_when_allowed(tmp_path, monkeypatch) 
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
-    _mock_converter_dependencies(monkeypatch)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
     out = api_module.convert_torch_file_to_onnx(
         model_path=model_path,
@@ -161,8 +137,6 @@ def test_convert_torch_file_uses_torch_load_when_allowed(tmp_path, monkeypatch) 
 
 
 def test_convert_torch_file_falls_back_to_unsafe_only_when_allowed(tmp_path, monkeypatch) -> None:
-    import onnx_converter
-    
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")
     output_path = tmp_path / "out.onnx"
@@ -185,7 +159,7 @@ def test_convert_torch_file_falls_back_to_unsafe_only_when_allowed(tmp_path, mon
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
-    _mock_converter_dependencies(monkeypatch)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
     out = api_module.convert_torch_file_to_onnx(
         model_path=model_path,

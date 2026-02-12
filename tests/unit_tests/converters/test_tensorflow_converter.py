@@ -5,27 +5,10 @@ import types
 from typing import Any
 
 import pytest
+import onnx_converter
 from onnx_converter import api as api_module
 
-
-class _FakeParityChecker:
-    """Fake parity checker for testing."""
-    def check(self, *args, **kwargs):
-        pass
-
-
-def _mock_converter_dependencies(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Mock converter, postprocessor, and parity checker dependencies."""
-    import onnx_converter
-    import onnx_converter.postprocess
-    import onnx_converter.adapters.parity_checkers
-    
-    # Mock postprocess functions to avoid loading ONNX files
-    monkeypatch.setattr(onnx_converter.postprocess, "add_standard_metadata", lambda **kwargs: None)
-    monkeypatch.setattr(onnx_converter.postprocess, "add_onnx_metadata", lambda *args, **kwargs: None)
-    
-    # Mock parity checker to avoid dependencies
-    monkeypatch.setattr(onnx_converter.adapters.parity_checkers, "TensorflowParityChecker", _FakeParityChecker)
+from .conftest import mock_converter_dependencies
 
 
 def _install_dummy_tf(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -46,8 +29,6 @@ def _install_dummy_tf(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_convert_tf_path_uses_savedmodel_dir(tmp_path, monkeypatch) -> None:
-    import onnx_converter
-    
     model_path = tmp_path / "saved_model"
     model_path.mkdir()
     output_path = tmp_path / "out.onnx"
@@ -60,7 +41,7 @@ def test_convert_tf_path_uses_savedmodel_dir(tmp_path, monkeypatch) -> None:
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_tensorflow_to_onnx", fake_convert)
-    _mock_converter_dependencies(monkeypatch)
+    mock_converter_dependencies(monkeypatch, framework="tensorflow")
 
     out = api_module.convert_tf_path_to_onnx(
         model_path=model_path,
@@ -72,8 +53,6 @@ def test_convert_tf_path_uses_savedmodel_dir(tmp_path, monkeypatch) -> None:
 
 
 def test_convert_tf_path_loads_file(tmp_path, monkeypatch) -> None:
-    import onnx_converter
-    
     model_path = tmp_path / "model.h5"
     model_path.write_text("dummy")
     output_path = tmp_path / "out.onnx"
@@ -86,7 +65,7 @@ def test_convert_tf_path_loads_file(tmp_path, monkeypatch) -> None:
         return str(output_path)
 
     monkeypatch.setattr(onnx_converter, "convert_tensorflow_to_onnx", fake_convert)
-    _mock_converter_dependencies(monkeypatch)
+    mock_converter_dependencies(monkeypatch, framework="tensorflow")
 
     out = api_module.convert_tf_path_to_onnx(
         model_path=model_path,
