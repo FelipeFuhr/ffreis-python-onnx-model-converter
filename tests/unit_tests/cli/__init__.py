@@ -1,1 +1,1 @@
-"""Unit tests for CLI."""
+"""Unit tests for CLI modules."""

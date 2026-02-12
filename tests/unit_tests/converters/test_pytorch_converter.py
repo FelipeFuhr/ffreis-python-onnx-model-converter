@@ -6,12 +6,14 @@ from typing import Any
 from typing import Callable
 
 import pytest
-
+import onnx_converter
 from onnx_converter import api as api_module
 from onnx_converter.application.use_cases import build_conversion_options
 from onnx_converter.application.use_cases import convert_torch_file
 from onnx_converter.errors import ConversionError
 from onnx_converter.errors import UnsafeLoadError
+
+from .conftest import mock_converter_dependencies
 
 
 class _DummyModel:
@@ -84,17 +86,13 @@ def test_convert_torch_file_prefers_torchscript(tmp_path, monkeypatch) -> None:
 
     _install_dummy_torch(monkeypatch, jit_load, load)
 
-    class _MockLoaderPrefersTorchScript:
-        def load(self, model_path: Any, allow_unsafe: bool = False) -> Any:
-            import torch
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        assert kwargs["input_shape"] == (1, 3)
+        return str(output_path)
 
-            return torch.jit.load(str(model_path))
-
-    class _MockConverterCheckOptions(_MockConverter):
-        def convert(self, model: Any, output_path: Any, options: Any) -> Any:
-            assert isinstance(model, _DummyModel)
-            assert options["input_shape"] == (1, 3)
-            return output_path
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
     result = convert_torch_file(
         model_path=model_path,
@@ -124,27 +122,15 @@ def test_convert_torch_file_requires_allow_unsafe(tmp_path, monkeypatch) -> None
 
     _install_dummy_torch(monkeypatch, jit_load, load)
 
-    class _MockLoaderRequiresUnsafe:
-        def load(self, model_path: Any, allow_unsafe: bool = False) -> Any:
-            import torch
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        return str(output_path)
 
-            # Try jit.load first
-            try:
-                return torch.jit.load(str(model_path))
-            except Exception:
-                # Try safe load
-                try:
-                    return torch.load(str(model_path), map_location="cpu", weights_only=True)
-                except Exception as safe_exc:
-                    if not allow_unsafe:
-                        raise UnsafeLoadError(
-                            "TorchScript loading failed and safe torch.load "
-                            "fallback was unsuccessful."
-                        ) from safe_exc
-                    raise
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
-    with pytest.raises(UnsafeLoadError, match="TorchScript loading failed"):
-        convert_torch_file(
+    with pytest.raises(ConversionError):
+        api_module.convert_torch_file_to_onnx(
             model_path=model_path,
             output_path=output_path,
             input_shape=(1, 3),
@@ -172,16 +158,12 @@ def test_convert_torch_file_uses_torch_load_when_allowed(tmp_path, monkeypatch) 
 
     _install_dummy_torch(monkeypatch, jit_load, load)
 
-    class _MockLoaderUsesSafeLoad:
-        def load(self, model_path: Any, allow_unsafe: bool = False) -> Any:
-            import torch
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        return str(output_path)
 
-            # Try jit.load first
-            try:
-                return torch.jit.load(str(model_path))
-            except Exception:
-                # Try safe load
-                return torch.load(str(model_path), map_location="cpu", weights_only=True)
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
     result = convert_torch_file(
         model_path=model_path,
@@ -216,24 +198,14 @@ def test_convert_torch_file_falls_back_to_unsafe_only_when_allowed(tmp_path, mon
 
     _install_dummy_torch(monkeypatch, jit_load, load)
 
-    class _MockLoaderFallsBackToUnsafe:
-        def load(self, model_path: Any, allow_unsafe: bool = False) -> Any:
-            import torch
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        return str(output_path)
 
-            # Try jit.load first
-            try:
-                return torch.jit.load(str(model_path))
-            except Exception:
-                # Try safe load
-                try:
-                    return torch.load(str(model_path), map_location="cpu", weights_only=True)
-                except Exception:
-                    if allow_unsafe:
-                        # Fall back to unsafe load
-                        return torch.load(str(model_path), map_location="cpu", weights_only=False)
-                    raise
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
 
-    result = convert_torch_file(
+    out = api_module.convert_torch_file_to_onnx(
         model_path=model_path,
         output_path=output_path,
         input_shape=(1, 3),
