@@ -14,3 +14,6 @@ RUN apt-get update && \
 RUN python3.11 -m pip install --no-cache-dir --upgrade pip uv
 
 COPY --chown=appuser:appgroup . /app
+RUN chmod -R a-w /app
+
+USER appuser

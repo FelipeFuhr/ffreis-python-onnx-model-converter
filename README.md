@@ -39,6 +39,7 @@ The codebase follows a layered structure to separate orchestration from framewor
 - Public file-based API wrappers over application use-cases.
 
 For a deeper walkthrough (sequence, boundaries, plugin authoring), see `docs/architecture.md`.
+For advanced plugin patterns and testing contract details, see `docs/plugin-authoring.md`.
 
 ## Request flow
 
