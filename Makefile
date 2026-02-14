@@ -109,7 +109,7 @@ clean: ## Remove caches and venv
 
 .PHONY: build-base
 build-base: ## Build base image (pinned by digest env)
-	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.base -t $(PREFIX)/base $(BASE_DIR) \
+	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.base -t $(PREFIX)/base -t $(PREFIX)/base:local $(BASE_DIR) \
 		--build-arg BASE_IMAGE="$(BASE_IMAGE_VALUE)" \
 		--build-arg BASE_DIGEST="$(BASE_DIGEST_VALUE)"
 

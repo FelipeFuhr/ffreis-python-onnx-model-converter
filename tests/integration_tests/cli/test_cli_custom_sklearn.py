@@ -42,12 +42,12 @@ def test_cli_sklearn_custom_transformer(tmp_path: Path) -> None:
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
-    MultiplyByConstant = module.MultiplyByConstant
+    multiply_by_constant = module.MultiplyByConstant
 
     X, y = load_iris(return_X_y=True)
     pipeline = Pipeline(
         [
-            ("scale", MultiplyByConstant(factor=1.5)),
+            ("scale", multiply_by_constant(factor=1.5)),
             ("clf", LogisticRegression(max_iter=200)),
         ]
     )

@@ -1,4 +1,5 @@
-FROM ffreis/base
+ARG BASE_IMAGE=ffreis/base:local
+FROM ${BASE_IMAGE}
 
 ARG EXTRAS=all
 
@@ -10,17 +11,15 @@ RUN apt-get update && \
       python3-venv \
       python3-pip \
       ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN python3 -m pip install --no-cache-dir uv
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m pip install --no-cache-dir uv
 
 WORKDIR /tmp/project
 
 COPY pyproject.toml uv.lock ./
 
-RUN test -s uv.lock || (echo "uv.lock is required for container builds"; exit 1)
-
-RUN uv venv /opt/venv --python python3 \
+RUN test -s uv.lock || (echo "uv.lock is required for container builds"; exit 1) \
+ && uv venv /opt/venv --python python3 \
  && . /opt/venv/bin/activate \
  && uv sync --extra ${EXTRAS}
 

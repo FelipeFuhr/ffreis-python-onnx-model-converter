@@ -48,6 +48,7 @@ METADATA_HELP = "Custom ONNX metadata KEY=VALUE (repeatable)."
 QUANTIZE_HELP = "Apply ONNX Runtime dynamic quantization."
 OPTIMIZE_HELP = "Optimize ONNX graph after conversion."
 QUANTIZE_PURPOSE = "dynamic quantization"
+OUTPUT_PATH_HELP = "Where to write the .onnx file."
 
 
 # -----------------------------
@@ -274,7 +275,7 @@ def pytorch_cmd(
         readable=True,
         help="Path to a .pt/.pth model.",
     ),
-    output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
+    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
     input_shape: list[int] = typer.Option(
         ...,
         "--input-shape",
@@ -401,7 +402,7 @@ def tensorflow_cmd(
         exists=True,
         help="Path to a SavedModel directory or a Keras .h5 file.",
     ),
-    output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
+    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
     opset_version: int = typer.Option(
         14, "--opset-version", help="ONNX opset version."
     ),
@@ -500,7 +501,7 @@ def sklearn_cmd(
         readable=True,
         help="Path to .joblib/.skops/.pkl model.",
     ),
-    output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
+    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
     n_features: int = typer.Option(
         ..., "--n-features", min=1, help="Number of input features."
     ),
@@ -623,7 +624,7 @@ def custom_cmd(
         readable=True,
         help="Path to model artifact handled by a plugin.",
     ),
-    output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
+    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
     model_type: str | None = typer.Option(
         None,
         "--model-type",
