@@ -37,10 +37,10 @@ jobs:
           set -euo pipefail
           test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
 
-      - name: Install deps (dev)
+      - name: Install deps (dev + cli)
         run: |
           set -euo pipefail
-          uv sync --extra dev
+          uv sync --extra dev --extra cli
 
       - name: Generate coverage report
         run: |
@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload coverage to DeepSource
         if: ${{ secrets.DEEPSOURCE_DSN != '' }}
-        uses: deepsourcelabs/test-coverage-action@v1.1.3
+        uses: deepsourcelabs/test-coverage-action@4284bb73a04adb39faaa6bfcc2d0e3dd137ffed7
         with:
           key: python
           coverage-file: coverage.xml

@@ -33,8 +33,8 @@ jobs:
           set -euo pipefail
           test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
 
-      - name: Install deps (dev)
-        run: uv sync --extra dev
+      - name: Install deps (dev + cli)
+        run: uv sync --extra dev --extra cli
 
       - name: Generate coverage (Makefile)
         run: |

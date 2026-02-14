@@ -112,7 +112,7 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--strict-markers --tb=short -ra"
+addopts = "--strict-markers --tb=short -ra --import-mode=importlib"
 markers = [
     "unit: fast, isolated unit tests",
     "integration: integration tests that may require optional deps",

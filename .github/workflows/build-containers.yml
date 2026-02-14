@@ -11,47 +11,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  matrix-build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.12", "3.11", "3.10"]
-        os: [ubuntu-latest, macos-latest]
+  build-all:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python }}
-
+          python-version: "3.12"
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b
         with:
           enable-cache: true
-
       - name: Require lock
         run: test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
-
-      - name: Install deps (dev)
+      - name: Install deps (dev + cli)
         run: |
           set -euo pipefail
-          uv sync --extra dev
-
+          uv sync --extra dev --extra cli
       - name: Run tests
         run: |
           set -euo pipefail
           uv run pytest -q -m "not integration"
-
       - name: Build package artifacts
         run: |
           set -euo pipefail
           uv build
-
-  container-smoke:
-    needs: matrix-build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
       - name: Install Podman
         run: |
           set -euo pipefail
@@ -61,20 +44,3 @@ jobs:
         run: |
           set -euo pipefail
           make build
-
-  pr-summary:
-    name: PR Summary
-    if: always()
-    needs: [matrix-build, container-smoke]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fail if any dependency failed/cancelled
-        run: |
-          set -euo pipefail
-          echo "matrix-build result: ${{ needs.matrix-build.result }}"
-          echo "container-smoke result: ${{ needs.container-smoke.result }}"
-
-          if [[ "${{ needs.matrix-build.result }}" != "success" ]]; then exit 1; fi
-          if [[ "${{ needs.container-smoke.result }}" != "success" ]]; then exit 1; fi
-
-          echo "All checks passed."

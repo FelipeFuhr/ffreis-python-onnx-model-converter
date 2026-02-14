@@ -35,6 +35,7 @@ def test_pytorch_missing_deps(tmp_path, monkeypatch) -> None:
             str(output_path),
             "--input-shape",
             "1",
+            "--input-shape",
             "3",
         ],
     )
@@ -59,12 +60,14 @@ def test_pytorch_invokes_api(tmp_path, monkeypatch) -> None:
         input_shape,
         opset_version,
         allow_unsafe,
+        **kwargs,
     ):
         called["model_path"] = model_path
         called["output_path"] = output_path
         called["input_shape"] = input_shape
         called["opset_version"] = opset_version
         called["allow_unsafe"] = allow_unsafe
+        called["kwargs"] = kwargs
         return output_path
 
     import onnx_converter.api as api_module
@@ -79,8 +82,11 @@ def test_pytorch_invokes_api(tmp_path, monkeypatch) -> None:
             str(output_path),
             "--input-shape",
             "1",
+            "--input-shape",
             "3",
+            "--input-shape",
             "224",
+            "--input-shape",
             "224",
         ],
     )
@@ -92,3 +98,4 @@ def test_pytorch_invokes_api(tmp_path, monkeypatch) -> None:
     assert called["input_shape"] == (1, 3, 224, 224)
     assert called["opset_version"] == 14
     assert called["allow_unsafe"] is False
+    assert called["kwargs"] == {}
