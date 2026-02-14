@@ -16,4 +16,3 @@ def test_cli_help_smoke() -> None:
 
     assert result.returncode == 0, result.stderr
     assert "Convert ML models" in result.stdout
-

@@ -9,8 +9,8 @@ RUN apt-get update && \
       libopenblas-dev \
       liblapack-dev && \
     rm -rf /var/lib/apt/lists/* && \
-    uv pip install --system --editable ".[cli,runtime,sklearn]" && \
-    uv pip install --system "auto-sklearn==0.15.0"
+    uv pip install --python /opt/examples-venv/bin/python --editable ".[cli,runtime,sklearn]" && \
+    uv pip install --python /opt/examples-venv/bin/python "auto-sklearn==0.15.0"
 
 USER appuser:appgroup
 ENV AUTOSKLEARN_FLAVOR=2

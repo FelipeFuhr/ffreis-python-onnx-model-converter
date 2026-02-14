@@ -19,11 +19,11 @@ def test_sklearn_convert(tmp_path: Path) -> None:
 
     from onnx_converter.converters.sklearn_converter import convert_sklearn_to_onnx
 
-    X, y = load_iris(return_X_y=True)
-    model = LogisticRegression(max_iter=200).fit(X, y)
+    features, labels = load_iris(return_X_y=True)
+    model = LogisticRegression(max_iter=200).fit(features, labels)
 
     output_path = tmp_path / "model.onnx"
-    initial_types = [("input", FloatTensorType([None, X.shape[1]]))]
+    initial_types = [("input", FloatTensorType([None, features.shape[1]]))]
 
     out = convert_sklearn_to_onnx(
         model=model,

@@ -8,6 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from onnx_converter.cli import cli as cli_module
+from onnx_converter.errors import ConversionError
 
 runner = CliRunner()
 
@@ -106,3 +107,35 @@ def test_pytorch_invokes_api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     assert called["opset_version"] == 14
     assert called["allow_unsafe"] is False
     assert called["kwargs"] == {}
+
+
+def test_pytorch_handles_conversion_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Return non-zero and print conversion error details when API fails."""
+    model_path = tmp_path / "model.pt"
+    model_path.write_text("dummy")
+    output_path = tmp_path / "out.onnx"
+    monkeypatch.setattr(cli_module, "_is_importable", lambda _name: True)
+
+    def fake_convert(**_: object) -> Path:
+        raise ConversionError("bad export")
+
+    import onnx_converter.api as api_module
+
+    monkeypatch.setattr(api_module, "convert_torch_file_to_onnx", fake_convert)
+    result = runner.invoke(
+        cli_module.app,
+        [
+            "pytorch",
+            str(model_path),
+            str(output_path),
+            "--input-shape",
+            "1",
+            "--input-shape",
+            "3",
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "ConversionError" in result.output

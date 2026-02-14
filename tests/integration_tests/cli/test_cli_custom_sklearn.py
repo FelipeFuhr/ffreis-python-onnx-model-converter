@@ -44,7 +44,7 @@ def test_cli_sklearn_custom_transformer(tmp_path: Path) -> None:
     spec.loader.exec_module(module)
     multiply_by_constant = module.MultiplyByConstant
 
-    X, y = load_iris(return_X_y=True)
+    features, labels = load_iris(return_X_y=True)
     pipeline = Pipeline(
         [
             ("scale", multiply_by_constant(factor=1.5)),
@@ -52,7 +52,7 @@ def test_cli_sklearn_custom_transformer(tmp_path: Path) -> None:
         ],
         memory=None,
     )
-    pipeline.fit(X, y)
+    pipeline.fit(features, labels)
 
     model_path = tmp_path / "custom.joblib"
     output_path = tmp_path / "custom.onnx"
@@ -65,7 +65,7 @@ def test_cli_sklearn_custom_transformer(tmp_path: Path) -> None:
             str(model_path),
             str(output_path),
             "--n-features",
-            str(X.shape[1]),
+            str(features.shape[1]),
             "--allow-unsafe",
             "--custom-converter-module",
             str(converter_module),

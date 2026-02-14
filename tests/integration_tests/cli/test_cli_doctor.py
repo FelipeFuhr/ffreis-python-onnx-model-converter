@@ -15,4 +15,3 @@ def test_doctor_command_runs_and_prints_python() -> None:
     assert result.exit_code == 0
     assert "Python:" in result.output
     assert "onnx:" in result.output
-

@@ -11,6 +11,7 @@ from onnx_converter.adapters.converters import (
     TensorflowModelConverter,
     TorchModelConverter,
 )
+from onnx_converter.errors import UnsupportedModelError
 
 
 def test_torch_adapter_roundtrip_contract(
@@ -99,3 +100,36 @@ def test_sklearn_adapter_roundtrip_contract(
     assert result == out
     assert called["output_path"] == str(out)
     assert called["target_opset"] == 14
+
+
+def test_sklearn_adapter_requires_positive_n_features(tmp_path: Path) -> None:
+    """Raise when sklearn adapter receives invalid n_features option."""
+    with pytest.raises(UnsupportedModelError, match="n_features is required"):
+        SklearnModelConverter().convert(
+            model=object(),
+            output_path=tmp_path / "x.onnx",
+            options={"n_features": 0},
+        )
+
+
+def test_sklearn_adapter_requires_skl2onnx_for_inference(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Raise when inferred initial types require missing skl2onnx dependency."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def fake_import(name: str, *args: object, **kwargs: object) -> object:
+        if name.startswith("skl2onnx"):
+            raise ImportError("missing")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    with pytest.raises(UnsupportedModelError, match="skl2onnx is required"):
+        SklearnModelConverter().convert(
+            model=object(),
+            output_path=tmp_path / "x.onnx",
+            options={"n_features": 4},
+        )

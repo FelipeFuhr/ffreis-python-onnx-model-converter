@@ -19,8 +19,8 @@ def test_cli_sklearn_roundtrip(tmp_path: Path) -> None:
     from sklearn.datasets import load_iris
     from sklearn.linear_model import LogisticRegression
 
-    X, y = load_iris(return_X_y=True)
-    model = LogisticRegression(max_iter=200, random_state=42).fit(X, y)
+    features, labels = load_iris(return_X_y=True)
+    model = LogisticRegression(max_iter=200, random_state=42).fit(features, labels)
 
     model_path = tmp_path / "model.joblib"
     onnx_path = tmp_path / "model.onnx"
@@ -32,7 +32,7 @@ def test_cli_sklearn_roundtrip(tmp_path: Path) -> None:
         str(model_path),
         str(onnx_path),
         "--n-features",
-        str(X.shape[1]),
+        str(features.shape[1]),
         "--allow-unsafe",
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, check=False)

@@ -11,8 +11,13 @@ RUN apt-get update && \
       ca-certificates && \
     python3 -m venv /opt/uv-bootstrap && \
     /opt/uv-bootstrap/bin/pip install --no-cache-dir --upgrade pip uv && \
+    python3 -m venv /opt/examples-venv && \
+    chown -R appuser:appgroup /opt/examples-venv && \
     ln -sf /opt/uv-bootstrap/bin/uv /usr/local/bin/uv && \
     rm -rf /var/lib/apt/lists/*
+
+ENV VIRTUAL_ENV=/opt/examples-venv
+ENV PATH="/opt/examples-venv/bin:${PATH}"
 
 COPY --chown=appuser:appgroup --chmod=0444 . /app
 RUN find /app -type d -exec chmod 0555 {} + && \

@@ -61,16 +61,16 @@ def test_validate_wraps_runtime_validation_error(
     model_path = tmp_path / "m.onnx"
     model_path.write_bytes(b"bad")
 
-    class _FakeOrt:
-        @staticmethod
-        def InferenceSession(path: str) -> object:
-            del path
-            return object()
+    def inference_session(path: str) -> object:
+        del path
+        return object()
+
+    fake_ort = types.SimpleNamespace(InferenceSession=inference_session)
 
     def _raise_check_error(_: object) -> None:
         raise ValueError("broken")
 
-    monkeypatch.setitem(sys.modules, "onnxruntime", _FakeOrt)
+    monkeypatch.setitem(sys.modules, "onnxruntime", fake_ort)
     monkeypatch.setattr(onnx, "load", lambda _: object())
     monkeypatch.setattr(onnx.checker, "check_model", _raise_check_error)
 

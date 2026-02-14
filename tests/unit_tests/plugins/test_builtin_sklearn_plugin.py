@@ -15,6 +15,7 @@ class DummyLoader:
     """Test double for sklearn model loading."""
 
     def __init__(self) -> None:
+        """Initialize call history."""
         self.calls: list[tuple[Path, bool]] = []
 
     def load(self, model_path: Path, allow_unsafe: bool = False) -> object:
@@ -27,6 +28,7 @@ class DummyConverter:
     """Test double for sklearn model conversion."""
 
     def __init__(self, out: Path) -> None:
+        """Initialize output path and call history."""
         self.out = out
         self.calls: list[dict[str, object]] = []
 
@@ -46,6 +48,7 @@ class DummyParity:
     """Test double for parity checking."""
 
     def __init__(self) -> None:
+        """Initialize call history."""
         self.calls: list[object] = []
 
     def check(self, model: object, onnx_path: Path, parity: object) -> None:
@@ -57,6 +60,7 @@ class DummyPost:
     """Test double for post-processing pipeline."""
 
     def __init__(self) -> None:
+        """Initialize call history."""
         self.calls: list[object] = []
 
     def run(
@@ -152,3 +156,36 @@ def test_calls_adapters(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None
     assert converter.calls
     assert parity.calls
     assert post.calls
+
+
+def test_can_handle_model_type_and_suffix() -> None:
+    """Handle explicit model types and known sklearn artifact suffixes."""
+    plugin = SklearnFilePlugin()
+    assert plugin.can_handle(Path("x.bin"), "sklearn") is True
+    assert plugin.can_handle(Path("x.bin"), "autosklearn") is True
+    assert plugin.can_handle(Path("x.joblib"), None) is True
+    assert plugin.can_handle(Path("x.unknown"), None) is False
+
+
+def test_calls_adapters_without_opset_version(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Do not inject target_opset when plugin opset_version is omitted."""
+    loader = DummyLoader()
+    converter = DummyConverter(out=tmp_path / "out.onnx")
+    parity = DummyParity()
+    post = DummyPost()
+
+    monkeypatch.setattr(builtins, "SklearnModelLoader", lambda: loader)
+    monkeypatch.setattr(builtins, "SklearnModelConverter", lambda: converter)
+    monkeypatch.setattr(builtins, "SklearnParityChecker", lambda: parity)
+    monkeypatch.setattr(builtins, "OnnxPostProcessorImpl", lambda: post)
+
+    plugin = SklearnFilePlugin()
+    plugin.convert(
+        model_path=tmp_path / "model.skops",
+        output_path=tmp_path / "out.onnx",
+        options={"n_features": 8},
+    )
+
+    assert "target_opset" not in converter.calls[0]["options"]
