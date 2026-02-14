@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
+import sys
+from importlib import util
 from pathlib import Path
 
 import joblib
@@ -14,10 +17,27 @@ from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 
-try:
-    from examples.custom_sklearn_transformer import MultiplyByConstant
-except ModuleNotFoundError:
-    from custom_sklearn_transformer import MultiplyByConstant
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _load_transformer_class() -> type:
+    """Load ``MultiplyByConstant`` from the custom transformer module."""
+    module_name = "examples.custom_sklearn_transformer"
+    if module_name in sys.modules:
+        module = sys.modules[module_name]
+        return module.MultiplyByConstant
+
+    module_path = PROJECT_ROOT / "examples" / "custom_sklearn_transformer.py"
+    spec = util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load custom module from {module_path}")
+    module = util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module.MultiplyByConstant
+
+
+MultiplyByConstant = _load_transformer_class()
 
 
 def main() -> None:
@@ -47,10 +67,23 @@ def main() -> None:
         "--n-features",
         str(X.shape[1]),
         "--custom-converter-module",
-        "examples/custom_sklearn_transformer.py",
+        "examples.custom_sklearn_transformer",
         "--allow-unsafe",
     ]
-    result = subprocess.run(command, check=False, capture_output=True, text=True)
+    env = os.environ.copy()
+    existing_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = (
+        f"{PROJECT_ROOT}:{existing_pythonpath}"
+        if existing_pythonpath
+        else str(PROJECT_ROOT)
+    )
+    result = subprocess.run(
+        command,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
     print(result.stdout)
     if result.returncode != 0:
         raise SystemExit(f"FAIL: CLI conversion failed.\n{result.stderr}")
