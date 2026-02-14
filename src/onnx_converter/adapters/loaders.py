@@ -6,9 +6,11 @@ import inspect
 from pathlib import Path
 from typing import Any
 
-from onnx_converter.errors import DependencyError
-from onnx_converter.errors import UnsafeLoadError
-from onnx_converter.errors import UnsupportedModelError
+from onnx_converter.errors import (
+    DependencyError,
+    UnsafeLoadError,
+    UnsupportedModelError,
+)
 
 
 def _torch_load_weights_only(torch_module: object, model_path: Path) -> object:
@@ -55,7 +57,8 @@ class TorchModelLoader:
             "model_state_dict" in model or "state_dict" in model
         ):
             raise UnsupportedModelError(
-                "Model appears to be a checkpoint. Load the architecture and export from code."
+                "Model appears to be a checkpoint. "
+                "Load the architecture and export from code."
             )
         return model
 
@@ -68,7 +71,9 @@ class TensorflowModelLoader:
         try:
             import tensorflow as tf
         except Exception as exc:
-            raise DependencyError("TensorFlow is required for this conversion.") from exc
+            raise DependencyError(
+                "TensorFlow is required for this conversion."
+            ) from exc
 
         if model_path.is_dir():
             return str(model_path)
@@ -91,14 +96,18 @@ class SklearnModelLoader:
             try:
                 from skops.io import load as skops_load
             except Exception as exc:
-                raise DependencyError("skops is required to load .skops artifacts.") from exc
+                raise DependencyError(
+                    "skops is required to load .skops artifacts."
+                ) from exc
             return skops_load(str(model_path))
 
         if suffix in {".joblib", ".jl", ".pkl", ".pickle"}:
             try:
                 import joblib
             except Exception as exc:
-                raise DependencyError("joblib is required for sklearn artifact loading.") from exc
+                raise DependencyError(
+                    "joblib is required for sklearn artifact loading."
+                ) from exc
             return joblib.load(str(model_path))
 
         raise UnsupportedModelError(

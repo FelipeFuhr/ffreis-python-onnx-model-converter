@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 from onnx_converter.application.options import PostprocessOptions
-from onnx_converter.postprocess import add_onnx_metadata
-from onnx_converter.postprocess import add_standard_metadata
-from onnx_converter.postprocess import optimize_onnx_graph
-from onnx_converter.postprocess import quantize_onnx_dynamic
+from onnx_converter.postprocess import (
+    add_onnx_metadata,
+    add_standard_metadata,
+    optimize_onnx_graph,
+    quantize_onnx_dynamic,
+)
 
 
 class OnnxPostProcessorImpl:

@@ -4,7 +4,6 @@ from typer.testing import CliRunner
 
 from onnx_converter.cli import cli as cli_module
 
-
 runner = CliRunner()
 
 

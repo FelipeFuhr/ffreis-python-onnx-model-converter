@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from onnx_converter.adapters.converters import SklearnModelConverter
-from onnx_converter.adapters.converters import TensorflowModelConverter
-from onnx_converter.adapters.converters import TorchModelConverter
+from onnx_converter.adapters.converters import (
+    SklearnModelConverter,
+    TensorflowModelConverter,
+    TorchModelConverter,
+)
 
 
 def test_torch_adapter_roundtrip_contract(monkeypatch, tmp_path: Path) -> None:
@@ -74,7 +76,11 @@ def test_sklearn_adapter_roundtrip_contract(monkeypatch, tmp_path: Path) -> None
     result = SklearnModelConverter().convert(
         model=object(),
         output_path=out,
-        options={"n_features": 4, "target_opset": 14, "initial_types": [("input", object())]},
+        options={
+            "n_features": 4,
+            "target_opset": 14,
+            "initial_types": [("input", object())],
+        },
     )
 
     assert result == out

@@ -99,7 +99,8 @@ def _require_deps(missing: Sequence[MissingDep]) -> None:
     # Build a helpful message with uv extras
     extras = sorted({d.extra_name for d in not_found})
     details = "\n".join(
-        f"- Missing '{d.import_name}' ({d.purpose}). Install extra: [bold].[{d.extra_name}][/bold]"
+        f"- Missing '{d.import_name}' ({d.purpose}). "
+        f"Install extra: [bold].[{d.extra_name}][/bold]"
         for d in not_found
     )
 
@@ -156,7 +157,10 @@ def _print_conversion_error(exc: Exception, debug: bool) -> int:
     typer.echo(f"[red]✗ {type(exc).__name__}:[/red] {exc}", err=True)
     if debug:
         typer.echo("\n[dim]Traceback:[/dim]", err=True)
-        typer.echo("".join(traceback.format_exception(type(exc), exc, exc.__traceback__)), err=True)
+        typer.echo(
+            "".join(traceback.format_exception(type(exc), exc, exc.__traceback__)),
+            err=True,
+        )
     code = getattr(exc, "exit_code", None)
     if isinstance(code, int) and code > 0:
         return code
@@ -227,7 +231,9 @@ def _validate_if_requested(output_path: Path, validate: bool) -> None:
 
     _require_deps(
         [
-            MissingDep("onnxruntime", "runtime", "runtime loading / inference validation"),
+            MissingDep(
+                "onnxruntime", "runtime", "runtime loading / inference validation"
+            ),
         ]
     )
 
@@ -274,7 +280,9 @@ def pytorch_cmd(
         "--input-shape",
         help="Input shape as repeated ints. Example: --input-shape 1 3 224 224",
     ),
-    opset_version: int = typer.Option(14, "--opset-version", help="ONNX opset version."),
+    opset_version: int = typer.Option(
+        14, "--opset-version", help="ONNX opset version."
+    ),
     input_names: list[str] | None = typer.Option(
         None, "--input-name", help="Input tensor name (repeatable)."
     ),
@@ -287,7 +295,10 @@ def pytorch_cmd(
     allow_unsafe: bool = typer.Option(
         False,
         "--allow-unsafe",
-        help="Allow unsafe pickle-based loading for PyTorch models (torch.load fallback).",
+        help=(
+            "Allow unsafe pickle-based loading for PyTorch models "
+            "(torch.load fallback)."
+        ),
     ),
     optimize: bool = typer.Option(
         False,
@@ -297,9 +308,7 @@ def pytorch_cmd(
     quantize_dynamic: bool = typer.Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(
-        None, "--metadata", help=METADATA_HELP
-    ),
+    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
     parity_input: Path | None = typer.Option(
         None,
         "--parity-input",
@@ -329,8 +338,10 @@ def pytorch_cmd(
     -----
     - Requires the `torch` extra.
     - If your model file is TorchScript, your loader should prefer `torch.jit.load`.
-    - Fallback first tries constrained `torch.load(..., weights_only=True)` when available.
-    - Full `torch.load` deserialization is pickle-based and unsafe unless the file is trusted.
+    - Fallback first tries constrained
+      `torch.load(..., weights_only=True)` when available.
+    - Full `torch.load` deserialization is pickle-based and unsafe unless the file
+      is trusted.
     """
     debug: bool = bool(ctx.obj.get("debug", False))
 
@@ -376,10 +387,10 @@ def pytorch_cmd(
         )
         typer.echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
         # Unexpected crash: still show a clean message; debug prints traceback.
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("tensorflow")
@@ -391,7 +402,9 @@ def tensorflow_cmd(
         help="Path to a SavedModel directory or a Keras .h5 file.",
     ),
     output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
-    opset_version: int = typer.Option(14, "--opset-version", help="ONNX opset version."),
+    opset_version: int = typer.Option(
+        14, "--opset-version", help="ONNX opset version."
+    ),
     optimize: bool = typer.Option(
         False,
         "--optimize",
@@ -400,9 +413,7 @@ def tensorflow_cmd(
     quantize_dynamic: bool = typer.Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(
-        None, "--metadata", help=METADATA_HELP
-    ),
+    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
     parity_input: Path | None = typer.Option(
         None,
         "--parity-input",
@@ -413,9 +424,7 @@ def tensorflow_cmd(
     parity_atol: float = typer.Option(
         1e-5, "--parity-atol", help="Absolute tolerance for parity check."
     ),
-    parity_rtol: float = typer.Option(
-        1e-4, "--parity-rtol", help=PARITY_RTOL_HELP
-    ),
+    parity_rtol: float = typer.Option(1e-4, "--parity-rtol", help=PARITY_RTOL_HELP),
     validate: bool = typer.Option(
         False, "--validate", help="Validate resulting ONNX with onnx + onnxruntime."
     ),
@@ -477,9 +486,9 @@ def tensorflow_cmd(
         _validate_if_requested(out, validate)
         typer.echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("sklearn")
@@ -492,7 +501,9 @@ def sklearn_cmd(
         help="Path to .joblib/.skops/.pkl model.",
     ),
     output_path: Path = typer.Argument(..., help="Where to write the .onnx file."),
-    n_features: int = typer.Option(..., "--n-features", min=1, help="Number of input features."),
+    n_features: int = typer.Option(
+        ..., "--n-features", min=1, help="Number of input features."
+    ),
     custom_converter_module: str | None = typer.Option(
         None,
         "--custom-converter-module",
@@ -501,7 +512,10 @@ def sklearn_cmd(
     allow_unsafe: bool = typer.Option(
         False,
         "--allow-unsafe",
-        help="Allow unsafe pickle-based loading for sklearn (.joblib/.pkl). Prefer .skops.",
+        help=(
+            "Allow unsafe pickle-based loading for sklearn (.joblib/.pkl). "
+            "Prefer .skops."
+        ),
     ),
     optimize: bool = typer.Option(
         False,
@@ -511,9 +525,7 @@ def sklearn_cmd(
     quantize_dynamic: bool = typer.Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(
-        None, "--metadata", help=METADATA_HELP
-    ),
+    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
     parity_input: Path | None = typer.Option(
         None,
         "--parity-input",
@@ -524,9 +536,7 @@ def sklearn_cmd(
     parity_atol: float = typer.Option(
         1e-5, "--parity-atol", help="Absolute tolerance for parity check."
     ),
-    parity_rtol: float = typer.Option(
-        1e-4, "--parity-rtol", help=PARITY_RTOL_HELP
-    ),
+    parity_rtol: float = typer.Option(1e-4, "--parity-rtol", help=PARITY_RTOL_HELP),
     validate: bool = typer.Option(
         False, "--validate", help="Validate resulting ONNX with onnx + onnxruntime."
     ),
@@ -599,9 +609,9 @@ def sklearn_cmd(
         _validate_if_requested(out, validate)
         typer.echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("custom")
@@ -641,9 +651,7 @@ def custom_cmd(
     quantize_dynamic: bool = typer.Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(
-        None, "--metadata", help=METADATA_HELP
-    ),
+    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
     parity_input: Path | None = typer.Option(
         None,
         "--parity-input",
@@ -684,9 +692,9 @@ def custom_cmd(
         )
         typer.echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug))
+        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("doctor")
@@ -721,7 +729,8 @@ def doctor_cmd() -> None:
 
     if py_ver >= (3, 12) and tf_version is None:
         typer.echo(
-            "[yellow]Note:[/yellow] TensorFlow wheels may require Python 3.11 for some versions."
+            "[yellow]Note:[/yellow] TensorFlow wheels may require "
+            "Python 3.11 for some versions."
         )
 
     try:

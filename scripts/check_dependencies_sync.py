@@ -3,10 +3,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import tomllib
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SYNC_EXTRAS = ("cli", "runtime", "torch", "tensorflow", "sklearn", "optuna")
@@ -51,9 +49,7 @@ def main() -> None:
         if unknown_in_requirements:
             parts.append("Unexpected in requirements.txt:")
             parts.extend(f"- {entry}" for entry in unknown_in_requirements)
-        raise SystemExit(
-            "\n".join(parts)
-        )
+        raise SystemExit("\n".join(parts))
     print("Dependency sync check passed.")
 
 

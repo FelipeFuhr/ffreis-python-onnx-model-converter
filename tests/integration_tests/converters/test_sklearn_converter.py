@@ -8,9 +8,9 @@ def test_sklearn_convert(tmp_path) -> None:
     pytest.importorskip("skl2onnx")
     pytest.importorskip("onnxruntime")
 
+    from skl2onnx.common.data_types import FloatTensorType
     from sklearn.datasets import load_iris
     from sklearn.linear_model import LogisticRegression
-    from skl2onnx.common.data_types import FloatTensorType
 
     from onnx_converter.converters.sklearn_converter import convert_sklearn_to_onnx
 

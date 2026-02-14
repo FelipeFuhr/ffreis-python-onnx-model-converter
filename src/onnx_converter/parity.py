@@ -39,9 +39,7 @@ def _run_onnx_first_output(onnx_path: Path, batch: np.ndarray) -> np.ndarray:
     try:
         import onnxruntime as ort
     except Exception as exc:
-        raise ParityError(
-            "Parity check requires onnxruntime to be installed."
-        ) from exc
+        raise ParityError("Parity check requires onnxruntime to be installed.") from exc
 
     session = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
@@ -111,7 +109,9 @@ def check_sklearn_parity(
     outputs = session.run(output_names, {input_name: parity_input.astype(np.float32)})
 
     onnx_pred = np.asarray(outputs[0])
-    if onnx_pred.shape != sklearn_pred.shape or not np.array_equal(onnx_pred, sklearn_pred):
+    if onnx_pred.shape != sklearn_pred.shape or not np.array_equal(
+        onnx_pred, sklearn_pred
+    ):
         raise ParityError("Sklearn parity failed: predicted labels differ.")
 
     if sklearn_proba is not None and len(outputs) > 1:

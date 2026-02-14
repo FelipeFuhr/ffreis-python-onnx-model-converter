@@ -8,9 +8,13 @@ def test_tensorflow_convert(tmp_path) -> None:
     pytest.importorskip("tf2onnx")
     pytest.importorskip("onnxruntime")
 
-    from onnx_converter.converters.tensorflow_converter import convert_tensorflow_to_onnx
+    from onnx_converter.converters.tensorflow_converter import (
+        convert_tensorflow_to_onnx,
+    )
 
-    model = tf.keras.Sequential([tf.keras.layers.Input(shape=(4,)), tf.keras.layers.Dense(2)])
+    model = tf.keras.Sequential(
+        [tf.keras.layers.Input(shape=(4,)), tf.keras.layers.Dense(2)]
+    )
     output_path = tmp_path / "model.onnx"
 
     out = convert_tensorflow_to_onnx(

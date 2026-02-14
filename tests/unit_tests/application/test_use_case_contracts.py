@@ -5,10 +5,12 @@ from typing import Any
 
 import pytest
 
-from onnx_converter.application.use_cases import build_conversion_options
-from onnx_converter.application.use_cases import convert_sklearn_file
-from onnx_converter.application.use_cases import convert_tensorflow_file
-from onnx_converter.application.use_cases import convert_torch_file
+from onnx_converter.application.use_cases import (
+    build_conversion_options,
+    convert_sklearn_file,
+    convert_tensorflow_file,
+    convert_torch_file,
+)
 from onnx_converter.errors import ParityError
 
 
@@ -40,7 +42,9 @@ class _Parity:
         self.should_fail = should_fail
         self.calls = 0
 
-    def check(self, model: Any, onnx_path: Path, parity: Any, context: Any = None) -> None:
+    def check(
+        self, model: Any, onnx_path: Path, parity: Any, context: Any = None
+    ) -> None:
         self.calls += 1
         del model, onnx_path, parity, context
         if self.should_fail:

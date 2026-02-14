@@ -14,7 +14,6 @@ from typer.testing import CliRunner
 
 from onnx_converter.cli import cli as cli_module
 
-
 runner = CliRunner()
 
 
@@ -24,10 +23,10 @@ def test_cli_sklearn_custom_transformer(tmp_path) -> None:
     pytest.importorskip("joblib")
     pytest.importorskip("skops")
 
+    import joblib
     from sklearn.datasets import load_iris
     from sklearn.linear_model import LogisticRegression
     from sklearn.pipeline import Pipeline
-    import joblib
 
     from examples.custom_sklearn_transformer import MultiplyByConstant
 

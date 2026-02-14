@@ -39,9 +39,7 @@ class AutoSklearnPlugin:
 
         # Common deployment path: convert only best discovered sklearn pipeline.
         if not hasattr(automl, "show_models"):
-            raise PluginError(
-                "Loaded object does not look like AutoSklearnEstimator."
-            )
+            raise PluginError("Loaded object does not look like AutoSklearnEstimator.")
 
         n_features_obj = options.get("n_features")
         if not isinstance(n_features_obj, int) or n_features_obj <= 0:

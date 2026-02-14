@@ -8,11 +8,11 @@ from pathlib import Path
 import joblib
 import numpy as np
 import onnxruntime as ort
+from skl2onnx.common.data_types import FloatTensorType
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from skl2onnx.common.data_types import FloatTensorType
 
 from examples.custom_sklearn_transformer import MultiplyByConstant
 from onnx_converter import convert_sklearn_to_onnx

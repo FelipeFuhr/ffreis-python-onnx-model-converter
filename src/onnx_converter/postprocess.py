@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from collections.abc import Mapping
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Mapping
 
 import onnx
 
@@ -37,7 +37,7 @@ def add_standard_metadata(
     payload = {
         "onnx_converter.framework": framework,
         "onnx_converter.source_path": str(source_path),
-        "onnx_converter.converted_at_utc": datetime.now(timezone.utc).isoformat(),
+        "onnx_converter.converted_at_utc": datetime.now(UTC).isoformat(),
     }
     payload.update(dict(config))
     add_onnx_metadata(output_path, payload)
@@ -60,8 +60,7 @@ def optimize_onnx_graph(output_path: Path) -> None:
 def quantize_onnx_dynamic(output_path: Path) -> None:
     """Apply dynamic quantization in-place using onnxruntime tools."""
     try:
-        from onnxruntime.quantization import QuantType
-        from onnxruntime.quantization import quantize_dynamic
+        from onnxruntime.quantization import QuantType, quantize_dynamic
     except Exception as exc:
         raise PostprocessError(
             "Dynamic quantization requested but onnxruntime is not installed."

@@ -3,10 +3,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import tomllib
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SYNC_EXTRAS = ("cli", "runtime", "torch", "tensorflow", "sklearn", "optuna")
@@ -24,7 +22,10 @@ def _collect_requirements() -> list[str]:
 def main() -> None:
     reqs = _collect_requirements()
     header = [
-        "# Generated from pyproject.toml (base + extras: cli,runtime,torch,tensorflow,sklearn)",
+        (
+            "# Generated from pyproject.toml "
+            "(base + extras: cli,runtime,torch,tensorflow,sklearn)"
+        ),
         "# Do not edit manually; run: uv run python scripts/generate_requirements.py",
         "",
     ]

@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Iterable
-from typing import Mapping
-from typing import Optional
 
 from onnx_converter.application.options import (
     ConversionOptions,
     ParityOptions,
     PostprocessOptions,
 )
-from onnx_converter.application.ports import ModelConverter
-from onnx_converter.application.ports import ModelLoader
-from onnx_converter.application.ports import OnnxPostProcessor
-from onnx_converter.application.ports import ParityChecker
+from onnx_converter.application.ports import (
+    ModelConverter,
+    ModelLoader,
+    OnnxPostProcessor,
+    ParityChecker,
+)
 from onnx_converter.application.results import ConversionResult
 
 
@@ -25,8 +25,8 @@ def build_conversion_options(
     opset_version: int = 14,
     optimize: bool = False,
     quantize_dynamic: bool = False,
-    metadata: Optional[Mapping[str, str]] = None,
-    parity_input_path: Optional[Path] = None,
+    metadata: Mapping[str, str] | None = None,
+    parity_input_path: Path | None = None,
     parity_atol: float = 1e-5,
     parity_rtol: float = 1e-4,
 ) -> ConversionOptions:
@@ -51,13 +51,13 @@ def convert_torch_file(
     output_path: Path,
     input_shape: Iterable[int],
     options: ConversionOptions,
-    input_names: Optional[list[str]] = None,
-    output_names: Optional[list[str]] = None,
+    input_names: list[str] | None = None,
+    output_names: list[str] | None = None,
     dynamic_batch: bool = False,
-    loader: Optional[ModelLoader] = None,
-    converter: Optional[ModelConverter] = None,
-    parity_checker: Optional[ParityChecker] = None,
-    postprocessor: Optional[OnnxPostProcessor] = None,
+    loader: ModelLoader | None = None,
+    converter: ModelConverter | None = None,
+    parity_checker: ParityChecker | None = None,
+    postprocessor: OnnxPostProcessor | None = None,
 ) -> ConversionResult:
     """Convert PyTorch model artifact via lazy use-case import."""
     from onnx_converter.application.use_cases import convert_torch_file as _impl
@@ -82,10 +82,10 @@ def convert_tensorflow_file(
     model_path: Path,
     output_path: Path,
     options: ConversionOptions,
-    loader: Optional[ModelLoader] = None,
-    converter: Optional[ModelConverter] = None,
-    parity_checker: Optional[ParityChecker] = None,
-    postprocessor: Optional[OnnxPostProcessor] = None,
+    loader: ModelLoader | None = None,
+    converter: ModelConverter | None = None,
+    parity_checker: ParityChecker | None = None,
+    postprocessor: OnnxPostProcessor | None = None,
 ) -> ConversionResult:
     """Convert TensorFlow model artifact via lazy use-case import."""
     from onnx_converter.application.use_cases import convert_tensorflow_file as _impl
@@ -107,10 +107,10 @@ def convert_sklearn_file(
     output_path: Path,
     n_features: int,
     options: ConversionOptions,
-    loader: Optional[ModelLoader] = None,
-    converter: Optional[ModelConverter] = None,
-    parity_checker: Optional[ParityChecker] = None,
-    postprocessor: Optional[OnnxPostProcessor] = None,
+    loader: ModelLoader | None = None,
+    converter: ModelConverter | None = None,
+    parity_checker: ParityChecker | None = None,
+    postprocessor: OnnxPostProcessor | None = None,
 ) -> ConversionResult:
     """Convert sklearn model artifact via lazy use-case import."""
     from onnx_converter.application.use_cases import convert_sklearn_file as _impl
@@ -131,9 +131,9 @@ def convert_custom_file(
     *,
     model_path: Path,
     output_path: Path,
-    model_type: Optional[str],
-    plugin_name: Optional[str],
-    plugin_modules: Optional[Iterable[str]],
+    model_type: str | None,
+    plugin_name: str | None,
+    plugin_modules: Iterable[str] | None,
     options: Mapping[str, object],
 ) -> ConversionResult:
     """Convert custom model artifact via lazy use-case import."""
