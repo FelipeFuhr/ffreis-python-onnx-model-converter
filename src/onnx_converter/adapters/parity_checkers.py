@@ -25,6 +25,19 @@ class TorchParityChecker:
         parity: ParityOptions,
         context: Mapping[str, Any] | None = None,
     ) -> None:
+        """Validate parity between PyTorch and ONNX outputs.
+
+        Parameters
+        ----------
+        model : Any
+            Source PyTorch model object.
+        onnx_path : Path
+            Generated ONNX model path.
+        parity : ParityOptions
+            Parity input and tolerance options.
+        context : Mapping[str, Any] | None, default=None
+            Reserved extension context.
+        """
         del context
         if parity.input_path is None:
             return
@@ -61,6 +74,19 @@ class TensorflowParityChecker:
         parity: ParityOptions,
         context: Mapping[str, Any] | None = None,
     ) -> None:
+        """Validate parity between TensorFlow and ONNX outputs.
+
+        Parameters
+        ----------
+        model : Any
+            Source TensorFlow model object.
+        onnx_path : Path
+            Generated ONNX model path.
+        parity : ParityOptions
+            Parity input and tolerance options.
+        context : Mapping[str, Any] | None, default=None
+            Reserved extension context.
+        """
         del context
         if parity.input_path is None:
             return
@@ -96,6 +122,19 @@ class SklearnParityChecker:
         parity: ParityOptions,
         context: Mapping[str, Any] | None = None,
     ) -> None:
+        """Validate parity between sklearn and ONNX outputs.
+
+        Parameters
+        ----------
+        model : Any
+            Source scikit-learn model object.
+        onnx_path : Path
+            Generated ONNX model path.
+        parity : ParityOptions
+            Parity input and tolerance options.
+        context : Mapping[str, Any] | None, default=None
+            Reserved extension context.
+        """
         del context
         if parity.input_path is None:
             return

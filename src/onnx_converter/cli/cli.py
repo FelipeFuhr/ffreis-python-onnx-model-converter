@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-onnx_converter.cli.app
+onnx_converter.cli.app.
 
 Typer-based CLI for converting models to ONNX with optional dependencies.
 

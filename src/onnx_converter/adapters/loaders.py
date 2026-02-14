@@ -33,6 +33,20 @@ class TorchModelLoader:
     """Load TorchScript or torch checkpoints."""
 
     def load(self, model_path: Path, allow_unsafe: bool = False) -> Any:
+        """Load a TorchScript model or checkpoint artifact.
+
+        Parameters
+        ----------
+        model_path : Path
+            Path to the serialized PyTorch artifact.
+        allow_unsafe : bool, default=False
+            Whether to allow pickle-based fallback loading.
+
+        Returns
+        -------
+        Any
+            Loaded PyTorch model object.
+        """
         try:
             import torch
         except Exception as exc:
@@ -67,6 +81,20 @@ class TensorflowModelLoader:
     """Load TensorFlow SavedModel path or Keras model file."""
 
     def load(self, model_path: Path, allow_unsafe: bool = False) -> Any:
+        """Load a TensorFlow SavedModel directory or Keras model file.
+
+        Parameters
+        ----------
+        model_path : Path
+            SavedModel directory or Keras file path.
+        allow_unsafe : bool, default=False
+            Unused for TensorFlow loaders.
+
+        Returns
+        -------
+        Any
+            Loaded TensorFlow model reference.
+        """
         del allow_unsafe
         try:
             import tensorflow as tf
@@ -84,6 +112,20 @@ class SklearnModelLoader:
     """Load sklearn-like serialized artifacts."""
 
     def load(self, model_path: Path, allow_unsafe: bool = False) -> Any:
+        """Load a serialized scikit-learn artifact.
+
+        Parameters
+        ----------
+        model_path : Path
+            Path to ``.skops`` or pickle-derived sklearn artifact.
+        allow_unsafe : bool, default=False
+            Whether unsafe pickle-based formats may be loaded.
+
+        Returns
+        -------
+        Any
+            Loaded scikit-learn model object.
+        """
         suffix = model_path.suffix.lower()
 
         if suffix in {".joblib", ".jl", ".pkl", ".pickle"} and not allow_unsafe:

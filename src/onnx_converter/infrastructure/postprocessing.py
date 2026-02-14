@@ -25,6 +25,21 @@ class OnnxPostProcessorImpl:
         config_metadata: Mapping[str, str],
         options: PostprocessOptions,
     ) -> None:
+        """Apply metadata enrichment and optional ONNX optimizations.
+
+        Parameters
+        ----------
+        output_path : Path
+            ONNX artifact to modify in place.
+        source_path : Path
+            Source model artifact path.
+        framework : str
+            Source framework label.
+        config_metadata : Mapping[str, str]
+            Metadata derived from conversion configuration.
+        options : PostprocessOptions
+            Post-processing feature toggles and metadata.
+        """
         add_standard_metadata(
             output_path=output_path,
             framework=framework,
