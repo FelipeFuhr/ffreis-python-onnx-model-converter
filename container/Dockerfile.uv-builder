@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ffreis/base:local
+ARG BASE_IMAGE=localhost/ffreis/base:local
 FROM ${BASE_IMAGE}
 
 ARG EXTRAS=all
@@ -12,7 +12,9 @@ RUN apt-get update && \
       python3-pip \
       ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && python3 -m pip install --no-cache-dir uv
+    && python3 -m venv /opt/uv-bootstrap \
+    && /opt/uv-bootstrap/bin/pip install --no-cache-dir --upgrade pip uv \
+    && ln -sf /opt/uv-bootstrap/bin/uv /usr/local/bin/uv
 
 WORKDIR /tmp/project
 

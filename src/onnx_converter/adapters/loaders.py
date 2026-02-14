@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import inspect
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from onnx_converter.errors import (
     DependencyError,
@@ -13,17 +14,25 @@ from onnx_converter.errors import (
 )
 
 
-def _torch_load_weights_only(torch_module: object, model_path: Path) -> object:
+class _TorchLoadModule(Protocol):
+    """Protocol for torch modules exposing ``load`` used by this adapter."""
+
+    load: Callable[..., object]
+
+
+def _torch_load_weights_only(
+    torch_module: _TorchLoadModule, model_path: Path
+) -> object:
     load_fn = torch_module.load
-    kwargs = {"map_location": "cpu"}
+    kwargs: dict[str, object] = {"map_location": "cpu"}
     if "weights_only" in inspect.signature(load_fn).parameters:
         kwargs["weights_only"] = True
     return load_fn(str(model_path), **kwargs)
 
 
-def _torch_load_unsafe(torch_module: object, model_path: Path) -> object:
+def _torch_load_unsafe(torch_module: _TorchLoadModule, model_path: Path) -> object:
     load_fn = torch_module.load
-    kwargs = {"map_location": "cpu"}
+    kwargs: dict[str, object] = {"map_location": "cpu"}
     if "weights_only" in inspect.signature(load_fn).parameters:
         kwargs["weights_only"] = False
     return load_fn(str(model_path), **kwargs)

@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   coverage:
+    name: Unit Coverage
     runs-on: ubuntu-latest
 
     steps:
@@ -47,5 +48,7 @@ jobs:
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
           files: ./coverage.xml
+          flags: unit
+          name: unit-coverage
           fail_ci_if_error: false
           verbose: true

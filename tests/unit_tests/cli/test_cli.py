@@ -21,9 +21,7 @@ def test_help_shows_commands() -> None:
     assert "sklearn" in result.output
 
 
-def test_pytorch_missing_deps(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_pytorch_missing_deps(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Ensure missing optional deps surface a user-facing CLI error."""
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")
@@ -52,9 +50,7 @@ def test_pytorch_missing_deps(
     assert "Missing optional dependencies" in result.output
 
 
-def test_pytorch_invokes_api(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_pytorch_invokes_api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Ensure the PyTorch CLI command forwards expected args to API layer."""
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")

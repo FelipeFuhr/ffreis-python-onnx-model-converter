@@ -29,7 +29,10 @@ jobs:
           base_image="$(grep '^BASE_IMAGE=' container/digests.env | cut -d= -f2)"
           base_digest="$(grep '^BASE_DIGEST=' container/digests.env | cut -d= -f2)"
 
-          docker build -f container/Dockerfile.base -t ffreis/base \
+          docker build -f container/Dockerfile.base \
+            -t ffreis/base \
+            -t ffreis/base:local \
+            -t localhost/ffreis/base:local \
             --build-arg BASE_IMAGE="${base_image}" \
             --build-arg BASE_DIGEST="${base_digest}" .
           docker build -f container/Dockerfile.base-runner -t ffreis/base-runner:local .

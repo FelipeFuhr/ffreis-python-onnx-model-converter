@@ -34,4 +34,20 @@ jobs:
         run: uv sync --extra dev --extra cli --extra sklearn --extra runtime
 
       - name: Run e2e tests
-        run: uv run pytest -q -m e2e
+        run: |
+          uv run pytest -q -m e2e \
+            --cov=onnx_converter \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term \
+            --cov-fail-under=0
+          test -s coverage.xml
+
+      - name: Upload e2e coverage to Codecov
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        with:
+          files: ./coverage.xml
+          flags: e2e
+          name: e2e-coverage
+          fail_ci_if_error: false
+          verbose: true
