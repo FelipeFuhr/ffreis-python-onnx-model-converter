@@ -53,6 +53,7 @@ jobs:
             trivy image \
               --input "$tar" \
               --no-progress \
+              --ignorefile .trivyignore.yaml \
               --scanners vuln \
               --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
               --ignore-unfixed \
@@ -61,11 +62,25 @@ jobs:
               --output "trivy-results/${name}.sarif"
             test -s "trivy-results/${name}.sarif"
 
+            # 1b) Export JSON for trend analysis and triage automation.
+            trivy image \
+              --input "$tar" \
+              --no-progress \
+              --ignorefile .trivyignore.yaml \
+              --scanners vuln \
+              --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
+              --ignore-unfixed \
+              --exit-code 0 \
+              --format json \
+              --output "trivy-results/${name}.json"
+            test -s "trivy-results/${name}.json"
+
             # 2) Print a human-readable full report in CI logs (all severities).
             echo "Full vulnerability report for ${image} (all severities):"
             trivy image \
               --input "$tar" \
               --no-progress \
+              --ignorefile .trivyignore.yaml \
               --scanners vuln \
               --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
               --ignore-unfixed \
@@ -77,12 +92,19 @@ jobs:
             trivy image \
               --input "$tar" \
               --no-progress \
+              --ignorefile .trivyignore.yaml \
               --scanners vuln \
               --severity HIGH,CRITICAL \
               --ignore-unfixed \
               --exit-code 1 \
               --format table
           done
+      - name: Upload Trivy JSON reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-json-reports
+          path: trivy-results/*.json
+          if-no-files-found: error
       - name: Upload Trivy SARIF (per image)
         if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         shell: bash
