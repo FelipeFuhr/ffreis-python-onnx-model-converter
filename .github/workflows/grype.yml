@@ -4,8 +4,22 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    paths:
+      - "container/**"
+      - "container/digests.env"
+      - "Makefile"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/grype.yml"
   pull_request:
     branches: [ main ]
+    paths:
+      - "container/**"
+      - "container/digests.env"
+      - "Makefile"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/grype.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

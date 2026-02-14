@@ -3,8 +3,24 @@ name: Examples
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - "examples/**"
+      - "container/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "Makefile"
+      - ".github/workflows/examples.yml"
   push:
     branches: [ main ]
+    paths:
+      - "examples/**"
+      - "container/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "Makefile"
+      - ".github/workflows/examples.yml"
   schedule:
     - cron: "0 6 * * 1"
   workflow_dispatch:

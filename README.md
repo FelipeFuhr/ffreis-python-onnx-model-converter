@@ -65,11 +65,12 @@ pip install -e .
 ```bash
 pip install -e ".[cli]"
 pip install -e ".[torch]"
-pip install -e ".[tensorflow]"
+pip install -e ".[tf_legacy]"   # TensorFlow/tf2onnx conversion path
+pip install -e ".[tensorflow]"  # backward-compatible alias
 pip install -e ".[sklearn]"
 pip install -e ".[optuna]"
 pip install -e ".[runtime]"
-pip install -e ".[all]"
+pip install -e ".[all]"         # secure default bundle (excludes tf_legacy)
 ```
 
 ## CLI usage
@@ -151,6 +152,10 @@ make ci-local
 - `architecture.yml`: dependency sync + architecture + complexity checks
 - `integration.yml`: scheduled/manual integration tests
 - `examples.yml`: dockerized example runs (fast PR set + heavier scheduled set)
+
+`tf_legacy` note:
+- TensorFlow conversion is intentionally separated from `all` because current `tf2onnx` constraints on Python `<3.13` can pin older `protobuf`.
+- CI/security gates target the secure default dependency profile; TensorFlow compatibility is tested in a dedicated integration job.
 
 ## Security and serialization notes
 

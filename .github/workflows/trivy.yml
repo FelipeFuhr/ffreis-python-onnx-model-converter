@@ -3,8 +3,22 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [ main ]
+    paths:
+      - "container/**"
+      - "container/digests.env"
+      - "Makefile"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/trivy.yml"
   push:
     branches: [ main ]
+    paths:
+      - "container/**"
+      - "container/digests.env"
+      - "Makefile"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/trivy.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
