@@ -12,35 +12,50 @@ concurrency:
 
 jobs:
   build-all:
+    name: Build All (${{ matrix.component }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [python, container]
+
     steps:
       - uses: actions/checkout@v6
+
       - uses: actions/setup-python@v6
+        if: ${{ matrix.component == 'python' }}
         with:
           python-version: "3.12"
       - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b
+        if: ${{ matrix.component == 'python' }}
         with:
           enable-cache: true
       - name: Require lock
+        if: ${{ matrix.component == 'python' }}
         run: test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
       - name: Install deps (dev + cli)
+        if: ${{ matrix.component == 'python' }}
         run: |
           set -euo pipefail
           uv sync --extra dev --extra cli
       - name: Run tests
+        if: ${{ matrix.component == 'python' }}
         run: |
           set -euo pipefail
           uv run pytest -q -m unit
       - name: Build package artifacts
+        if: ${{ matrix.component == 'python' }}
         run: |
           set -euo pipefail
           uv build
       - name: Install Podman
+        if: ${{ matrix.component == 'container' }}
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y podman
       - name: Build images
+        if: ${{ matrix.component == 'container' }}
         run: |
           set -euo pipefail
           make build
