@@ -49,7 +49,8 @@ def test_cli_sklearn_custom_transformer(tmp_path: Path) -> None:
         [
             ("scale", multiply_by_constant(factor=1.5)),
             ("clf", LogisticRegression(max_iter=200)),
-        ]
+        ],
+        memory=None,
     )
     pipeline.fit(X, y)
 
