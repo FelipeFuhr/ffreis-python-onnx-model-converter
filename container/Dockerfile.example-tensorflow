@@ -3,6 +3,8 @@ FROM onnx-converter/examples-base:local
 # TensorFlow/tf2onnx currently has no stable cp313 wheel support for this stack.
 # Keep the repository default at Python 3.13, but run this example in an isolated
 # Python 3.12 environment with a compatible protobuf range (no forced override).
+# TODO(ffreis): remove this py312 compatibility env once TensorFlow + tf2onnx
+# can be resolved on CPython 3.13 with a non-legacy protobuf constraint.
 RUN uv python install 3.12 && \
     uv venv /app/.venv-tf --python 3.12 && \
     uv pip install --python /app/.venv-tf/bin/python \
