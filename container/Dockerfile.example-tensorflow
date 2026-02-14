@@ -1,6 +1,6 @@
 FROM onnx-converter/examples-base:local
 
-RUN uv pip install --python /opt/examples-venv/bin/python --editable ".[runtime]" && \
+RUN uv pip install --python /opt/examples-venv/bin/python ".[runtime]" && \
     uv pip install --python /opt/examples-venv/bin/python "tensorflow-cpu>=2.13.0" "tf2onnx>=1.16.0"
 
 USER appuser:appgroup
