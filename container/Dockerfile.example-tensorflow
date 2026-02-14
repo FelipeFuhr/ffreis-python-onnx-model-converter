@@ -1,8 +1,15 @@
 FROM onnx-converter/examples-base:local
 
-RUN uv pip install --python /opt/examples-venv/bin/python ".[runtime]" && \
-    uv pip install --python /opt/examples-venv/bin/python "tensorflow-cpu>=2.13.0" "tf2onnx>=1.16.0" && \
-    uv pip install --python /opt/examples-venv/bin/python --no-deps "protobuf>=6.33.5"
+# TensorFlow/tf2onnx currently has no stable cp313 wheel support for this stack.
+# Keep the repository default at Python 3.13, but run this example in an isolated
+# Python 3.12 environment with a compatible protobuf range (no forced override).
+RUN uv python install 3.12 && \
+    uv venv /app/.venv-tf --python 3.12 && \
+    uv pip install --python /app/.venv-tf/bin/python \
+      ".[runtime]" \
+      "tensorflow-cpu>=2.19,<2.20" \
+      "tf2onnx>=1.16,<1.17" \
+      "protobuf>=3.20,<4"
 
 USER appuser:appgroup
-ENTRYPOINT ["python3", "examples/tensorflow_example.py"]
+ENTRYPOINT ["/app/.venv-tf/bin/python", "examples/tensorflow_example.py"]
