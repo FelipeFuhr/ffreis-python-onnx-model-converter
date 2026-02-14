@@ -1,6 +1,6 @@
 FROM ffreis/base-runner:local
 
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.13
 
 USER root
 WORKDIR /app

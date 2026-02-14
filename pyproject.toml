@@ -108,7 +108,7 @@ exclude = [".venv", "venv", "__pycache__"]
 show-source = true
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 strict = true
 ignore_missing_imports = true
 exclude = "(venv|.venv|tests/helpers)"

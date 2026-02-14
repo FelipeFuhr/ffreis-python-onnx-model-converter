@@ -2,7 +2,7 @@ ARG BASE_IMAGE=localhost/ffreis/base:local
 FROM ${BASE_IMAGE}
 
 ARG EXTRAS=all
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.13
 
 USER root
 

@@ -41,7 +41,9 @@ jobs:
       - name: Build images
         run: |
           set -euo pipefail
-          CONTAINER_COMMAND=podman make build
+          # Use Python 3.13 for containerized dependency resolution so runtime
+          # stack selects protobuf 6.x instead of legacy 3.20.x pins.
+          CONTAINER_COMMAND=podman PYTHON_VERSION=3.13 make build
       - name: Install Trivy
         run: |
           set -euo pipefail

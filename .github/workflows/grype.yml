@@ -45,7 +45,7 @@ jobs:
       - name: Build images (local)
         run: |
           set -euo pipefail
-          CONTAINER_COMMAND=podman make build
+          CONTAINER_COMMAND=podman PYTHON_VERSION=3.13 make build
 
       - name: Install Grype
         run: |

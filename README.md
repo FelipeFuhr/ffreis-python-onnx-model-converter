@@ -125,7 +125,7 @@ python examples/autosklearn_roundtrip.py
 
 ## Developer workflow
 
-Default local version is Python 3.12 (`Makefile` default). CI also defaults to 3.12, with matrix runs including older versions.
+Default local version is Python 3.13 (`Makefile` default). CI also defaults to 3.13, with matrix runs including older versions.
 
 ```bash
 make env
@@ -146,7 +146,7 @@ make ci-local
 
 ## CI overview
 
-- `build-python.yml`: matrix tests/package build (`3.12`, `3.11`, `3.10`)
+- `build-python.yml`: matrix tests/package build (`3.13`, `3.11`, `3.10`)
 - `lint.yml`: ruff + mypy
 - `coverage.yml`: coverage report (threshold configured in `pyproject.toml`)
 - `architecture.yml`: dependency sync + architecture + complexity checks
@@ -175,7 +175,7 @@ make ci-local
 ## Requirements
 
 - Python `>=3.10` (project support)
-- Python `3.12` (default local/CI baseline)
+- Python `3.13` (default local/CI baseline)
 
 ## License
 

@@ -3,7 +3,7 @@
 SHELL := /usr/bin/env bash
 
 CONTAINER_COMMAND ?= podman
-PYTHON_VERSION ?= 3.12
+PYTHON_VERSION ?= 3.13
 VENV_DIR ?= .venv
 
 PREFIX ?= ffreis
