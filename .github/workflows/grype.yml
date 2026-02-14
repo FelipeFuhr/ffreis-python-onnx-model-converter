@@ -90,7 +90,6 @@ jobs:
               -X POST \
               /repos/${{ github.repository }}/code-scanning/sarifs \
               -f sarif="${sarif_payload}" \
-              -f tool_name="grype-${name}" \
               -f commit_sha="${{ github.sha }}" \
               -f ref="${{ github.ref }}"
           done
