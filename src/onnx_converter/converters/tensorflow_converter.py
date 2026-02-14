@@ -1,69 +1,129 @@
-"""
-TensorFlow/Keras to ONNX Converter
-"""
+"""TensorFlow/Keras-to-ONNX conversion utilities."""
+
+from __future__ import annotations
+
 import os
-from typing import List, Optional
+from typing import Any
 
 import tensorflow as tf
 import tf2onnx
 
 
-def convert_tensorflow_to_onnx(
-    model,
+def _ensure_output_dir(output_path: str) -> None:
+    os.makedirs(
+        os.path.dirname(output_path) if os.path.dirname(output_path) else ".",
+        exist_ok=True,
+    )
+
+
+def _ensure_keras_output_names(model: tf.keras.Model) -> None:
+    """Set output_names for Keras models when absent (Keras 3 compatibility)."""
+    if not hasattr(model, "output_names") and hasattr(model, "outputs"):
+        model.output_names = [tensor.name.split(":")[0] for tensor in model.outputs]
+
+
+def _build_default_signature(model: tf.keras.Model) -> list[tf.TensorSpec] | None:
+    """Infer tf2onnx input signature from model input_shape."""
+    if not hasattr(model, "input_shape"):
+        return None
+
+    input_shape = model.input_shape
+    if isinstance(input_shape, list):
+        return [
+            tf.TensorSpec(shape, tf.float32, name=f"input_{i}")
+            for i, shape in enumerate(input_shape)
+        ]
+    return [tf.TensorSpec(input_shape, tf.float32, name="input")]
+
+
+def _convert_saved_model(
+    model_path: str,
     output_path: str,
-    input_signature: Optional[List[tf.TensorSpec]] = None,
+    input_signature: list[tf.TensorSpec] | None,
+    opset_version: int,
+    **kwargs: Any,
+) -> None:
+    tf2onnx.convert.from_saved_model(
+        model_path,
+        input_signature=input_signature,
+        opset=opset_version,
+        output_path=output_path,
+        **kwargs,
+    )
+
+
+def _convert_keras_model(
+    model: tf.keras.Model,
+    output_path: str,
+    input_signature: list[tf.TensorSpec] | None,
+    opset_version: int,
+    **kwargs: Any,
+) -> None:
+    _ensure_keras_output_names(model)
+    resolved_signature = input_signature or _build_default_signature(model)
+
+    tf2onnx.convert.from_keras(
+        model,
+        input_signature=resolved_signature,
+        opset=opset_version,
+        output_path=output_path,
+        **kwargs,
+    )
+
+
+def convert_tensorflow_to_onnx(
+    model: str | tf.keras.Model,
+    output_path: str,
+    input_signature: list[tf.TensorSpec] | None = None,
     opset_version: int = 14,
-    **kwargs
+    **kwargs: Any,
 ) -> str:
+    """Convert a TensorFlow or Keras model to ONNX format.
+
+    Parameters
+    ----------
+    model
+        TensorFlow/Keras model instance or SavedModel path.
+    output_path : str
+        Path where the ONNX model will be written.
+    input_signature : list[tf.TensorSpec], optional
+        Input tensor signature passed to ``tf2onnx``.
+    opset_version : int, default=14
+        ONNX opset version used by ``tf2onnx``.
+    **kwargs
+        Additional keyword arguments forwarded to ``tf2onnx.convert``.
+
+    Returns
+    -------
+    str
+        Path to the saved ONNX model.
+
+    Raises
+    ------
+    ValueError
+        If ``model`` is neither a SavedModel path nor a ``tf.keras.Model``.
     """
-    Convert a TensorFlow or Keras model to ONNX format.
-
-    Args:
-        model: TensorFlow/Keras model to convert (can be tf.keras.Model or path to SavedModel)
-        output_path: Path where the ONNX model will be saved
-        input_signature: List of TensorSpec defining input shapes and dtypes
-        opset_version: ONNX opset version (default: 14)
-        **kwargs: Additional arguments to pass to tf2onnx.convert
-
-    Returns:
-        Path to the saved ONNX model
-
-    Example:
-        >>> model = tf.keras.applications.MobileNetV2(weights='imagenet')
-        >>> input_spec = [tf.TensorSpec((None, 224, 224, 3), tf.float32, name="input")]
-        >>> convert_tensorflow_to_onnx(model, "mobilenet.onnx", input_signature=input_spec)
-    """
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+    _ensure_output_dir(output_path)
 
     if isinstance(model, str):
-        tf2onnx.convert.from_saved_model(
-            model,
-            input_signature=input_signature,
-            opset=opset_version,
+        _convert_saved_model(
+            model_path=model,
             output_path=output_path,
-            **kwargs
+            input_signature=input_signature,
+            opset_version=opset_version,
+            **kwargs,
         )
-    elif isinstance(model, tf.keras.Model):
-        if input_signature is None:
-            if hasattr(model, "input_shape"):
-                input_shape = model.input_shape
-                if isinstance(input_shape, list):
-                    input_signature = [
-                        tf.TensorSpec(shape, tf.float32, name=f"input_{i}")
-                        for i, shape in enumerate(input_shape)
-                    ]
-                else:
-                    input_signature = [tf.TensorSpec(input_shape, tf.float32, name="input")]
+        return output_path
 
-        tf2onnx.convert.from_keras(
-            model,
-            input_signature=input_signature,
-            opset=opset_version,
-            output_path=output_path,
-            **kwargs
-        )
-    else:
+    if not isinstance(model, tf.keras.Model):
         raise ValueError(f"Unsupported model type: {type(model)}")
 
-    print(f"✓ TensorFlow/Keras model successfully converted to ONNX: {output_path}")
+    _convert_keras_model(
+        model=model,
+        output_path=output_path,
+        input_signature=input_signature,
+        opset_version=opset_version,
+        **kwargs,
+    )
+
     return output_path

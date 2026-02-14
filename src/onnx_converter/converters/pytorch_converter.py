@@ -1,71 +1,93 @@
-"""
-PyTorch to ONNX Converter
-"""
+"""PyTorch-to-ONNX conversion utilities."""
+
+from __future__ import annotations
+
 import os
-from typing import Optional, Tuple
+from pathlib import Path
+from typing import Any
 
 import torch
 import torch.onnx
+from pydantic import ValidationError
+
+from onnx_converter.errors import ConversionError
+from onnx_converter.schemas import PytorchConversionConfig
 
 
 def convert_pytorch_to_onnx(
     model: torch.nn.Module,
     output_path: str,
-    input_shape: Tuple[int, ...],
-    input_names: Optional[list] = None,
-    output_names: Optional[list] = None,
-    dynamic_axes: Optional[dict] = None,
+    input_shape: tuple[int, ...],
+    input_names: list[str] | None = None,
+    output_names: list[str] | None = None,
+    dynamic_axes: dict[str, dict[int, str]] | None = None,
     opset_version: int = 14,
-    **kwargs
+    **kwargs: Any,
 ) -> str:
+    """Convert a PyTorch model to ONNX format.
+
+    Parameters
+    ----------
+    model : torch.nn.Module
+        Model instance to convert.
+    output_path : str
+        Path where the ONNX model will be written.
+    input_shape : tuple[int, ...]
+        Shape of the dummy input tensor used during export.
+    input_names : list[str], optional
+        Input tensor names. Defaults to ``["input"]``.
+    output_names : list[str], optional
+        Output tensor names. Defaults to ``["output"]``.
+    dynamic_axes : dict[str, dict[int, str]], optional
+        Dynamic axis mapping passed to ``torch.onnx.export``.
+    opset_version : int, default=14
+        ONNX opset version used by the exporter.
+    **kwargs
+        Additional keyword arguments forwarded to ``torch.onnx.export``.
+
+    Returns
+    -------
+    str
+        Path to the saved ONNX model.
+
+    Raises
+    ------
+    ConversionError
+        If export configuration is invalid.
     """
-    Convert a PyTorch model to ONNX format.
+    try:
+        config = PytorchConversionConfig(
+            output_path=Path(output_path),
+            input_shape=input_shape,
+            input_names=input_names or ["input"],
+            output_names=output_names or ["output"],
+            dynamic_axes=dynamic_axes,
+            opset_version=opset_version,
+        )
+    except ValidationError as exc:
+        raise ConversionError(f"Invalid PyTorch export options: {exc}") from exc
 
-    Args:
-        model: PyTorch model to convert
-        output_path: Path where the ONNX model will be saved
-        input_shape: Shape of the input tensor (e.g., (1, 3, 224, 224) for images)
-        input_names: List of input names (default: ["input"])
-        output_names: List of output names (default: ["output"])
-        dynamic_axes: Dictionary specifying dynamic axes for inputs/outputs
-        opset_version: ONNX opset version (default: 14)
-        **kwargs: Additional arguments to pass to torch.onnx.export
-
-    Returns:
-        Path to the saved ONNX model
-
-    Example:
-        >>> model = torchvision.models.resnet18(pretrained=True)
-        >>> convert_pytorch_to_onnx(
-        ...     model,
-        ...     "resnet18.onnx",
-        ...     (1, 3, 224, 224),
-        ...     dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}}
-        ... )
-    """
     model.eval()
 
-    dummy_input = torch.randn(*input_shape)
+    dummy_input = torch.randn(*config.input_shape)
 
-    if input_names is None:
-        input_names = ["input"]
-    if output_names is None:
-        output_names = ["output"]
-
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+    output_path_str = str(config.output_path)
+    os.makedirs(
+        os.path.dirname(output_path_str) if os.path.dirname(output_path_str) else ".",
+        exist_ok=True,
+    )
 
     torch.onnx.export(
         model,
         dummy_input,
-        output_path,
+        output_path_str,
         export_params=True,
-        opset_version=opset_version,
+        opset_version=config.opset_version,
         do_constant_folding=True,
-        input_names=input_names,
-        output_names=output_names,
-        dynamic_axes=dynamic_axes,
-        **kwargs
+        input_names=config.input_names,
+        output_names=config.output_names,
+        dynamic_axes=config.dynamic_axes,
+        **kwargs,
     )
 
-    print(f"✓ PyTorch model successfully converted to ONNX: {output_path}")
-    return output_path
+    return output_path_str

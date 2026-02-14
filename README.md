@@ -1,200 +1,177 @@
 # ONNX Model Converter
 
-A comprehensive toolkit for converting machine learning models from PyTorch, Keras, TensorFlow, and Scikit-learn to ONNX format. These ONNX artifacts can be shipped to containers for training, serving, and deployment.
+Convert model artifacts from PyTorch, TensorFlow/Keras, and scikit-learn into ONNX with optional parity checks, post-processing, and plugin-based extension points.
 
-## Features
+## What this project does
 
-- **Multi-Framework Support**: Convert models from:
-  - PyTorch (including torchvision models)
-  - TensorFlow/Keras (SavedModel and .h5 formats)
-  - Scikit-learn (models and pipelines)
+- Converts model artifacts to ONNX through Python API and CLI.
+- Supports safer loading defaults for pickle-based formats.
+- Supports optional parity checks between source model outputs and ONNX Runtime outputs.
+- Supports optional ONNX post-processing (metadata, optimization, dynamic quantization).
+- Supports plugin-based custom model families (for example AutoSklearn wrappers).
 
-- **Easy to Use**: Simple Python API and CLI interface
-- **Production Ready**: Generate ONNX models ready for deployment
-- **Flexible**: Support for dynamic shapes, custom input/output names, and various opset versions
+## Architecture (current)
+
+The codebase follows a layered structure to separate orchestration from framework mechanics.
+
+- `src/onnx_converter/application/`
+- Use-cases and typed options (`ConversionOptions`, `ParityOptions`, `PostprocessOptions`).
+- Orchestrates loaders, converters, parity checks, and post-processing.
+
+- `src/onnx_converter/adapters/`
+- Framework-specific adapter implementations.
+- Model loaders, model-to-ONNX converters, and parity checkers.
+
+- `src/onnx_converter/infrastructure/`
+- ONNX post-processing implementation details.
+
+- `src/onnx_converter/plugins/`
+- Plugin protocol, registry, and built-in plugins.
+- Entry point for custom model families that are not first-class in core.
+
+- `src/onnx_converter/converters/`
+- Lower-level framework conversion helpers.
+
+- `src/onnx_converter/cli/`
+- Typer CLI commands and dependency gates.
+
+- `src/onnx_converter/api.py`
+- Public file-based API wrappers over application use-cases.
+
+For a deeper walkthrough (sequence, boundaries, plugin authoring), see `docs/architecture.md`.
+For advanced plugin patterns and testing contract details, see `docs/plugin-authoring.md`.
+
+## Request flow
+
+1. CLI/API collects arguments and dependency checks.
+2. API builds typed conversion options.
+3. Application use-case validates config and orchestrates ports.
+4. Adapter loader reads model artifact.
+5. Adapter converter exports ONNX.
+6. Optional parity check runs.
+7. Optional post-process runs.
+8. Output path is returned.
 
 ## Installation
 
+### Minimal
+
 ```bash
 pip install -e .
+```
+
+### Feature extras
+
+```bash
+pip install -e ".[cli]"
 pip install -e ".[torch]"
 pip install -e ".[tensorflow]"
 pip install -e ".[sklearn]"
+pip install -e ".[optuna]"
+pip install -e ".[runtime]"
 pip install -e ".[all]"
 ```
 
-## Quick Start
-
-### Python API
-
-#### PyTorch
-
-```python
-from onnx_converter import convert_pytorch_to_onnx
-import torchvision.models as models
-
-# Load your PyTorch model
-model = models.resnet18(pretrained=True)
-
-# Convert to ONNX
-convert_pytorch_to_onnx(
-    model=model,
-    output_path="resnet18.onnx",
-    input_shape=(1, 3, 224, 224),
-    dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}}
-)
-```
-
-#### TensorFlow/Keras
-
-```python
-from onnx_converter import convert_tensorflow_to_onnx
-import tensorflow as tf
-
-# Load your Keras model
-model = tf.keras.applications.MobileNetV2(weights='imagenet')
-
-# Convert to ONNX
-input_signature = [tf.TensorSpec((None, 224, 224, 3), tf.float32, name="image")]
-convert_tensorflow_to_onnx(
-    model=model,
-    output_path="mobilenet.onnx",
-    input_signature=input_signature
-)
-```
-
-#### Scikit-learn
-
-```python
-from onnx_converter import convert_sklearn_to_onnx
-from sklearn.ensemble import RandomForestClassifier
-from skl2onnx.common.data_types import FloatTensorType
-
-# Train your sklearn model
-from sklearn.datasets import load_iris
-X, y = load_iris(return_X_y=True)
-model = RandomForestClassifier().fit(X, y)
-
-# Convert to ONNX
-initial_types = [('input', FloatTensorType([None, 4]))]
-convert_sklearn_to_onnx(
-    model=model,
-    output_path="rf_classifier.onnx",
-    initial_types=initial_types
-)
-```
-
-### Command Line Interface
+## CLI usage
 
 ```bash
-# PyTorch
-convert-to-onnx pytorch model.pt output.onnx --input-shape 1,3,224,224
+# PyTorch artifact -> ONNX
+convert-to-onnx pytorch model.pt output.onnx --input-shape 1 3 224 224
 
-# TensorFlow/Keras
+# TensorFlow/Keras artifact -> ONNX
 convert-to-onnx tensorflow saved_model_dir output.onnx
 
-# Scikit-learn
-convert-to-onnx sklearn model.pkl output.onnx --n-features 4
+# sklearn artifact -> ONNX
+convert-to-onnx sklearn model.joblib output.onnx --n-features 4 --allow-unsafe
+
+# Plugin-based conversion
+convert-to-onnx custom automl.joblib output.onnx \
+  --model-type autosklearn \
+  --plugin-module examples/autosklearn_plugin.py \
+  --plugin-name autosklearn \
+  --n-features 20 \
+  --allow-unsafe
+```
+
+## Python API usage
+
+```python
+from pathlib import Path
+from onnx_converter.api import convert_sklearn_file_to_onnx
+
+convert_sklearn_file_to_onnx(
+    model_path=Path("model.joblib"),
+    output_path=Path("model.onnx"),
+    n_features=8,
+    allow_unsafe=True,
+    optimize=True,
+)
 ```
 
 ## Examples
 
-Run the example scripts to see the converters in action:
+All examples are in `examples/` and are designed to fail fast with clear criteria.
 
 ```bash
-# PyTorch example (ResNet18)
 python examples/pytorch_example.py
-
-# TensorFlow/Keras example (MobileNetV2)
 python examples/tensorflow_example.py
-
-# Scikit-learn example (Random Forest + Pipelines)
 python examples/sklearn_example.py
+python examples/sklearn_custom_cli_example.py
+python examples/compare_sklearn_vs_onnx.py
+python examples/optuna_sklearn_example.py
+python examples/autosklearn_roundtrip.py
 ```
 
-## API Reference
+## Developer workflow
 
-### PyTorch Converter
+Default local version is Python 3.12 (`Makefile` default). CI also defaults to 3.12, with matrix runs including older versions.
 
-```python
-convert_pytorch_to_onnx(
-    model,              # PyTorch model
-    output_path,        # Output ONNX file path
-    input_shape,        # Tuple: input tensor shape
-    input_names=None,   # List: input names (default: ["input"])
-    output_names=None,  # List: output names (default: ["output"])
-    dynamic_axes=None,  # Dict: dynamic axes specification
-    opset_version=14    # Int: ONNX opset version
-)
+```bash
+make env
+make install-dev
+make check
+make coverage
+make architecture-check
+make ci-local
 ```
 
-### TensorFlow/Keras Converter
+### Useful targets
 
-```python
-convert_tensorflow_to_onnx(
-    model,                  # TF/Keras model or path to SavedModel
-    output_path,            # Output ONNX file path
-    input_signature=None,   # List[TensorSpec]: input specifications
-    opset_version=14        # Int: ONNX opset version
-)
-```
+- `make test-unit`: run fast unit-oriented suite (`-m "not integration"`)
+- `make test-integration`: run integration-marked tests
+- `make deps-sync-check`: verify `requirements.txt` is synced with `pyproject.toml`
+- `make deps-sync-generate`: regenerate `requirements.txt` from `pyproject.toml`
+- `make architecture-check`: boundary + complexity + strict mypy for application layer
 
-### Scikit-learn Converter
+## CI overview
 
-```python
-convert_sklearn_to_onnx(
-    model,                # Sklearn model or pipeline
-    output_path,          # Output ONNX file path
-    initial_types=None,   # List[Tuple]: input type specifications
-    target_opset=None     # Int: ONNX opset version
-)
-```
+- `build-python.yml`: matrix tests/package build (`3.12`, `3.11`, `3.10`)
+- `lint.yml`: ruff + mypy
+- `coverage.yml`: coverage report (threshold configured in `pyproject.toml`)
+- `architecture.yml`: dependency sync + architecture + complexity checks
+- `integration.yml`: scheduled/manual integration tests
+- `examples.yml`: dockerized example runs (fast PR set + heavier scheduled set)
 
-## Use Cases
+## Security and serialization notes
 
-### Container Deployment
+- Pickle-based artifact loading is unsafe for untrusted input.
+- The project defaults to safer behavior and requires explicit `--allow-unsafe` for risky paths.
+- Prefer safer formats when available (`.skops`, TorchScript/state_dict workflows, or direct in-memory export).
 
-The generated ONNX models can be easily deployed in containers:
+## Project map
 
-```dockerfile
-FROM python:3.9-slim
-
-# Install ONNX Runtime
-RUN pip install onnxruntime
-
-# Copy your ONNX model
-COPY model.onnx /app/
-
-# Your inference code
-COPY inference.py /app/
-
-WORKDIR /app
-CMD ["python", "inference.py"]
-```
-
-### Model Serving
-
-ONNX models can be served using various frameworks:
-- ONNX Runtime Server
-- Triton Inference Server
-- Azure ML
-- AWS SageMaker
+- `src/onnx_converter/`: library code
+- `tests/`: unit and integration tests
+- `examples/`: executable example specs
+- `container/`: example/runtime container definitions
+- `scripts/`: CI/static architecture checks
+- `.github/workflows/`: CI workflows
 
 ## Requirements
 
-- Python 3.10+
-- PyTorch 2.0+ (for PyTorch models)
-- TensorFlow 2.13+ (for TensorFlow/Keras models)
-- Scikit-learn 1.3+ (for sklearn models)
-- ONNX 1.15+
-- ONNXRuntime 1.17+
-
-See `requirements.txt` for complete list.
+- Python `>=3.10` (project support)
+- Python `3.12` (default local/CI baseline)
 
 ## License
 
-MIT License
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+MIT

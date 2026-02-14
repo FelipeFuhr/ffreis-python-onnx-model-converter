@@ -1,71 +1,226 @@
-"""
-PyTorch to ONNX Converter
-"""
-import os
-from typing import Optional, Tuple
+from __future__ import annotations
 
-import torch
-import torch.onnx
+import sys
+import types
+from collections.abc import Callable
+from typing import Any
+
+import pytest
+
+import onnx_converter
+from onnx_converter import api as api_module
+from onnx_converter.errors import ConversionError
+
+from .conftest import mock_converter_dependencies
 
 
-def convert_pytorch_to_onnx(
-    model: torch.nn.Module,
-    output_path: str,
-    input_shape: Tuple[int, ...],
-    input_names: Optional[list] = None,
-    output_names: Optional[list] = None,
-    dynamic_axes: Optional[dict] = None,
-    opset_version: int = 14,
-    **kwargs
-) -> str:
-    """
-    Convert a PyTorch model to ONNX format.
+class _DummyModel:
+    pass
 
-    Args:
-        model: PyTorch model to convert
-        output_path: Path where the ONNX model will be saved
-        input_shape: Shape of the input tensor (e.g., (1, 3, 224, 224) for images)
-        input_names: List of input names (default: ["input"])
-        output_names: List of output names (default: ["output"])
-        dynamic_axes: Dictionary specifying dynamic axes for inputs/outputs
-        opset_version: ONNX opset version (default: 14)
-        **kwargs: Additional arguments to pass to torch.onnx.export
 
-    Returns:
-        Path to the saved ONNX model
+class _MockConverter:
+    """Mock converter for testing."""
 
-    Example:
-        >>> model = torchvision.models.resnet18(pretrained=True)
-        >>> convert_pytorch_to_onnx(
-        ...     model,
-        ...     "resnet18.onnx",
-        ...     (1, 3, 224, 224),
-        ...     dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}}
-        ... )
-    """
-    model.eval()
+    def convert(self, model: Any, output_path: Any, options: Any) -> Any:
+        return output_path
 
-    dummy_input = torch.randn(*input_shape)
 
-    if input_names is None:
-        input_names = ["input"]
-    if output_names is None:
-        output_names = ["output"]
+class _MockParity:
+    """Mock parity checker for testing."""
 
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+    def __init__(self) -> None:
+        self.calls = 0
 
-    torch.onnx.export(
-        model,
-        dummy_input,
-        output_path,
-        export_params=True,
-        opset_version=opset_version,
-        do_constant_folding=True,
-        input_names=input_names,
-        output_names=output_names,
-        dynamic_axes=dynamic_axes,
-        **kwargs
+    def check(
+        self, model: Any, onnx_path: Any, parity: Any, context: Any = None
+    ) -> None:
+        self.calls += 1
+        del model, onnx_path, parity, context
+
+
+class _MockPostprocess:
+    """Mock postprocessor for testing."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def run(
+        self,
+        output_path: Any,
+        source_path: Any,
+        framework: str,
+        config_metadata: Any,
+        options: Any,
+    ) -> None:
+        self.calls += 1
+        del output_path, source_path, framework, config_metadata, options
+
+
+def _install_dummy_torch(
+    monkeypatch: pytest.MonkeyPatch,
+    jit_load: Callable[[str], Any],
+    load: Callable[..., Any],
+) -> None:
+    dummy_torch = types.SimpleNamespace()
+
+    class _Jit:
+        @staticmethod
+        def load(path: str) -> Any:
+            return jit_load(path)
+
+    dummy_torch.jit = _Jit
+
+    def _load(path: str, map_location: Any = None, weights_only: Any = None) -> Any:
+        return load(path, map_location=map_location, weights_only=weights_only)
+
+    dummy_torch.load = _load
+
+    monkeypatch.setitem(sys.modules, "torch", dummy_torch)
+
+
+def test_convert_torch_file_prefers_torchscript(tmp_path, monkeypatch) -> None:
+    model_path = tmp_path / "model.pt"
+    model_path.write_text("dummy")
+    output_path = tmp_path / "out.onnx"
+
+    jit_load_called = []
+
+    def jit_load(_path: str) -> _DummyModel:
+        jit_load_called.append(True)
+        return _DummyModel()
+
+    def load(
+        _path: str, map_location: Any = None, weights_only: Any = None
+    ) -> _DummyModel:
+        raise AssertionError("torch.load should not be called")
+
+    _install_dummy_torch(monkeypatch, jit_load, load)
+
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        assert kwargs["input_shape"] == (1, 3)
+        return str(output_path)
+
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
+
+    result = api_module.convert_torch_file_to_onnx(
+        model_path=model_path,
+        output_path=output_path,
+        input_shape=(1, 3),
+        opset_version=14,
+        allow_unsafe=False,
     )
 
-    print(f"✓ PyTorch model successfully converted to ONNX: {output_path}")
-    return output_path
+    assert result == output_path
+    assert len(jit_load_called) == 1
+
+
+def test_convert_torch_file_requires_allow_unsafe(tmp_path, monkeypatch) -> None:
+    model_path = tmp_path / "model.pt"
+    model_path.write_text("dummy")
+    output_path = tmp_path / "out.onnx"
+
+    def jit_load(_path: str) -> _DummyModel:
+        raise RuntimeError("fail")
+
+    def load(
+        _path: str, map_location: Any = None, weights_only: Any = None
+    ) -> _DummyModel:
+        raise RuntimeError("safe load failed")
+
+    _install_dummy_torch(monkeypatch, jit_load, load)
+
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        return str(output_path)
+
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
+
+    with pytest.raises(ConversionError):
+        api_module.convert_torch_file_to_onnx(
+            model_path=model_path,
+            output_path=output_path,
+            input_shape=(1, 3),
+            opset_version=14,
+            allow_unsafe=False,
+        )
+
+
+def test_convert_torch_file_uses_torch_load_when_allowed(tmp_path, monkeypatch) -> None:
+    model_path = tmp_path / "model.pt"
+    model_path.write_text("dummy")
+    output_path = tmp_path / "out.onnx"
+
+    def jit_load(_path: str) -> _DummyModel:
+        raise RuntimeError("fail")
+
+    called = {}
+
+    def load(
+        _path: str, map_location: Any = None, weights_only: Any = None
+    ) -> _DummyModel:
+        called["weights_only"] = weights_only
+        return _DummyModel()
+
+    _install_dummy_torch(monkeypatch, jit_load, load)
+
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        return str(output_path)
+
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
+
+    result = api_module.convert_torch_file_to_onnx(
+        model_path=model_path,
+        output_path=output_path,
+        input_shape=(1, 3),
+        opset_version=14,
+        allow_unsafe=True,
+    )
+
+    assert result == output_path
+    assert called["weights_only"] is True
+
+
+def test_convert_torch_file_falls_back_to_unsafe_only_when_allowed(
+    tmp_path, monkeypatch
+) -> None:
+    model_path = tmp_path / "model.pt"
+    model_path.write_text("dummy")
+    output_path = tmp_path / "out.onnx"
+
+    def jit_load(_path: str) -> _DummyModel:
+        raise RuntimeError("fail")
+
+    called = {"weights_only": []}
+
+    def load(
+        _path: str, map_location: Any = None, weights_only: Any = None
+    ) -> _DummyModel:
+        called["weights_only"].append(weights_only)
+        if weights_only is True:
+            raise RuntimeError("safe load failed")
+        return _DummyModel()
+
+    _install_dummy_torch(monkeypatch, jit_load, load)
+
+    # Mock the converter to avoid importing real torch.onnx
+    def fake_convert(**kwargs: Any) -> str:
+        return str(output_path)
+
+    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    mock_converter_dependencies(monkeypatch, framework="torch")
+
+    result = api_module.convert_torch_file_to_onnx(
+        model_path=model_path,
+        output_path=output_path,
+        input_shape=(1, 3),
+        opset_version=14,
+        allow_unsafe=True,
+    )
+
+    assert result == output_path
+    assert called["weights_only"] == [True, False]

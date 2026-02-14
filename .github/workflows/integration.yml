@@ -1,0 +1,35 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Require uv.lock
+        run: test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
+
+      - name: Install deps (dev + all)
+        run: uv sync --extra dev --extra all
+
+      - name: Run integration tests
+        run: uv run pytest -m integration -q

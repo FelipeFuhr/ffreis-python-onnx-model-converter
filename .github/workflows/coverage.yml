@@ -34,7 +34,7 @@ jobs:
           test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
 
       - name: Install deps (dev)
-        run: uv sync --group dev
+        run: uv sync --extra dev
 
       - name: Generate coverage (Makefile)
         run: |
@@ -43,8 +43,9 @@ jobs:
           test -s coverage.xml
 
       - name: Upload coverage to Codecov
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
           files: ./coverage.xml
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true

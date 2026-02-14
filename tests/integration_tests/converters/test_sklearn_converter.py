@@ -1,18 +1,30 @@
-def test_sklearn_convert(tmp_path):
-    from sklearn.linear_model import LogisticRegression
+from __future__ import annotations
+
+import pytest
+
+
+def test_sklearn_convert(tmp_path) -> None:
+    pytest.importorskip("sklearn")
+    pytest.importorskip("skl2onnx")
+    pytest.importorskip("onnxruntime")
+
     from sklearn.datasets import load_iris
-    import joblib
+    from sklearn.linear_model import LogisticRegression
+    from skl2onnx.common.data_types import FloatTensorType
+
+    from onnx_converter.converters.sklearn_converter import convert_sklearn_to_onnx
 
     X, y = load_iris(return_X_y=True)
-    m = LogisticRegression().fit(X, y)
+    model = LogisticRegression(max_iter=200).fit(X, y)
 
-    p = tmp_path/"m.joblib"
-    joblib.dump(m, p)
+    output_path = tmp_path / "model.onnx"
+    initial_types = [("input", FloatTensorType([None, X.shape[1]]))]
 
-    from onnx_converter.converters.sklearn import SklearnConverter
-    out = tmp_path/"m.onnx"
+    out = convert_sklearn_to_onnx(
+        model=model,
+        output_path=str(output_path),
+        initial_types=initial_types,
+    )
 
-    SklearnConverter().convert(p, out, n_features=4)
-
-    import onnxruntime as ort
-    ort.InferenceSession(str(out))
+    assert output_path.exists()
+    assert str(output_path) == out

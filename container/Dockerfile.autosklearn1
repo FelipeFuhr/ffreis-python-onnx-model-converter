@@ -1,0 +1,17 @@
+FROM onnx-converter/examples-base:local
+
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      swig \
+      gfortran \
+      libopenblas-dev \
+      liblapack-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    uv pip install --system --editable ".[cli,runtime,sklearn]" && \
+    uv pip install --system "auto-sklearn==0.15.0"
+
+USER appuser:appgroup
+ENV AUTOSKLEARN_FLAVOR=1
+ENTRYPOINT ["python3.11", "examples/autosklearn_roundtrip.py"]
