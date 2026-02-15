@@ -10,10 +10,10 @@
 
 ## Validation
 
-- [ ] `.venv/bin/python -m ruff check src tests examples`
-- [ ] `.venv/bin/python -m ruff format --check src tests examples`
-- [ ] `.venv/bin/python -m mypy src`
-- [ ] `.venv/bin/python -m pytest -q -m "not slow"` (if behavior changed)
+- [ ] `uv run ruff check src tests examples`
+- [ ] `uv run ruff format --check src tests examples`
+- [ ] `uv run mypy src`
+- [ ] `uv run pytest -q -m unit tests`
 
 ## Testing Notes
 
