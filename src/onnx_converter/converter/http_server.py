@@ -31,9 +31,10 @@ except ModuleNotFoundError:  # pragma: no cover
 fastapi = _fastapi_module
 responses = _fastapi_responses_module
 
-_uvicorn_module: ModuleType | None
 try:
-    import uvicorn as _uvicorn_module
+    import uvicorn as _uvicorn_imported
+
+    _uvicorn_module: ModuleType | None = _uvicorn_imported
 except ModuleNotFoundError:  # pragma: no cover
     _uvicorn_module = None
 
