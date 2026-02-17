@@ -9,14 +9,14 @@ import httpx
 import pytest
 
 from onnx_converter.converter.core import ConversionOutcome
-from onnx_converter.converter.grpc_server import ConverterGrpcService
 from onnx_converter.converter.http_server import create_app
 
 try:
+    import converter_grpc.converter_pb2 as converter_pb2
     import grpc
 
-    from converter_grpc import converter_pb2
-except ModuleNotFoundError as exc:
+    from onnx_converter.converter.grpc_server import ConverterGrpcService
+except (ImportError, ModuleNotFoundError) as exc:
     pytest.skip(f"grpc parity dependencies unavailable: {exc}", allow_module_level=True)
 
 pytestmark = pytest.mark.integration

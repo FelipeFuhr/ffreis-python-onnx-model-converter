@@ -80,6 +80,10 @@ grpc-generate: ## Regenerate gRPC protobuf stubs
 grpc-check: ## Verify gRPC protobuf stubs are in sync
 	./scripts/check_grpc_stubs.sh
 
+.PHONY: grpc-clean
+grpc-clean: ## Remove generated gRPC protobuf stubs
+	rm -f src/converter_grpc/converter_pb2.py src/converter_grpc/converter_pb2_grpc.py
+
 .PHONY: smoke-api-grpc
 smoke-api-grpc: ## Run docker-compose HTTP + gRPC smoke test
 	docker compose -f examples/docker-compose.api-grpc.yml up --build --abort-on-container-exit --exit-code-from smoke

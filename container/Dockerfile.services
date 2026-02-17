@@ -13,10 +13,13 @@ WORKDIR /app
 COPY --from=uv /uv /usr/local/bin/uv
 
 COPY pyproject.toml uv.lock README.md /app/
+COPY proto /app/proto
+COPY scripts /app/scripts
 COPY src /app/src
 COPY examples /app/examples
 
 RUN uv venv "${VIRTUAL_ENV}" --python 3.13 \
+    && ./scripts/generate_grpc_stubs.sh \
     && uv pip install --python "${VIRTUAL_ENV}/bin/python" -e ".[server,grpc,sklearn]"
 
 CMD ["python", "-m", "onnx_converter.converter.http_server"]

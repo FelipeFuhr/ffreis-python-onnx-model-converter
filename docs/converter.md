@@ -89,6 +89,11 @@ make grpc-check
 make test-grpc-parity
 ```
 
+Generated files are created on demand and are not committed:
+
+- `src/converter_grpc/converter_pb2.py`
+- `src/converter_grpc/converter_pb2_grpc.py`
+
 Stub generation uses pinned tool/runtime versions for reproducibility:
 
 - `grpcio-tools==1.78.0`
@@ -100,6 +105,12 @@ Optional overrides:
 - `GRPCIO_TOOLS_VERSION`
 - `GRPCIO_VERSION`
 - `PROTOBUF_VERSION`
+
+Remove generated stubs:
+
+```bash
+rm -f src/converter_grpc/converter_pb2.py src/converter_grpc/converter_pb2_grpc.py
+```
 
 ## Docker Compose smoke example
 

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import os
 from collections.abc import Iterable, Iterator
 from concurrent import futures
+from types import ModuleType
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 try:
@@ -13,17 +15,20 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     grpc = None
 
-from converter_grpc import converter_pb2 as _converter_pb2
 from onnx_converter.converter.core import ConversionRequest, convert_artifact_bytes
 from onnx_converter.errors import ConversionError
 
-converter_pb2: Any = cast(Any, _converter_pb2)
-if grpc is not None:
-    from converter_grpc import converter_pb2_grpc as _converter_pb2_grpc
 
-    converter_pb2_grpc: Any = cast(Any, _converter_pb2_grpc)
-else:  # pragma: no cover
-    converter_pb2_grpc = None
+def _load_grpc_module(module_name: str) -> ModuleType | None:
+    """Load generated grpc module by name when present."""
+    try:
+        return importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        return None
+
+
+converter_pb2 = _load_grpc_module("converter_grpc.converter_pb2")
+converter_pb2_grpc = _load_grpc_module("converter_grpc.converter_pb2_grpc")
 
 if TYPE_CHECKING:
     from grpc import ServicerContext
@@ -89,9 +94,19 @@ def _require_grpc_stubs() -> _GrpcStubs:
     """Return generated grpc stubs module or raise an actionable runtime error."""
     if converter_pb2_grpc is None:
         raise RuntimeError(
-            "gRPC stubs are unavailable. Install grpc dependencies with extra: .[grpc]"
+            "gRPC stubs are unavailable. Run ./scripts/generate_grpc_stubs.sh first."
         )
     return cast(_GrpcStubs, converter_pb2_grpc)
+
+
+def _require_converter_pb2() -> ModuleType:
+    """Return generated protobuf messages module or raise actionable error."""
+    if converter_pb2 is None:
+        raise RuntimeError(
+            "gRPC protobuf messages are unavailable. "
+            "Run ./scripts/generate_grpc_stubs.sh first."
+        )
+    return converter_pb2
 
 
 def _iter_chunks(payload: bytes, *, chunk_size: int = 1 << 20) -> Iterator[bytes]:
@@ -114,6 +129,7 @@ class ConverterGrpcService:
     ) -> Iterator[object]:  # noqa: N802
         """Receive artifact chunks, run conversion, and stream ONNX output chunks."""
         grpc_runtime = _require_grpc_runtime()
+        pb2 = _require_converter_pb2()
         metadata = None
         chunks: list[bytes] = []
         for request in request_iterator:
@@ -171,8 +187,9 @@ class ConverterGrpcService:
         except Exception as exc:
             context.abort(grpc_runtime.StatusCode.INTERNAL, str(exc))
 
-        yield converter_pb2.ConvertReplyChunk(
-            result=converter_pb2.ConvertResult(
+        pb2_any = cast(Any, pb2)
+        yield pb2_any.ConvertReplyChunk(
+            result=pb2_any.ConvertResult(
                 input_sha256=input_sha,
                 output_sha256=outcome.output_sha256,
                 output_filename=outcome.output_filename,
@@ -180,7 +197,7 @@ class ConverterGrpcService:
             )
         )
         for chunk in _iter_chunks(outcome.output_bytes):
-            yield converter_pb2.ConvertReplyChunk(data=chunk)
+            yield pb2_any.ConvertReplyChunk(data=chunk)
 
 
 def create_server(*, host: str, port: int, max_workers: int = 8) -> _GrpcServer:
