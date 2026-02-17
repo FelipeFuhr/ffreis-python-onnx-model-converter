@@ -6,7 +6,8 @@ import argparse
 import importlib
 import logging
 import os
-from typing import TYPE_CHECKING, Annotated, Any, cast
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import BaseModel, ConfigDict
 
@@ -16,7 +17,7 @@ from onnx_converter.errors import ConversionError
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from fastapi import FastAPI, UploadFile
+    from fastapi import FastAPI
     from fastapi.responses import Response
 
 _fastapi_module: Any = None
@@ -27,10 +28,16 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     pass
 
+fastapi = _fastapi_module
+responses = _fastapi_responses_module
+
+_uvicorn_module: ModuleType | None
 try:
-    import uvicorn
+    import uvicorn as _uvicorn_module
 except ModuleNotFoundError:  # pragma: no cover
-    uvicorn = None  # type: ignore[assignment]
+    _uvicorn_module = None
+
+uvicorn: ModuleType | None = _uvicorn_module
 
 
 def _require_http_runtime() -> None:
@@ -76,8 +83,6 @@ def _parse_input_shape(value: str | None) -> tuple[int, ...] | None:
 def create_app() -> FastAPI:
     """Create converter daemon HTTP application."""
     _require_http_runtime()
-    fastapi = cast(Any, _fastapi_module)
-    responses = cast(Any, _fastapi_responses_module)
     app = fastapi.FastAPI(
         title="ONNX Converter Daemon",
         version="0.1.0",
@@ -96,16 +101,17 @@ def create_app() -> FastAPI:
 
     @app.post("/v1/convert/upload")
     async def convert_upload(
-        artifact: Annotated[UploadFile, fastapi.File(...)],
-        framework: Annotated[str, fastapi.Form(...)],
-        expected_sha256: Annotated[str | None, fastapi.Form()] = None,
-        input_shape: Annotated[str | None, fastapi.Form()] = None,
-        n_features: Annotated[int | None, fastapi.Form()] = None,
-        opset_version: Annotated[int, fastapi.Form()] = 14,
-    ) -> Response:
+        artifact: object = fastapi.File(...),
+        framework: str = fastapi.Form(...),
+        expected_sha256: str | None = fastapi.Form(default=None),
+        input_shape: str | None = fastapi.Form(default=None),
+        n_features: int | None = fastapi.Form(default=None),
+        opset_version: int = fastapi.Form(default=14),
+    ) -> object:
         """Convert uploaded artifact and return ONNX bytes."""
-        artifact_name = artifact.filename or "artifact.bin"
-        payload = await artifact.read()
+        uploaded = cast(Any, artifact)
+        artifact_name = uploaded.filename or "artifact.bin"
+        payload = await uploaded.read()
         if not payload:
             raise fastapi.HTTPException(
                 status_code=fastapi.status.HTTP_400_BAD_REQUEST,

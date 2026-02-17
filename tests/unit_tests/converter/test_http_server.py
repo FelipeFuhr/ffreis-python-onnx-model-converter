@@ -214,6 +214,7 @@ def test_main_runs_uvicorn(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Parse CLI args and pass them to uvicorn."""
+    pytest.importorskip("fastapi")
     calls: dict[str, object] = {}
 
     import onnx_converter.converter.http_server as module

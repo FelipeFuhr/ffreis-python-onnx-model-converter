@@ -8,7 +8,7 @@ import os
 from collections.abc import Iterable, Iterator
 from concurrent import futures
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 try:
     import grpc
@@ -19,21 +19,35 @@ from onnx_converter.converter.core import ConversionRequest, convert_artifact_by
 from onnx_converter.errors import ConversionError
 
 
-def _load_grpc_module(module_name: str) -> ModuleType | None:
-    """Load generated grpc module by name when present."""
+def _load_converter_pb2() -> ModuleType | None:
+    """Load generated protobuf messages module when present."""
     try:
-        return importlib.import_module(module_name)
+        return importlib.import_module("converter_grpc.converter_pb2")
     except ModuleNotFoundError:
         return None
 
 
-converter_pb2 = _load_grpc_module("converter_grpc.converter_pb2")
-converter_pb2_grpc = _load_grpc_module("converter_grpc.converter_pb2_grpc")
+def _load_converter_pb2_grpc() -> ModuleType | None:
+    """Load generated grpc service stubs module when present."""
+    try:
+        return importlib.import_module("converter_grpc.converter_pb2_grpc")
+    except ModuleNotFoundError:
+        return None
+
+
+converter_pb2 = _load_converter_pb2()
+converter_pb2_grpc = _load_converter_pb2_grpc()
 
 if TYPE_CHECKING:
     from grpc import ServicerContext
 else:
-    ServicerContext = Any
+
+    class ServicerContext(Protocol):
+        """Subset of grpc context API used by this module."""
+
+        def abort(self, code: object, details: str) -> None:
+            """Abort RPC with code/details."""
+            ...
 
 
 class _GrpcStatusCode(Protocol):
@@ -81,6 +95,71 @@ class _GrpcStubs(Protocol):
         ...
 
 
+class _ConvertMetadataLike(Protocol):
+    """Subset of ConvertMetadata fields used by transport handler."""
+
+    framework: str
+    filename: str
+    expected_sha256: str
+    input_shape: Iterable[int]
+    n_features: int
+    opset_version: int
+
+
+class _ConvertRequestChunkLike(Protocol):
+    """Subset of ConvertRequestChunk API used by transport handler."""
+
+    metadata: _ConvertMetadataLike
+    data: bytes
+
+    def WhichOneof(self, group: str) -> str | None:
+        """Return active oneof field name."""
+        ...
+
+
+class _ConvertResultLike(Protocol):
+    """Marker protocol for generated ConvertResult messages."""
+
+
+class _ConvertReplyChunkLike(Protocol):
+    """Marker protocol for generated ConvertReplyChunk messages."""
+
+
+class _ConvertResultFactory(Protocol):
+    """Constructor signature for generated ConvertResult."""
+
+    def __call__(
+        self,
+        *,
+        input_sha256: str,
+        output_sha256: str,
+        output_filename: str,
+        output_size_bytes: int,
+    ) -> _ConvertResultLike:
+        """Build ConvertResult."""
+        ...
+
+
+class _ConvertReplyChunkFactory(Protocol):
+    """Constructor signature for generated ConvertReplyChunk."""
+
+    def __call__(
+        self,
+        *,
+        result: _ConvertResultLike | None = None,
+        data: bytes = b"",
+    ) -> _ConvertReplyChunkLike:
+        """Build ConvertReplyChunk."""
+        ...
+
+
+class _ConverterPb2(Protocol):
+    """Subset of generated pb2 module API used by this module."""
+
+    ConvertResult: _ConvertResultFactory
+    ConvertReplyChunk: _ConvertReplyChunkFactory
+
+
 def _require_grpc_runtime() -> _GrpcRuntime:
     """Return grpc module or raise an actionable runtime error."""
     if grpc is None:
@@ -99,14 +178,14 @@ def _require_grpc_stubs() -> _GrpcStubs:
     return cast(_GrpcStubs, converter_pb2_grpc)
 
 
-def _require_converter_pb2() -> ModuleType:
+def _require_converter_pb2() -> _ConverterPb2:
     """Return generated protobuf messages module or raise actionable error."""
     if converter_pb2 is None:
         raise RuntimeError(
             "gRPC protobuf messages are unavailable. "
             "Run ./scripts/generate_grpc_stubs.sh first."
         )
-    return converter_pb2
+    return cast(_ConverterPb2, converter_pb2)
 
 
 def _iter_chunks(payload: bytes, *, chunk_size: int = 1 << 20) -> Iterator[bytes]:
@@ -124,28 +203,27 @@ class ConverterGrpcService:
 
     def Convert(
         self,
-        request_iterator: Iterable[object],
+        request_iterator: Iterable[_ConvertRequestChunkLike],
         context: ServicerContext,
-    ) -> Iterator[object]:  # noqa: N802
+    ) -> Iterator[_ConvertReplyChunkLike]:  # noqa: N802
         """Receive artifact chunks, run conversion, and stream ONNX output chunks."""
         grpc_runtime = _require_grpc_runtime()
         pb2 = _require_converter_pb2()
         metadata = None
         chunks: list[bytes] = []
-        for request in request_iterator:
-            chunk = cast(Any, request)
-            payload_kind = chunk.WhichOneof("payload")
+        for request_chunk in request_iterator:
+            payload_kind = request_chunk.WhichOneof("payload")
             if payload_kind == "metadata":
                 if metadata is not None:
                     context.abort(
                         grpc_runtime.StatusCode.INVALID_ARGUMENT,
                         "metadata provided more than once",
                     )
-                metadata = chunk.metadata
+                metadata = request_chunk.metadata
                 continue
             if payload_kind != "data":
                 continue
-            data = bytes(chunk.data)
+            data = bytes(request_chunk.data)
             if data:
                 chunks.append(data)
 
@@ -160,26 +238,31 @@ class ConverterGrpcService:
                 "missing artifact payload",
             )
 
-        md = cast(Any, metadata)
-        framework = str(md.framework).strip().lower()
+        assert metadata is not None
+        framework = str(metadata.framework).strip().lower()
         input_shape = (
-            tuple(int(v) for v in md.input_shape)
-            if getattr(md, "input_shape", None)
+            tuple(int(v) for v in metadata.input_shape)
+            if metadata.input_shape
             else None
         )
-        n_features_raw = int(md.n_features) if int(md.n_features) > 0 else None
-        request = ConversionRequest(
+        n_features_raw = (
+            int(metadata.n_features) if int(metadata.n_features) > 0 else None
+        )
+        conversion_request = ConversionRequest(
             framework=framework,  # type: ignore[arg-type]
-            filename=str(md.filename or "artifact.bin"),
-            expected_sha256=(str(md.expected_sha256).strip() or None),
+            filename=str(metadata.filename or "artifact.bin"),
+            expected_sha256=(str(metadata.expected_sha256).strip() or None),
             input_shape=input_shape,
             n_features=n_features_raw,
-            opset_version=int(md.opset_version or 14),
+            opset_version=int(metadata.opset_version or 14),
             # gRPC transport does not allow clients to opt into unsafe deserialization.
             allow_unsafe=False,
         )
         try:
-            input_sha, outcome = convert_artifact_bytes(b"".join(chunks), request)
+            input_sha, outcome = convert_artifact_bytes(
+                b"".join(chunks),
+                conversion_request,
+            )
         except ValueError as exc:
             context.abort(grpc_runtime.StatusCode.INVALID_ARGUMENT, str(exc))
         except ConversionError as exc:
@@ -187,9 +270,8 @@ class ConverterGrpcService:
         except Exception as exc:
             context.abort(grpc_runtime.StatusCode.INTERNAL, str(exc))
 
-        pb2_any = cast(Any, pb2)
-        yield pb2_any.ConvertReplyChunk(
-            result=pb2_any.ConvertResult(
+        yield pb2.ConvertReplyChunk(
+            result=pb2.ConvertResult(
                 input_sha256=input_sha,
                 output_sha256=outcome.output_sha256,
                 output_filename=outcome.output_filename,
@@ -197,7 +279,7 @@ class ConverterGrpcService:
             )
         )
         for chunk in _iter_chunks(outcome.output_bytes):
-            yield pb2_any.ConvertReplyChunk(data=chunk)
+            yield pb2.ConvertReplyChunk(data=chunk)
 
 
 def create_server(*, host: str, port: int, max_workers: int = 8) -> _GrpcServer:

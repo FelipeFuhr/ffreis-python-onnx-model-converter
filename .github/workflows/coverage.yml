@@ -41,6 +41,7 @@ jobs:
       - name: Generate coverage (Makefile)
         run: |
           set -euo pipefail
+          ./scripts/generate_grpc_stubs.sh
           make coverage
           test -s coverage.xml
 
