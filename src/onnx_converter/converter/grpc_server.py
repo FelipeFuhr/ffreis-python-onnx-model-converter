@@ -198,66 +198,102 @@ def _iter_chunks(payload: bytes, *, chunk_size: int = 1 << 20) -> Iterator[bytes
         offset = end
 
 
+def _collect_convert_payload(
+    request_iterator: Iterable[_ConvertRequestChunkLike],
+    context: ServicerContext,
+    grpc_runtime: _GrpcRuntime,
+) -> tuple[_ConvertMetadataLike, list[bytes]]:
+    """Collect metadata and non-empty data chunks from request stream."""
+    metadata: _ConvertMetadataLike | None = None
+    chunks: list[bytes] = []
+    for request_chunk in request_iterator:
+        payload_kind = request_chunk.WhichOneof("payload")
+        if payload_kind == "metadata":
+            if metadata is not None:
+                context.abort(
+                    grpc_runtime.StatusCode.INVALID_ARGUMENT,
+                    "metadata provided more than once",
+                )
+            metadata = request_chunk.metadata
+            continue
+        if payload_kind != "data":
+            continue
+        data = bytes(request_chunk.data)
+        if data:
+            chunks.append(data)
+
+    if metadata is None:
+        context.abort(
+            grpc_runtime.StatusCode.INVALID_ARGUMENT,
+            "missing conversion metadata",
+        )
+    if not chunks:
+        context.abort(
+            grpc_runtime.StatusCode.INVALID_ARGUMENT,
+            "missing artifact payload",
+        )
+    assert metadata is not None
+    return metadata, chunks
+
+
+def _build_conversion_request(metadata: _ConvertMetadataLike) -> ConversionRequest:
+    """Build domain conversion request from transport metadata."""
+    framework = str(metadata.framework).strip().lower()
+    input_shape = (
+        tuple(int(v) for v in metadata.input_shape) if metadata.input_shape else None
+    )
+    n_features_raw = int(metadata.n_features) if int(metadata.n_features) > 0 else None
+    return ConversionRequest(
+        framework=framework,  # type: ignore[arg-type]
+        filename=str(metadata.filename or "artifact.bin"),
+        expected_sha256=(str(metadata.expected_sha256).strip() or None),
+        input_shape=input_shape,
+        n_features=n_features_raw,
+        opset_version=int(metadata.opset_version or 14),
+        # gRPC transport does not allow clients to opt into unsafe deserialization.
+        allow_unsafe=False,
+    )
+
+
+def _stream_convert_reply(
+    pb2: _ConverterPb2,
+    *,
+    input_sha: str,
+    output_sha256: str,
+    output_filename: str,
+    output_size_bytes: int,
+    output_bytes: bytes,
+) -> Iterator[_ConvertReplyChunkLike]:
+    """Yield result metadata frame followed by payload chunks."""
+    yield pb2.ConvertReplyChunk(
+        result=pb2.ConvertResult(
+            input_sha256=input_sha,
+            output_sha256=output_sha256,
+            output_filename=output_filename,
+            output_size_bytes=output_size_bytes,
+        )
+    )
+    for chunk in _iter_chunks(output_bytes):
+        yield pb2.ConvertReplyChunk(data=chunk)
+
+
 class ConverterGrpcService:
     """gRPC converter service implementation."""
 
-    def Convert(
+    def convert(
         self,
         request_iterator: Iterable[_ConvertRequestChunkLike],
         context: ServicerContext,
-    ) -> Iterator[_ConvertReplyChunkLike]:  # noqa: N802
+    ) -> Iterator[_ConvertReplyChunkLike]:
         """Receive artifact chunks, run conversion, and stream ONNX output chunks."""
         grpc_runtime = _require_grpc_runtime()
         pb2 = _require_converter_pb2()
-        metadata = None
-        chunks: list[bytes] = []
-        for request_chunk in request_iterator:
-            payload_kind = request_chunk.WhichOneof("payload")
-            if payload_kind == "metadata":
-                if metadata is not None:
-                    context.abort(
-                        grpc_runtime.StatusCode.INVALID_ARGUMENT,
-                        "metadata provided more than once",
-                    )
-                metadata = request_chunk.metadata
-                continue
-            if payload_kind != "data":
-                continue
-            data = bytes(request_chunk.data)
-            if data:
-                chunks.append(data)
-
-        if metadata is None:
-            context.abort(
-                grpc_runtime.StatusCode.INVALID_ARGUMENT,
-                "missing conversion metadata",
-            )
-        if not chunks:
-            context.abort(
-                grpc_runtime.StatusCode.INVALID_ARGUMENT,
-                "missing artifact payload",
-            )
-
-        assert metadata is not None
-        framework = str(metadata.framework).strip().lower()
-        input_shape = (
-            tuple(int(v) for v in metadata.input_shape)
-            if metadata.input_shape
-            else None
+        metadata, chunks = _collect_convert_payload(
+            request_iterator,
+            context,
+            grpc_runtime,
         )
-        n_features_raw = (
-            int(metadata.n_features) if int(metadata.n_features) > 0 else None
-        )
-        conversion_request = ConversionRequest(
-            framework=framework,  # type: ignore[arg-type]
-            filename=str(metadata.filename or "artifact.bin"),
-            expected_sha256=(str(metadata.expected_sha256).strip() or None),
-            input_shape=input_shape,
-            n_features=n_features_raw,
-            opset_version=int(metadata.opset_version or 14),
-            # gRPC transport does not allow clients to opt into unsafe deserialization.
-            allow_unsafe=False,
-        )
+        conversion_request = _build_conversion_request(metadata)
         try:
             input_sha, outcome = convert_artifact_bytes(
                 b"".join(chunks),
@@ -269,17 +305,17 @@ class ConverterGrpcService:
             context.abort(grpc_runtime.StatusCode.INVALID_ARGUMENT, str(exc))
         except Exception as exc:
             context.abort(grpc_runtime.StatusCode.INTERNAL, str(exc))
-
-        yield pb2.ConvertReplyChunk(
-            result=pb2.ConvertResult(
-                input_sha256=input_sha,
-                output_sha256=outcome.output_sha256,
-                output_filename=outcome.output_filename,
-                output_size_bytes=outcome.output_size_bytes,
-            )
+        yield from _stream_convert_reply(
+            pb2,
+            input_sha=input_sha,
+            output_sha256=outcome.output_sha256,
+            output_filename=outcome.output_filename,
+            output_size_bytes=outcome.output_size_bytes,
+            output_bytes=outcome.output_bytes,
         )
-        for chunk in _iter_chunks(outcome.output_bytes):
-            yield pb2.ConvertReplyChunk(data=chunk)
+
+    # gRPC generated handlers call the RPC method name "Convert".
+    Convert = convert
 
 
 def create_server(*, host: str, port: int, max_workers: int = 8) -> _GrpcServer:
