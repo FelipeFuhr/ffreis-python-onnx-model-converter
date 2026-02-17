@@ -120,8 +120,17 @@ python examples/sklearn_example.py
 python examples/sklearn_custom_cli_example.py
 python examples/compare_sklearn_vs_onnx.py
 python examples/optuna_sklearn_example.py
-python examples/autosklearn_roundtrip.py
 ```
+
+AutoSklearn examples use a dedicated legacy dependency stack and are run via
+their Docker examples:
+
+```bash
+make examples-autosklearn
+```
+
+This keeps the default project lock and multi-version CI matrix stable while
+still preserving runnable AutoSklearn paths.
 
 ## Developer workflow
 

@@ -13,7 +13,8 @@ message ConvertMetadata {
   repeated int64 input_shape = 4;
   int64 n_features = 5;
   int32 opset_version = 6;
-  bool allow_unsafe = 7;
+  reserved 7;
+  reserved "allow_unsafe";
 }
 
 message ConvertRequestChunk {

@@ -76,7 +76,6 @@ def create_app() -> FastAPI:
         input_shape: Annotated[str | None, Form()] = None,
         n_features: Annotated[int | None, Form()] = None,
         opset_version: Annotated[int, Form()] = 14,
-        allow_unsafe: Annotated[bool, Form()] = False,
     ) -> Response:
         """Convert uploaded artifact and return ONNX bytes."""
         artifact_name = artifact.filename or "artifact.bin"
@@ -95,7 +94,8 @@ def create_app() -> FastAPI:
                 input_shape=_parse_input_shape(input_shape),
                 n_features=n_features,
                 opset_version=opset_version,
-                allow_unsafe=allow_unsafe,
+                # Unsafe deserialization is intentionally disabled in transport APIs.
+                allow_unsafe=False,
             )
             input_sha, outcome = convert_artifact_bytes(payload, request)
         except (ValueError, ConversionError) as exc:

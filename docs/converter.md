@@ -30,10 +30,10 @@ Endpoint:
     - `input_shape` (optional, comma-separated; required for `pytorch`)
     - `n_features` (optional; required for `sklearn`)
     - `opset_version` (optional, default `14`)
-    - `allow_unsafe` (optional, default `false`)
   - notes:
     - `framework` is normalized via `strip().lower()`
     - unsafe filenames are sanitized to a safe basename before temp-file writes
+    - unsafe deserialization toggles are not exposed in HTTP/gRPC transport APIs
 
 Response:
 

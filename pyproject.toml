@@ -43,15 +43,14 @@ tensorflow = [
     "tf2onnx>=1.16.1; python_version < '3.13'",
 ]
 sklearn = [
+    # sklearn conversion extra is currently supported on Python >=3.11 only.
+    # Core package remains installable on Python 3.10 for non-sklearn flows.
     "scikit-learn>=1.8.0; python_version >= '3.11'",
     "skl2onnx>=1.20.0; python_version >= '3.11'",
     # strongly recommended for loading:
     "joblib>=1.5.3; python_version >= '3.11'",
     # recommended for safer sklearn serialization:
     "skops>=0.13.0; python_version >= '3.11'",
-]
-autosklearn = [
-    "auto-sklearn==0.15.0; python_version < '3.11'",
 ]
 # TensorFlow example-only dependency set pinned for compatibility.
 tf_example = [
@@ -78,8 +77,10 @@ server = [
     "python-multipart>=0.0.9",
 ]
 grpc = [
-    "grpcio>=1.66.0",
-    "protobuf>=5.27.0; python_version >= '3.13'",
+    # Generated stubs currently enforce grpcio >=1.78.0.
+    # Protobuf differs by Python line due TensorFlow/tf2onnx legacy constraints.
+    "grpcio>=1.78.0",
+    "protobuf>=6.31.1; python_version >= '3.13'",
     "protobuf>=3.20,<4; python_version < '3.13'",
 ]
 all = [

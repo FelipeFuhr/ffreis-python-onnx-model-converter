@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1e\x63onverter_grpc/converter.proto\x12\x0e\x63onverter.grpc\"\xa5\x01\n\x0f\x43onvertMetadata\x12\x11\n\tframework\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpected_sha256\x18\x03 \x01(\t\x12\x13\n\x0binput_shape\x18\x04 \x03(\x03\x12\x12\n\nn_features\x18\x05 \x01(\x03\x12\x15\n\ropset_version\x18\x06 \x01(\x05\x12\x14\n\x0c\x61llow_unsafe\x18\x07 \x01(\x08\"e\n\x13\x43onvertRequestChunk\x12\x33\n\x08metadata\x18\x01 \x01(\x0b\x32\x1f.converter.grpc.ConvertMetadataH\x00\x12\x0e\n\x04\x64\x61ta\x18\x02 \x01(\x0cH\x00\x42\t\n\x07payload\"p\n\rConvertResult\x12\x14\n\x0cinput_sha256\x18\x01 \x01(\t\x12\x15\n\routput_sha256\x18\x02 \x01(\t\x12\x17\n\x0foutput_filename\x18\x03 \x01(\t\x12\x19\n\x11output_size_bytes\x18\x04 \x01(\x03\"_\n\x11\x43onvertReplyChunk\x12/\n\x06result\x18\x01 \x01(\x0b\x32\x1d.converter.grpc.ConvertResultH\x00\x12\x0e\n\x04\x64\x61ta\x18\x02 \x01(\x0cH\x00\x42\t\n\x07payload2i\n\x10\x43onverterService\x12U\n\x07\x43onvert\x12#.converter.grpc.ConvertRequestChunk\x1a!.converter.grpc.ConvertReplyChunk(\x01\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1e\x63onverter_grpc/converter.proto\x12\x0e\x63onverter.grpc\"\xa3\x01\n\x0f\x43onvertMetadata\x12\x11\n\tframework\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\x12\x17\n\x0f\x65xpected_sha256\x18\x03 \x01(\t\x12\x13\n\x0binput_shape\x18\x04 \x03(\x03\x12\x12\n\nn_features\x18\x05 \x01(\x03\x12\x15\n\ropset_version\x18\x06 \x01(\x05J\x04\x08\x07\x10\x08R\x0c\x61llow_unsafe\"e\n\x13\x43onvertRequestChunk\x12\x33\n\x08metadata\x18\x01 \x01(\x0b\x32\x1f.converter.grpc.ConvertMetadataH\x00\x12\x0e\n\x04\x64\x61ta\x18\x02 \x01(\x0cH\x00\x42\t\n\x07payload\"p\n\rConvertResult\x12\x14\n\x0cinput_sha256\x18\x01 \x01(\t\x12\x15\n\routput_sha256\x18\x02 \x01(\t\x12\x17\n\x0foutput_filename\x18\x03 \x01(\t\x12\x19\n\x11output_size_bytes\x18\x04 \x01(\x03\"_\n\x11\x43onvertReplyChunk\x12/\n\x06result\x18\x01 \x01(\x0b\x32\x1d.converter.grpc.ConvertResultH\x00\x12\x0e\n\x04\x64\x61ta\x18\x02 \x01(\x0cH\x00\x42\t\n\x07payload2i\n\x10\x43onverterService\x12U\n\x07\x43onvert\x12#.converter.grpc.ConvertRequestChunk\x1a!.converter.grpc.ConvertReplyChunk(\x01\x30\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,13 +32,13 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'converter_grpc.converter_pb
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_CONVERTMETADATA']._serialized_start=51
-  _globals['_CONVERTMETADATA']._serialized_end=216
-  _globals['_CONVERTREQUESTCHUNK']._serialized_start=218
-  _globals['_CONVERTREQUESTCHUNK']._serialized_end=319
-  _globals['_CONVERTRESULT']._serialized_start=321
-  _globals['_CONVERTRESULT']._serialized_end=433
-  _globals['_CONVERTREPLYCHUNK']._serialized_start=435
-  _globals['_CONVERTREPLYCHUNK']._serialized_end=530
-  _globals['_CONVERTERSERVICE']._serialized_start=532
-  _globals['_CONVERTERSERVICE']._serialized_end=637
+  _globals['_CONVERTMETADATA']._serialized_end=214
+  _globals['_CONVERTREQUESTCHUNK']._serialized_start=216
+  _globals['_CONVERTREQUESTCHUNK']._serialized_end=317
+  _globals['_CONVERTRESULT']._serialized_start=319
+  _globals['_CONVERTRESULT']._serialized_end=431
+  _globals['_CONVERTREPLYCHUNK']._serialized_start=433
+  _globals['_CONVERTREPLYCHUNK']._serialized_end=528
+  _globals['_CONVERTERSERVICE']._serialized_start=530
+  _globals['_CONVERTERSERVICE']._serialized_end=635
 # @@protoc_insertion_point(module_scope)

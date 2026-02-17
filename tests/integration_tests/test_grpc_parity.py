@@ -88,6 +88,7 @@ def test_schema_mapping_for_convert_request_is_explicit() -> None:
     grpc_fields = _fields(converter_pb2.ConvertMetadata)
 
     # `artifact` is transport-only in HTTP; gRPC carries raw bytes as chunk data.
+    # `allow_unsafe` is intentionally not exposed by transport APIs.
     expected_http_fields = grpc_fields | {"artifact"}
     assert http_fields == expected_http_fields
 
@@ -105,7 +106,6 @@ def test_grpc_contract_for_convert_messages() -> None:
         "input_shape",
         "n_features",
         "opset_version",
-        "allow_unsafe",
     }
     assert request_fields == {"metadata", "data"}
     assert result_fields == {

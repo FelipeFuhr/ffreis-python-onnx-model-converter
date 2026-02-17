@@ -85,7 +85,8 @@ class ConverterGrpcService:
             input_shape=input_shape,
             n_features=n_features_raw,
             opset_version=int(md.opset_version or 14),
-            allow_unsafe=bool(md.allow_unsafe),
+            # gRPC transport does not allow clients to opt into unsafe deserialization.
+            allow_unsafe=False,
         )
         try:
             input_sha, outcome = convert_artifact_bytes(b"".join(chunks), request)

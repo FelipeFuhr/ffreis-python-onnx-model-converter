@@ -84,6 +84,13 @@ grpc-check: ## Verify gRPC protobuf stubs are in sync
 smoke-api-grpc: ## Run docker-compose HTTP + gRPC smoke test
 	docker compose -f examples/docker-compose.api-grpc.yml up --build --abort-on-container-exit --exit-code-from smoke
 
+.PHONY: examples-autosklearn
+examples-autosklearn: ## Build and run autosklearn example containers
+	docker build -f container/examples/Dockerfile.example-autosklearn1 -t example-autosklearn-v1 .
+	docker run --rm example-autosklearn-v1
+	docker build -f container/examples/Dockerfile.example-autosklearn2 -t example-autosklearn-v2 .
+	docker run --rm example-autosklearn-v2
+
 .PHONY: test-grpc-parity
 test-grpc-parity: ## Run gRPC/API parity tests
 	$(VENV_DIR)/bin/pytest -q tests/integration_tests/test_grpc_parity.py

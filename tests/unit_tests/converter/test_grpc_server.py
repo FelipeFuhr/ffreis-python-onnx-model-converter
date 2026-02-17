@@ -69,7 +69,6 @@ def test_convert_stream_returns_metadata_and_payload_chunks(
                     input_shape=[1, 3, 224, 224],
                     n_features=4,
                     opset_version=17,
-                    allow_unsafe=True,
                 )
             ),
             converter_pb2.ConvertRequestChunk(),
@@ -92,7 +91,7 @@ def test_convert_stream_returns_metadata_and_payload_chunks(
     assert request.input_shape == (1, 3, 224, 224)
     assert request.n_features == 4
     assert request.opset_version == 17
-    assert request.allow_unsafe is True
+    assert request.allow_unsafe is False
 
 
 def test_convert_stream_rejects_missing_metadata() -> None:
