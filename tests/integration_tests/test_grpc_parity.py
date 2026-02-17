@@ -5,14 +5,19 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, cast
 
-import grpc
 import httpx
 import pytest
 
-from converter_grpc import converter_pb2
 from onnx_converter.converter.core import ConversionOutcome
 from onnx_converter.converter.grpc_server import ConverterGrpcService
 from onnx_converter.converter.http_server import create_app
+
+try:
+    import grpc
+
+    from converter_grpc import converter_pb2
+except ModuleNotFoundError as exc:
+    pytest.skip(f"grpc parity dependencies unavailable: {exc}", allow_module_level=True)
 
 pytestmark = pytest.mark.integration
 
@@ -27,14 +32,15 @@ _UNMAPPED_GRPC_METHODS: set[str] = set()
 class _AbortRecorder:
     """Capture abort arguments from service context."""
 
-    code: grpc.StatusCode | None = None
+    code: object | None = None
     details: str | None = None
 
-    def abort(self, code: grpc.StatusCode, details: str) -> None:
+    def abort(self, code: object, details: str) -> None:
         """Raise runtime error on abort."""
         self.code = code
         self.details = details
-        raise RuntimeError(f"aborted: {code.name}: {details}")
+        code_name = getattr(code, "name", "UNKNOWN")
+        raise RuntimeError(f"aborted: {code_name}: {details}")
 
 
 def _fields(message: object) -> set[str]:

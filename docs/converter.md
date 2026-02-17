@@ -7,6 +7,13 @@ integrity metadata.
 ## Install extras
 
 ```bash
+# HTTP only
+uv sync --extra server
+
+# gRPC only
+uv sync --extra grpc
+
+# both interfaces
 uv sync --extra server --extra grpc
 ```
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import types
+
 import pytest
 
 from onnx_converter.errors import ConversionError
@@ -228,7 +230,11 @@ def test_main_runs_uvicorn(
         calls["port"] = port
         calls["reload"] = reload
 
-    monkeypatch.setattr(module.uvicorn, "run", fake_run)
+    monkeypatch.setattr(
+        module,
+        "uvicorn",
+        types.SimpleNamespace(run=fake_run),
+    )
     module.main()
     assert calls == {
         "app_ref": "onnx_converter.converter.http_server:app",

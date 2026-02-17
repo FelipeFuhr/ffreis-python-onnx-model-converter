@@ -23,11 +23,10 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install dependencies
+      - name: Install dependencies (uv)
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,server,grpc]"
+          uv sync --extra dev --extra server --extra grpc
 
       - name: Check generated gRPC stubs are current
         run: |
@@ -37,4 +36,4 @@ jobs:
       - name: Run gRPC/API parity test
         run: |
           set -euo pipefail
-          pytest -q tests/integration_tests/test_grpc_parity.py
+          uv run pytest -q tests/integration_tests/test_grpc_parity.py

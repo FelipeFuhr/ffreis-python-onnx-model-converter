@@ -6,22 +6,92 @@ import argparse
 import os
 from collections.abc import Iterable, Iterator
 from concurrent import futures
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
-import grpc
+try:
+    import grpc
+except ModuleNotFoundError:  # pragma: no cover
+    grpc = None
 
 from converter_grpc import converter_pb2 as _converter_pb2
-from converter_grpc import converter_pb2_grpc as _converter_pb2_grpc
 from onnx_converter.converter.core import ConversionRequest, convert_artifact_bytes
 from onnx_converter.errors import ConversionError
 
 converter_pb2: Any = cast(Any, _converter_pb2)
-converter_pb2_grpc: Any = cast(Any, _converter_pb2_grpc)
+if grpc is not None:
+    from converter_grpc import converter_pb2_grpc as _converter_pb2_grpc
+
+    converter_pb2_grpc: Any = cast(Any, _converter_pb2_grpc)
+else:  # pragma: no cover
+    converter_pb2_grpc = None
 
 if TYPE_CHECKING:
     from grpc import ServicerContext
 else:
     ServicerContext = Any
+
+
+class _GrpcStatusCode(Protocol):
+    """Subset of grpc.StatusCode enum used by this module."""
+
+    INVALID_ARGUMENT: object
+    INTERNAL: object
+
+
+class _GrpcServer(Protocol):
+    """Subset of grpc.Server API used by this module."""
+
+    def add_insecure_port(self, address: str) -> int:
+        """Bind server to an insecure address."""
+        ...
+
+    def start(self) -> None:
+        """Start serving requests."""
+        ...
+
+    def wait_for_termination(self) -> None:
+        """Block until server termination."""
+        ...
+
+
+class _GrpcRuntime(Protocol):
+    """Subset of grpc module API used by this module."""
+
+    StatusCode: _GrpcStatusCode
+
+    def server(self, executor: futures.Executor) -> _GrpcServer:
+        """Build grpc server instance."""
+        ...
+
+
+class _GrpcStubs(Protocol):
+    """Subset of generated stub helpers used by this module."""
+
+    def add_ConverterServiceServicer_to_server(
+        self,
+        servicer: object,
+        server: _GrpcServer,
+    ) -> None:
+        """Register converter service implementation."""
+        ...
+
+
+def _require_grpc_runtime() -> _GrpcRuntime:
+    """Return grpc module or raise an actionable runtime error."""
+    if grpc is None:
+        raise RuntimeError(
+            "grpcio is required to run converter-grpc. Install with extra: .[grpc]"
+        )
+    return cast(_GrpcRuntime, grpc)
+
+
+def _require_grpc_stubs() -> _GrpcStubs:
+    """Return generated grpc stubs module or raise an actionable runtime error."""
+    if converter_pb2_grpc is None:
+        raise RuntimeError(
+            "gRPC stubs are unavailable. Install grpc dependencies with extra: .[grpc]"
+        )
+    return cast(_GrpcStubs, converter_pb2_grpc)
 
 
 def _iter_chunks(payload: bytes, *, chunk_size: int = 1 << 20) -> Iterator[bytes]:
@@ -43,6 +113,7 @@ class ConverterGrpcService:
         context: ServicerContext,
     ) -> Iterator[object]:  # noqa: N802
         """Receive artifact chunks, run conversion, and stream ONNX output chunks."""
+        grpc_runtime = _require_grpc_runtime()
         metadata = None
         chunks: list[bytes] = []
         for request in request_iterator:
@@ -51,7 +122,7 @@ class ConverterGrpcService:
             if payload_kind == "metadata":
                 if metadata is not None:
                     context.abort(
-                        grpc.StatusCode.INVALID_ARGUMENT,
+                        grpc_runtime.StatusCode.INVALID_ARGUMENT,
                         "metadata provided more than once",
                     )
                 metadata = chunk.metadata
@@ -64,11 +135,14 @@ class ConverterGrpcService:
 
         if metadata is None:
             context.abort(
-                grpc.StatusCode.INVALID_ARGUMENT,
+                grpc_runtime.StatusCode.INVALID_ARGUMENT,
                 "missing conversion metadata",
             )
         if not chunks:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "missing artifact payload")
+            context.abort(
+                grpc_runtime.StatusCode.INVALID_ARGUMENT,
+                "missing artifact payload",
+            )
 
         md = cast(Any, metadata)
         framework = str(md.framework).strip().lower()
@@ -91,11 +165,11 @@ class ConverterGrpcService:
         try:
             input_sha, outcome = convert_artifact_bytes(b"".join(chunks), request)
         except ValueError as exc:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(exc))
+            context.abort(grpc_runtime.StatusCode.INVALID_ARGUMENT, str(exc))
         except ConversionError as exc:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(exc))
+            context.abort(grpc_runtime.StatusCode.INVALID_ARGUMENT, str(exc))
         except Exception as exc:
-            context.abort(grpc.StatusCode.INTERNAL, str(exc))
+            context.abort(grpc_runtime.StatusCode.INTERNAL, str(exc))
 
         yield converter_pb2.ConvertReplyChunk(
             result=converter_pb2.ConvertResult(
@@ -109,10 +183,12 @@ class ConverterGrpcService:
             yield converter_pb2.ConvertReplyChunk(data=chunk)
 
 
-def create_server(*, host: str, port: int, max_workers: int = 8) -> grpc.Server:
+def create_server(*, host: str, port: int, max_workers: int = 8) -> _GrpcServer:
     """Create gRPC server instance."""
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
-    converter_pb2_grpc.add_ConverterServiceServicer_to_server(
+    grpc_runtime = _require_grpc_runtime()
+    stubs = _require_grpc_stubs()
+    server = grpc_runtime.server(futures.ThreadPoolExecutor(max_workers=max_workers))
+    stubs.add_ConverterServiceServicer_to_server(
         ConverterGrpcService(),
         server,
     )

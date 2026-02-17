@@ -70,6 +70,8 @@ pip install -e ".[tensorflow]"  # backward-compatible alias
 pip install -e ".[sklearn]"
 pip install -e ".[optuna]"
 pip install -e ".[runtime]"
+pip install -e ".[server]"      # HTTP transport
+pip install -e ".[grpc]"        # gRPC transport
 pip install -e ".[all]"         # secure default bundle (excludes tf_legacy)
 ```
 
