@@ -3,7 +3,7 @@ services:
     build:
       context: ..
       dockerfile: container/Dockerfile.services
-    image: ffreis-onnx-converter:api-grpc-smoke
+    image: ${IMAGE_ROOT:-ffreis}-onnx-converter:${IMAGE_TAG:-api-grpc-smoke}
     command:
       - python
       - -m
@@ -24,7 +24,7 @@ services:
       retries: 30
 
   converter-grpc:
-    image: ffreis-onnx-converter:api-grpc-smoke
+    image: ${IMAGE_ROOT:-ffreis}-onnx-converter:${IMAGE_TAG:-api-grpc-smoke}
     command:
       - python
       - -m
@@ -37,7 +37,7 @@ services:
       - "18091:8091"
 
   smoke:
-    image: ffreis-onnx-converter:api-grpc-smoke
+    image: ${IMAGE_ROOT:-ffreis}-onnx-converter:${IMAGE_TAG:-api-grpc-smoke}
     depends_on:
       converter-api:
         condition: service_healthy

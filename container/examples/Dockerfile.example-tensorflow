@@ -1,4 +1,5 @@
-FROM onnx-converter/examples-base:local
+ARG EXAMPLES_BASE_IMAGE=ffreis/onnx-converter-examples-base
+FROM ${EXAMPLES_BASE_IMAGE}
 
 # TensorFlow/tf2onnx currently has no stable cp313 wheel support for this stack.
 # Keep the repository default at Python 3.13, but run this example in an isolated

@@ -1,4 +1,5 @@
-FROM onnx-converter/examples-base:local
+ARG EXAMPLES_BASE_IMAGE=ffreis/onnx-converter-examples-base
+FROM ${EXAMPLES_BASE_IMAGE}
 
 USER root
 RUN apt-get update && \

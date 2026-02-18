@@ -7,12 +7,19 @@ PYTHON_VERSION ?= 3.13
 VENV_DIR ?= .venv
 
 PREFIX ?= ffreis
+IMAGE_PROVIDER ?=
+IMAGE_TAG ?= api-grpc-smoke
+SMOKE_TIMEOUT ?= 20m
 BASE_DIR ?= .
 CONTAINER_DIR ?= container
 
-UV_VENV_IMAGE ?= $(PREFIX)/onnx-converter-uv-venv
-PACKAGE_IMAGE ?= $(PREFIX)/onnx-converter-package
-CLI_IMAGE ?= $(PREFIX)/onnx-converter-cli
+IMAGE_PREFIX := $(if $(IMAGE_PROVIDER),$(IMAGE_PROVIDER)/,)$(PREFIX)
+IMAGE_ROOT := $(IMAGE_PREFIX)
+BASE_IMAGE ?= $(IMAGE_PREFIX)/base
+BASE_RUNNER_IMAGE ?= $(IMAGE_PREFIX)/base-runner
+UV_VENV_IMAGE ?= $(IMAGE_PREFIX)/onnx-converter-uv-venv
+PACKAGE_IMAGE ?= $(IMAGE_PREFIX)/onnx-converter-package
+CLI_IMAGE ?= $(IMAGE_PREFIX)/onnx-converter-cli
 EXTRAS ?= all
 
 BASE_IMAGE_VALUE := $(shell grep '^BASE_IMAGE=' $(CONTAINER_DIR)/digests.env | cut -d= -f2)
@@ -31,7 +38,11 @@ all: check ## Run lint and tests
 
 .PHONY: env
 env: ## Create virtual environment
-	python$(PYTHON_VERSION) -m venv $(VENV_DIR)
+	@if [ -d "$(VENV_DIR)" ]; then \
+		echo "Virtual environment already exists at $(VENV_DIR)"; \
+	else \
+		python$(PYTHON_VERSION) -m venv $(VENV_DIR); \
+	fi
 	@echo "Activate with: . $(VENV_DIR)/bin/activate"
 
 .PHONY: install
@@ -86,18 +97,34 @@ grpc-clean: ## Remove generated gRPC protobuf stubs
 
 .PHONY: smoke-api-grpc
 smoke-api-grpc: ## Run docker-compose HTTP + gRPC smoke test
-	docker compose -f examples/docker-compose.api-grpc.yml up --build --abort-on-container-exit --exit-code-from smoke
+	@set -euo pipefail; \
+	cleanup() { \
+		IMAGE_ROOT="$(IMAGE_ROOT)" IMAGE_TAG="$(IMAGE_TAG)" docker compose -f examples/docker-compose.api-grpc.yml down --remove-orphans || true; \
+	}; \
+	trap cleanup EXIT; \
+	IMAGE_ROOT="$(IMAGE_ROOT)" IMAGE_TAG="$(IMAGE_TAG)" timeout --foreground "$(SMOKE_TIMEOUT)" docker compose -f examples/docker-compose.api-grpc.yml up --build --abort-on-container-exit --exit-code-from smoke
 
 .PHONY: examples-autosklearn
 examples-autosklearn: ## Build and run autosklearn example containers
-	docker build -f container/examples/Dockerfile.example-autosklearn1 -t example-autosklearn-v1 .
+	docker build -f container/examples/Dockerfile.example-base \
+		--build-arg BASE_RUNNER_IMAGE="$(BASE_RUNNER_IMAGE)" \
+		-t "$(IMAGE_PREFIX)/onnx-converter-examples-base" .
+	docker build -f container/examples/Dockerfile.example-autosklearn1 \
+		--build-arg EXAMPLES_BASE_IMAGE="$(IMAGE_PREFIX)/onnx-converter-examples-base" \
+		-t example-autosklearn-v1 .
 	docker run --rm example-autosklearn-v1
-	docker build -f container/examples/Dockerfile.example-autosklearn2 -t example-autosklearn-v2 .
+	docker build -f container/examples/Dockerfile.example-autosklearn2 \
+		--build-arg EXAMPLES_BASE_IMAGE="$(IMAGE_PREFIX)/onnx-converter-examples-base" \
+		-t example-autosklearn-v2 .
 	docker run --rm example-autosklearn-v2
 
 .PHONY: test-grpc-parity
 test-grpc-parity: ## Run gRPC/API parity tests
 	$(VENV_DIR)/bin/pytest -q tests/integration_tests/test_grpc_parity.py
+
+.PHONY: openapi-check
+openapi-check: ## Validate OpenAPI contract and verify runtime drift
+	env -u VIRTUAL_ENV uv run --project . --extra server --with openapi-spec-validator --with pyyaml python scripts/check_openapi.py
 
 .PHONY: check
 check: grpc-check lint test-unit ## Run lint and fast tests
@@ -129,20 +156,20 @@ clean: ## Remove caches and venv
 .PHONY: build-base
 build-base: ## Build base image (pinned by digest env)
 	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.base \
-		-t $(PREFIX)/base \
-		-t $(PREFIX)/base:local \
-		-t localhost/$(PREFIX)/base:local \
+		-t $(BASE_IMAGE) \
 		$(BASE_DIR) \
 		--build-arg BASE_IMAGE="$(BASE_IMAGE_VALUE)" \
 		--build-arg BASE_DIGEST="$(BASE_DIGEST_VALUE)"
 
 .PHONY: build-base-runner
 build-base-runner: build-base ## Build base-runner image
-	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.base-runner -t $(PREFIX)/base-runner -t $(PREFIX)/base-runner:local $(BASE_DIR)
+	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.base-runner -t $(BASE_RUNNER_IMAGE) $(BASE_DIR) \
+		--build-arg BASE_IMAGE="$(BASE_IMAGE)"
 
 .PHONY: build-uv-venv
 build-uv-venv: build-base ## Build uv venv image
 	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.uv-builder -t $(UV_VENV_IMAGE) $(BASE_DIR) \
+		--build-arg BASE_IMAGE="$(BASE_IMAGE)" \
 		--build-arg PYTHON_VERSION="$(PYTHON_VERSION)"
 
 .PHONY: build-package
@@ -154,7 +181,8 @@ build-package: build-uv-venv ## Build package image (installs converter)
 .PHONY: build-cli
 build-cli: build-base-runner build-package ## Build CLI image
 	$(CONTAINER_COMMAND) build -f $(CONTAINER_DIR)/Dockerfile.cli -t $(CLI_IMAGE) $(BASE_DIR) \
-		--build-arg PACKAGE_IMAGE="$(PACKAGE_IMAGE)"
+		--build-arg PACKAGE_IMAGE="$(PACKAGE_IMAGE)" \
+		--build-arg BASE_RUNNER_IMAGE="$(BASE_RUNNER_IMAGE)"
 
 .PHONY: build build-converter-images
 build: build-converter-images ## Build all converter images (alias used by CI)
@@ -168,4 +196,4 @@ clean-images: ## Remove converter images
 	$(CONTAINER_COMMAND) rmi $(UV_VENV_IMAGE) $(PACKAGE_IMAGE) $(CLI_IMAGE) || true
 
 .PHONY: ci-grpc
-ci-grpc: grpc-check lint test-grpc-parity ## Run gRPC sync + parity quality gate
+ci-grpc: grpc-check openapi-check lint test-grpc-parity ## Run gRPC sync + parity quality gate
