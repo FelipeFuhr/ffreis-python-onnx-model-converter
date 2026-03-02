@@ -5,7 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol, cast
 
-import pytest
+from pytest import CaptureFixture as pytest_CaptureFixture
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import importorskip as pytest_importorskip
+from pytest import raises as pytest_raises
 
 from onnx_converter.errors import ConversionError
 
@@ -30,15 +33,15 @@ class _GrpcModuleLike(Protocol):
 
 
 def _deps() -> tuple[_GrpcModuleLike, object, object]:
-    grpc = pytest.importorskip("grpc")
-    converter_pb2 = pytest.importorskip("converter_grpc.converter_pb2")
+    grpc = pytest_importorskip("grpc")
+    converter_pb2 = pytest_importorskip("converter_grpc.converter_pb2")
     from onnx_converter.converter import grpc_server as module
 
     return grpc, converter_pb2, module
 
 
 def test_convert_stream_returns_metadata_and_payload_chunks(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Stream converted output with result metadata as first frame."""
     _, converter_pb2, module = _deps()
@@ -105,7 +108,7 @@ def test_convert_stream_rejects_missing_metadata() -> None:
     service = module.ConverterGrpcService()
     context = _AbortRecorder()
     request_stream = iter([converter_pb2.ConvertRequestChunk(data=b"x")])
-    with pytest.raises(RuntimeError, match="missing conversion metadata"):
+    with pytest_raises(RuntimeError, match="missing conversion metadata"):
         list(service.Convert(request_stream, context))
     assert context.code == grpc.StatusCode.INVALID_ARGUMENT.name
 
@@ -125,7 +128,7 @@ def test_convert_stream_rejects_duplicate_metadata() -> None:
             ),
         ]
     )
-    with pytest.raises(RuntimeError, match="metadata provided more than once"):
+    with pytest_raises(RuntimeError, match="metadata provided more than once"):
         list(service.Convert(request_stream, context))
     assert context.code == grpc.StatusCode.INVALID_ARGUMENT.name
 
@@ -142,13 +145,13 @@ def test_convert_stream_rejects_missing_payload() -> None:
             )
         ]
     )
-    with pytest.raises(RuntimeError, match="missing artifact payload"):
+    with pytest_raises(RuntimeError, match="missing artifact payload"):
         list(service.Convert(request_stream, context))
     assert context.code == grpc.StatusCode.INVALID_ARGUMENT.name
 
 
 def test_convert_stream_maps_value_error_to_invalid_argument(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Map ValueError from conversion to INVALID_ARGUMENT."""
     grpc, converter_pb2, module = _deps()
@@ -171,13 +174,13 @@ def test_convert_stream_maps_value_error_to_invalid_argument(
             converter_pb2.ConvertRequestChunk(data=b"x"),
         ]
     )
-    with pytest.raises(RuntimeError, match="invalid request"):
+    with pytest_raises(RuntimeError, match="invalid request"):
         list(service.Convert(request_stream, context))
     assert context.code == grpc.StatusCode.INVALID_ARGUMENT.name
 
 
 def test_convert_stream_maps_conversion_error_to_invalid_argument(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Map conversion domain errors to INVALID_ARGUMENT."""
     grpc, converter_pb2, module = _deps()
@@ -200,7 +203,7 @@ def test_convert_stream_maps_conversion_error_to_invalid_argument(
             converter_pb2.ConvertRequestChunk(data=b"x"),
         ]
     )
-    with pytest.raises(RuntimeError, match="conversion exploded"):
+    with pytest_raises(RuntimeError, match="conversion exploded"):
         list(service.Convert(request_stream, context))
     assert context.code == grpc.StatusCode.INVALID_ARGUMENT.name
 
@@ -212,7 +215,7 @@ def test_iter_chunks_splits_payload() -> None:
     assert chunks == [b"ab", b"cd", b"ef"]
 
 
-def test_create_server_registers_service(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_create_server_registers_service(monkeypatch: pytest_MonkeyPatch) -> None:
     """Create server and bind host/port."""
     _, _, module = _deps()
     calls: dict[str, object] = {}
@@ -245,8 +248,8 @@ def test_create_server_registers_service(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_main_starts_server(
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest_MonkeyPatch,
+    capsys: pytest_CaptureFixture[str],
 ) -> None:
     """Parse args, start server, and wait for termination."""
     _, _, module = _deps()

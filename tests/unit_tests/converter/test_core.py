@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import mark as pytest_mark
+from pytest import raises as pytest_raises
 
 from onnx_converter.converter import core
 from onnx_converter.converter.core import ConversionRequest, digest_bytes
@@ -20,7 +22,7 @@ def test_digest_file_and_write_bytes_roundtrip(tmp_path: Path) -> None:
     assert core.digest_file(output) == digest_bytes(payload)
 
 
-@pytest.mark.parametrize(
+@pytest_mark.parametrize(
     ("value", "expected"),
     [
         (None, None),
@@ -36,11 +38,11 @@ def test_normalize_sha256(value: str | None, expected: str | None) -> None:
 
 def test_normalize_sha256_rejects_invalid_value() -> None:
     """Reject non-hex and wrong-length SHA values."""
-    with pytest.raises(ValueError, match="64-character hex digest"):
+    with pytest_raises(ValueError, match="64-character hex digest"):
         core.normalize_sha256("xyz")
 
 
-@pytest.mark.parametrize(
+@pytest_mark.parametrize(
     ("value", "expected"),
     [
         ("model.joblib", "model.joblib"),
@@ -57,7 +59,7 @@ def test_safe_input_filename(value: str, expected: str) -> None:
     assert core.safe_input_filename(value) == expected
 
 
-def test_run_conversion_dispatches_to_torch(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_conversion_dispatches_to_torch(monkeypatch: pytest_MonkeyPatch) -> None:
     """Dispatch PyTorch requests with all conversion options."""
     seen: dict[str, Path | tuple[int, ...] | int | bool] = {}
 
@@ -95,7 +97,7 @@ def test_run_conversion_dispatches_to_torch(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_run_conversion_dispatches_to_tensorflow(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Dispatch TensorFlow requests with opset option."""
     seen: dict[str, Path | int] = {}
@@ -125,7 +127,7 @@ def test_run_conversion_dispatches_to_tensorflow(
     assert seen["opset_version"] == 17
 
 
-def test_run_conversion_dispatches_to_sklearn(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_run_conversion_dispatches_to_sklearn(monkeypatch: pytest_MonkeyPatch) -> None:
     """Dispatch scikit-learn requests with safety flag."""
     seen: dict[str, Path | int | bool] = {}
 
@@ -163,21 +165,21 @@ def test_run_conversion_validates_framework_options() -> None:
     dummy_path = Path("a.bin")
     dummy_output = Path("b.onnx")
 
-    with pytest.raises(ValueError, match="input_shape is required"):
+    with pytest_raises(ValueError, match="input_shape is required"):
         core.run_conversion(
             input_path=dummy_path,
             request=ConversionRequest(framework="pytorch", filename="m.pt"),
             output_path=dummy_output,
         )
 
-    with pytest.raises(ValueError, match="n_features must be > 0"):
+    with pytest_raises(ValueError, match="n_features must be > 0"):
         core.run_conversion(
             input_path=dummy_path,
             request=ConversionRequest(framework="sklearn", filename="m.joblib"),
             output_path=dummy_output,
         )
 
-    with pytest.raises(ValueError, match="unsupported framework"):
+    with pytest_raises(ValueError, match="unsupported framework"):
         invalid_request = ConversionRequest(framework="tensorflow", filename="m.bin")
         object.__setattr__(invalid_request, "framework", "xgboost")
         core.run_conversion(
@@ -186,7 +188,7 @@ def test_run_conversion_validates_framework_options() -> None:
 
 
 def test_convert_artifact_bytes_returns_integrity_metadata(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Verify conversion returns stable input/output hashes."""
 
@@ -216,7 +218,7 @@ def test_convert_artifact_bytes_returns_integrity_metadata(
 
 
 def test_convert_artifact_bytes_sanitizes_input_filename(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Prevent path traversal by using a sanitized temp input filename."""
 
@@ -248,12 +250,12 @@ def test_convert_artifact_bytes_rejects_hash_mismatch() -> None:
         filename="saved_model.zip",
         expected_sha256="0" * 64,
     )
-    with pytest.raises(ValueError, match="input SHA-256 mismatch"):
+    with pytest_raises(ValueError, match="input SHA-256 mismatch"):
         core.convert_artifact_bytes(b"actual", request)
 
 
 def test_convert_artifact_bytes_wraps_unexpected_exception(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Wrap non-domain exceptions into ConversionError."""
 
@@ -266,7 +268,7 @@ def test_convert_artifact_bytes_wraps_unexpected_exception(
         raise RuntimeError("boom")
 
     monkeypatch.setattr(core, "run_conversion", fake_run_conversion)
-    with pytest.raises(ConversionError, match="boom"):
+    with pytest_raises(ConversionError, match="boom"):
         core.convert_artifact_bytes(
             b"payload",
             ConversionRequest(framework="tensorflow", filename="model"),
@@ -274,7 +276,7 @@ def test_convert_artifact_bytes_wraps_unexpected_exception(
 
 
 def test_convert_artifact_bytes_reraises_conversion_error(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Propagate ConversionError without rewriting."""
 
@@ -287,7 +289,7 @@ def test_convert_artifact_bytes_reraises_conversion_error(
         raise ConversionError("bad model")
 
     monkeypatch.setattr(core, "run_conversion", fake_run_conversion)
-    with pytest.raises(ConversionError, match="bad model"):
+    with pytest_raises(ConversionError, match="bad model"):
         core.convert_artifact_bytes(
             b"payload",
             ConversionRequest(framework="tensorflow", filename=""),

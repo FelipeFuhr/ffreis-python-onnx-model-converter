@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-import os
+from os import makedirs as os_makedirs
+from os import path as os_path
 from pathlib import Path
 
 from pydantic import ValidationError
@@ -58,8 +59,8 @@ def convert_sklearn_to_onnx(
         raise ConversionError(f"Invalid sklearn export options: {exc}") from exc
 
     output_path_str = str(config.output_path)
-    os.makedirs(
-        os.path.dirname(output_path_str) if os.path.dirname(output_path_str) else ".",
+    os_makedirs(
+        os_path.dirname(output_path_str) if os_path.dirname(output_path_str) else ".",
         exist_ok=True,
     )
 

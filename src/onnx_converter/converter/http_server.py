@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import argparse
-import importlib
-import logging
-import os
+from argparse import ArgumentParser as argparse_ArgumentParser
+from importlib import import_module as importlib_import_module
+from logging import getLogger as logging_getLogger
+from os import getenv as os_getenv
 from types import ModuleType
 from typing import TYPE_CHECKING, Protocol, cast
 
@@ -18,7 +18,7 @@ from onnx_converter.converter.core import (
 )
 from onnx_converter.errors import ConversionError
 
-logger = logging.getLogger(__name__)
+logger = logging_getLogger(__name__)
 
 if TYPE_CHECKING:
     from fastapi import FastAPI, UploadFile
@@ -33,6 +33,9 @@ else:
         async def read(self) -> bytes:
             """Read uploaded content bytes."""
             return b""
+
+    class Response:
+        """Fallback Response type used when FastAPI is not installed."""
 
 
 class _FastapiStatusLike(Protocol):
@@ -70,13 +73,15 @@ class _ResponsesModuleLike(Protocol):
 _fastapi_module: ModuleType | None = None
 _fastapi_responses_module: ModuleType | None = None
 try:
-    _fastapi_module = importlib.import_module("fastapi")
-    _fastapi_responses_module = importlib.import_module("fastapi.responses")
+    _fastapi_module = importlib_import_module("fastapi")
+    _fastapi_responses_module = importlib_import_module("fastapi.responses")
 except ModuleNotFoundError:  # pragma: no cover
     pass
 
 if _fastapi_module is not None and not TYPE_CHECKING:
     UploadFile = cast(type[UploadFile], _fastapi_module.UploadFile)
+if _fastapi_responses_module is not None and not TYPE_CHECKING:
+    Response = cast(type[Response], _fastapi_responses_module.Response)
 
 fastapi = cast(_FastapiModuleLike | None, _fastapi_module)
 responses = _fastapi_responses_module
@@ -246,15 +251,15 @@ def main() -> None:
     _require_http_runtime()
     if uvicorn is None:
         raise RuntimeError("uvicorn is required to run converter-http")
-    parser = argparse.ArgumentParser(description="ONNX converter daemon HTTP server.")
+    parser = argparse_ArgumentParser(description="ONNX converter daemon HTTP server.")
     parser.add_argument(
         "--host",
-        default=os.getenv("CONVERTER_HTTP_HOST", "0.0.0.0"),
+        default=os_getenv("CONVERTER_HTTP_HOST", "0.0.0.0"),
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=int(os.getenv("CONVERTER_HTTP_PORT", "8090")),
+        default=int(os_getenv("CONVERTER_HTTP_PORT", "8090")),
     )
     args = parser.parse_args()
     uvicorn.run(

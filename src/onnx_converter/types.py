@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import Literal, Protocol, TypeAlias
 
-type FrameworkKind = Literal["pytorch", "tensorflow", "sklearn"]
+FrameworkKind: TypeAlias = Literal["pytorch", "tensorflow", "sklearn"]
 
 
 class ModelArtifact(Protocol):
@@ -21,13 +21,13 @@ class SklearnInitialTypeLike(Protocol):
     """Marker protocol for skl2onnx initial type declarations."""
 
 
-type OptionScalar = str | int | float | bool | None | Path
-type OptionValue = (
+OptionScalar: TypeAlias = str | int | float | bool | None | Path
+OptionValue: TypeAlias = (
     OptionScalar
     | tuple["OptionValue", ...]
     | list["OptionValue"]
     | dict[str, "OptionValue"]
     | dict[int, "OptionValue"]
 )
-type OptionMap = Mapping[str, OptionValue]
-type MutableOptionMap = dict[str, OptionValue]
+OptionMap: TypeAlias = Mapping[str, OptionValue]
+MutableOptionMap: TypeAlias = dict[str, OptionValue]

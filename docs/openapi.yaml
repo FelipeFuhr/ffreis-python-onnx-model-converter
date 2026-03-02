@@ -42,8 +42,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema:
-                title: Response Convert Upload V1 Convert Upload Post
+              schema: {}
         '422':
           description: Validation Error
           content:
@@ -55,6 +54,8 @@ components:
     Body_convert_upload_v1_convert_upload_post:
       properties:
         artifact:
+          type: string
+          format: binary
           title: Artifact
         framework:
           type: string

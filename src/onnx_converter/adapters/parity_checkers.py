@@ -5,7 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Protocol, cast
 
-import numpy as np
+from numpy import asarray as np_asarray
+from numpy import float32 as np_float32
+from numpy import ndarray as np_ndarray
 
 from onnx_converter.application.options import ParityOptions
 from onnx_converter.errors import ParityError
@@ -45,17 +47,19 @@ class TorchParityChecker:
             return
 
         try:
-            import torch
+            from torch import float32 as torch_float32
+            from torch import from_numpy as torch_from_numpy
+            from torch import no_grad as torch_no_grad
         except Exception as exc:
             raise ParityError("PyTorch parity check requires torch.") from exc
 
         parity_input = load_parity_input(parity.input_path)
         torch_model = cast(_TorchCallableProtocol, model)
-        with torch.no_grad():
-            output = torch_model(torch.from_numpy(parity_input).to(torch.float32))
+        with torch_no_grad():
+            output = torch_model(torch_from_numpy(parity_input).to(torch_float32))
             if isinstance(output, (tuple, list)):
                 output = output[0]
-            expected = np.asarray(output.detach().cpu().numpy(), dtype=np.float32)
+            expected = np_asarray(output.detach().cpu().numpy(), dtype=np_float32)
 
         check_tensor_parity(
             expected=expected,
@@ -104,7 +108,7 @@ class TensorflowParityChecker:
         output = tensorflow_model(parity_input.astype("float32"), training=False)
         if isinstance(output, (tuple, list)):
             output = output[0]
-        expected = np.asarray(output.numpy(), dtype=np.float32)
+        expected = np_asarray(output.numpy(), dtype=np_float32)
 
         check_tensor_parity(
             expected=expected,
@@ -156,7 +160,7 @@ class SklearnParityChecker:
 class _SklearnPredictorProtocol(Protocol):
     """Protocol for sklearn predictor model methods used by parity checks."""
 
-    def predict(self, features: np.ndarray) -> np.ndarray:
+    def predict(self, features: np_ndarray) -> np_ndarray:
         """Predict class labels for feature matrix."""
 
 
@@ -164,7 +168,7 @@ class _TensorflowCallableProtocol(Protocol):
     """Protocol for callable TensorFlow models."""
 
     def __call__(
-        self, inputs: np.ndarray, training: bool = False
+        self, inputs: np_ndarray, training: bool = False
     ) -> _NumpyTensorProtocol:
         """Run inference on inputs."""
 
@@ -185,7 +189,7 @@ class _TorchCallableProtocol(Protocol):
 class _NumpyTensorProtocol(Protocol):
     """Protocol for tensor-like values exposing ``numpy``."""
 
-    def numpy(self) -> np.ndarray:
+    def numpy(self) -> np_ndarray:
         """Return a NumPy-compatible array."""
 
 
@@ -198,5 +202,5 @@ class _TorchTensorProtocol(Protocol):
     def cpu(self) -> _TorchTensorProtocol:
         """Move tensor to CPU."""
 
-    def numpy(self) -> np.ndarray:
+    def numpy(self) -> np_ndarray:
         """Return a NumPy-compatible array."""

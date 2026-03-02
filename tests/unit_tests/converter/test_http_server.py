@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-import argparse
-import types
+from argparse import ArgumentParser as argparse_ArgumentParser
+from argparse import Namespace as argparse_Namespace
+from types import SimpleNamespace as types_SimpleNamespace
 from typing import TYPE_CHECKING, Protocol, cast
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import importorskip as pytest_importorskip
+from pytest import mark as pytest_mark
+from pytest import raises as pytest_raises
 
 from onnx_converter.converter.core import ConversionOutcome, ConversionRequest
 from onnx_converter.errors import ConversionError
@@ -24,8 +28,8 @@ class _UvicornLike(Protocol):
 
 
 def _client() -> TestClient:
-    pytest.importorskip("fastapi")
-    pytest.importorskip("httpx")
+    pytest_importorskip("fastapi")
+    pytest_importorskip("httpx")
 
     from fastapi.testclient import TestClient
 
@@ -35,7 +39,7 @@ def _client() -> TestClient:
 
 
 def test_convert_upload_returns_binary_and_integrity_headers(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Return converted binary plus input/output digest metadata."""
     seen: dict[str, _RequestWithFramework] = {}
@@ -87,7 +91,7 @@ def test_convert_upload_returns_binary_and_integrity_headers(
 
 
 def test_convert_upload_normalizes_framework_input(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Normalize framework similarly to gRPC transport."""
     seen: dict[str, str] = {}
@@ -137,7 +141,7 @@ def test_convert_upload_rejects_empty_payload() -> None:
 
 
 def test_convert_upload_maps_domain_validation_errors_to_400(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Return a 400 when conversion layer raises expected validation errors."""
 
@@ -162,7 +166,7 @@ def test_convert_upload_maps_domain_validation_errors_to_400(
 
 
 def test_convert_upload_maps_unexpected_errors_to_500(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Return a 500 when conversion layer raises an unexpected error."""
 
@@ -186,7 +190,7 @@ def test_convert_upload_maps_unexpected_errors_to_500(
     assert response.json()["detail"] == "internal server error"
 
 
-@pytest.mark.parametrize(
+@pytest_mark.parametrize(
     ("raw", "parsed"),
     [
         (None, None),
@@ -206,7 +210,7 @@ def test_parse_input_shape_rejects_invalid_value() -> None:
     """Reject malformed input_shape values."""
     from onnx_converter.converter.http_server import _parse_input_shape
 
-    with pytest.raises(ValueError, match="comma-separated integers"):
+    with pytest_raises(ValueError, match="comma-separated integers"):
         _parse_input_shape("1,a,3")
 
 
@@ -223,18 +227,18 @@ def test_health_and_ready_endpoints() -> None:
 
 
 def test_main_runs_uvicorn(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Parse CLI args and pass them to uvicorn."""
-    pytest.importorskip("fastapi")
+    pytest_importorskip("fastapi")
     calls: dict[str, str | int | bool] = {}
 
     import onnx_converter.converter.http_server as module
 
     monkeypatch.setattr(
-        argparse.ArgumentParser,
+        argparse_ArgumentParser,
         "parse_args",  # noqa: ARG005
-        lambda self: argparse.Namespace(host="127.0.0.1", port=9999),
+        lambda self: argparse_Namespace(host="127.0.0.1", port=9999),
     )
 
     def fake_run(app_ref: str, *, host: str, port: int, reload: bool) -> None:
@@ -246,7 +250,7 @@ def test_main_runs_uvicorn(
     monkeypatch.setattr(
         module,
         "uvicorn",
-        cast(_UvicornLike, types.SimpleNamespace(run=fake_run)),
+        cast(_UvicornLike, types_SimpleNamespace(run=fake_run)),
     )
     module.main()
     assert calls == {

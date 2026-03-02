@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import inspect
 from collections.abc import Callable
+from inspect import signature as inspect_signature
 from pathlib import Path
 from typing import Protocol, cast
 
@@ -26,7 +26,7 @@ def _torch_load_weights_only(
 ) -> ModelArtifact:
     load_fn = torch_module.load
     kwargs: dict[str, OptionValue] = {"map_location": "cpu"}
-    if "weights_only" in inspect.signature(load_fn).parameters:
+    if "weights_only" in inspect_signature(load_fn).parameters:
         kwargs["weights_only"] = True
     return load_fn(str(model_path), **kwargs)
 
@@ -36,7 +36,7 @@ def _torch_load_unsafe(
 ) -> ModelArtifact:
     load_fn = torch_module.load
     kwargs: dict[str, OptionValue] = {"map_location": "cpu"}
-    if "weights_only" in inspect.signature(load_fn).parameters:
+    if "weights_only" in inspect_signature(load_fn).parameters:
         kwargs["weights_only"] = False
     return load_fn(str(model_path), **kwargs)
 
@@ -109,7 +109,7 @@ class TensorflowModelLoader:
         """
         del allow_unsafe
         try:
-            import tensorflow as tf
+            from tensorflow import keras as tf_keras
         except Exception as exc:
             raise DependencyError(
                 "TensorFlow is required for this conversion."
@@ -117,7 +117,7 @@ class TensorflowModelLoader:
 
         if model_path.is_dir():
             return cast(ModelArtifact, str(model_path))
-        return cast(ModelArtifact, tf.keras.models.load_model(str(model_path)))
+        return cast(ModelArtifact, tf_keras.models.load_model(str(model_path)))
 
 
 class SklearnModelLoader:
@@ -157,12 +157,12 @@ class SklearnModelLoader:
 
         if suffix in {".joblib", ".jl", ".pkl", ".pickle"}:
             try:
-                import joblib
+                from joblib import load as joblib_load
             except Exception as exc:
                 raise DependencyError(
                     "joblib is required for sklearn artifact loading."
                 ) from exc
-            return cast(ModelArtifact, joblib.load(str(model_path)))
+            return cast(ModelArtifact, joblib_load(str(model_path)))
 
         raise UnsupportedModelError(
             "Unsupported model file extension. Use .joblib, .skops, or .pkl/.pickle."

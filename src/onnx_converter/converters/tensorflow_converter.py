@@ -2,29 +2,32 @@
 
 from __future__ import annotations
 
-import os
 from collections.abc import Sequence
+from os import makedirs as os_makedirs
+from os import path as os_path
 
-import tensorflow as tf
-import tf2onnx
+from tensorflow import TensorSpec as tf_TensorSpec
+from tensorflow import float32 as tf_float32
+from tensorflow import keras as tf_keras
+from tf2onnx import convert as tf2onnx_convert
 
 from onnx_converter.types import OptionValue, TensorSpecLike
 
 
 def _ensure_output_dir(output_path: str) -> None:
-    os.makedirs(
-        os.path.dirname(output_path) if os.path.dirname(output_path) else ".",
+    os_makedirs(
+        os_path.dirname(output_path) if os_path.dirname(output_path) else ".",
         exist_ok=True,
     )
 
 
-def _ensure_keras_output_names(model: tf.keras.Model) -> None:
+def _ensure_keras_output_names(model: tf_keras.Model) -> None:
     """Set output_names for Keras models when absent (Keras 3 compatibility)."""
     if not hasattr(model, "output_names") and hasattr(model, "outputs"):
         model.output_names = [tensor.name.split(":")[0] for tensor in model.outputs]
 
 
-def _build_default_signature(model: tf.keras.Model) -> list[tf.TensorSpec] | None:
+def _build_default_signature(model: tf_keras.Model) -> list[tf_TensorSpec] | None:
     """Infer tf2onnx input signature from model input_shape."""
     if not hasattr(model, "input_shape"):
         return None
@@ -32,10 +35,10 @@ def _build_default_signature(model: tf.keras.Model) -> list[tf.TensorSpec] | Non
     input_shape = model.input_shape
     if isinstance(input_shape, list):
         return [
-            tf.TensorSpec(shape, tf.float32, name=f"input_{i}")
+            tf_TensorSpec(shape, tf_float32, name=f"input_{i}")
             for i, shape in enumerate(input_shape)
         ]
-    return [tf.TensorSpec(input_shape, tf.float32, name="input")]
+    return [tf_TensorSpec(input_shape, tf_float32, name="input")]
 
 
 def _convert_saved_model(
@@ -45,7 +48,7 @@ def _convert_saved_model(
     opset_version: int,
     **kwargs: OptionValue,
 ) -> None:
-    tf2onnx.convert.from_saved_model(
+    tf2onnx_convert.from_saved_model(
         model_path,
         input_signature=input_signature,
         opset=opset_version,
@@ -55,7 +58,7 @@ def _convert_saved_model(
 
 
 def _convert_keras_model(
-    model: tf.keras.Model,
+    model: tf_keras.Model,
     output_path: str,
     input_signature: Sequence[TensorSpecLike] | None,
     opset_version: int,
@@ -64,7 +67,7 @@ def _convert_keras_model(
     _ensure_keras_output_names(model)
     resolved_signature = input_signature or _build_default_signature(model)
 
-    tf2onnx.convert.from_keras(
+    tf2onnx_convert.from_keras(
         model,
         input_signature=resolved_signature,
         opset=opset_version,
@@ -74,7 +77,7 @@ def _convert_keras_model(
 
 
 def convert_tensorflow_to_onnx(
-    model: str | tf.keras.Model,
+    model: str | tf_keras.Model,
     output_path: str,
     input_signature: Sequence[TensorSpecLike] | None = None,
     opset_version: int = 14,
@@ -117,7 +120,7 @@ def convert_tensorflow_to_onnx(
         )
         return output_path
 
-    if not isinstance(model, tf.keras.Model):
+    if not isinstance(model, tf_keras.Model):
         raise ValueError(f"Unsupported model type: {type(model)}")
 
     _convert_keras_model(

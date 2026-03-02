@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import argparse
-import importlib
-import logging
-import os
+from argparse import ArgumentParser as argparse_ArgumentParser
 from collections.abc import Iterable, Iterator
 from concurrent import futures
+from importlib import import_module as importlib_import_module
+from logging import getLogger as logging_getLogger
+from os import getenv as os_getenv
 from types import ModuleType
 from typing import TYPE_CHECKING, Protocol, cast
 
@@ -23,7 +23,7 @@ from onnx_converter.converter.core import (
 )
 from onnx_converter.errors import ConversionError
 
-logger = logging.getLogger(__name__)
+logger = logging_getLogger(__name__)
 
 
 class _GrpcStatusCodeValue(Protocol):
@@ -33,7 +33,7 @@ class _GrpcStatusCodeValue(Protocol):
 def _load_converter_pb2() -> ModuleType | None:
     """Load generated protobuf messages module when present."""
     try:
-        return importlib.import_module("converter_grpc.converter_pb2")
+        return importlib_import_module("converter_grpc.converter_pb2")
     except ModuleNotFoundError:
         return None
 
@@ -41,7 +41,7 @@ def _load_converter_pb2() -> ModuleType | None:
 def _load_converter_pb2_grpc() -> ModuleType | None:
     """Load generated grpc service stubs module when present."""
     try:
-        return importlib.import_module("converter_grpc.converter_pb2_grpc")
+        return importlib_import_module("converter_grpc.converter_pb2_grpc")
     except ModuleNotFoundError:
         return None
 
@@ -342,13 +342,10 @@ class ConverterGrpcService:
             output_bytes=outcome.output_bytes,
         )
 
-    def Convert(
-        self: ConverterGrpcService,
-        request_iterator: Iterable[_ConvertRequestChunkLike],
-        context: ServicerContext,
-    ) -> Iterator[_ConvertReplyChunkLike]:
-        """Compatibility wrapper for generated gRPC stubs expecting `Convert`."""
-        return self.convert(request_iterator, context)
+    # gRPC generated server registration expects a `Convert` attribute.
+    # Keep the canonical implementation in snake_case and provide a
+    # class-level alias for compatibility with generated stubs.
+    Convert = convert
 
 
 def create_server(*, host: str, port: int, max_workers: int = 8) -> _GrpcServer:
@@ -366,15 +363,15 @@ def create_server(*, host: str, port: int, max_workers: int = 8) -> _GrpcServer:
 
 def main() -> None:
     """Run converter daemon gRPC entrypoint."""
-    parser = argparse.ArgumentParser(description="ONNX converter daemon gRPC server.")
+    parser = argparse_ArgumentParser(description="ONNX converter daemon gRPC server.")
     parser.add_argument(
         "--host",
-        default=os.getenv("CONVERTER_GRPC_HOST", "0.0.0.0"),
+        default=os_getenv("CONVERTER_GRPC_HOST", "0.0.0.0"),
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=int(os.getenv("CONVERTER_GRPC_PORT", "8091")),
+        default=int(os_getenv("CONVERTER_GRPC_PORT", "8091")),
     )
     parser.add_argument("--max-workers", type=int, default=8)
     args = parser.parse_args()

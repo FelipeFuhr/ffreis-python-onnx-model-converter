@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
-import joblib
+from joblib import load as joblib_load
 from skl2onnx.common.data_types import FloatTensorType
 
 from onnx_converter.errors import PluginError
@@ -63,7 +63,7 @@ class AutoSklearnPlugin:
             Generated ONNX model path.
         """
         try:
-            automl = joblib.load(str(model_path))
+            automl = joblib_load(str(model_path))
         except Exception as exc:
             raise PluginError(f"Failed to load autosklearn artifact: {exc}") from exc
 

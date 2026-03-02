@@ -2,29 +2,42 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass
+from os import getenv as os_getenv
 from typing import Protocol, cast, no_type_check
 
-import httpx
-import pytest
 from fastapi.testclient import TestClient
+from httpx import ASGITransport as httpx_ASGITransport
+from httpx import AsyncClient as httpx_AsyncClient
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import mark as pytest_mark
+from pytest import raises as pytest_raises
+from pytest import skip as pytest_skip
 
 from onnx_converter.converter.core import ConversionOutcome, ConversionRequest
 from onnx_converter.converter.http_server import create_app
 
 try:
-    import converter_grpc.converter_pb2 as converter_pb2
-    import grpc
+    from converter_grpc.converter_pb2 import DESCRIPTOR as converter_pb2_DESCRIPTOR
+    from converter_grpc.converter_pb2 import (
+        ConvertMetadata as converter_pb2_ConvertMetadata,
+    )
+    from converter_grpc.converter_pb2 import (
+        ConvertRequestChunk as converter_pb2_ConvertRequestChunk,
+    )
+    from converter_grpc.converter_pb2 import (
+        ConvertResult as converter_pb2_ConvertResult,
+    )
+    from grpc import StatusCode as grpc_StatusCode
 
     from onnx_converter.converter.grpc_server import ConverterGrpcService
 except (ImportError, ModuleNotFoundError) as exc:
-    pytest.skip(f"grpc parity dependencies unavailable: {exc}", allow_module_level=True)
+    pytest_skip(f"grpc parity dependencies unavailable: {exc}", allow_module_level=True)
 
-pytestmark = pytest.mark.integration
-_HYPOTHESIS_MAX_EXAMPLES = int(os.getenv("HYPOTHESIS_MAX_EXAMPLES", "30"))
+pytestmark = pytest_mark.integration
+_HYPOTHESIS_MAX_EXAMPLES = int(os_getenv("HYPOTHESIS_MAX_EXAMPLES", "30"))
 
 _HTTP_TO_GRPC_SURFACE_MAP: dict[str, str] = {
     "/v1/convert/upload": "Convert",
@@ -64,7 +77,7 @@ def _fields(message: _DescriptorOwner) -> set[str]:
 
 def _grpc_method_names() -> set[str]:
     """Return gRPC method names from protobuf service descriptor."""
-    service = converter_pb2.DESCRIPTOR.services_by_name["ConverterService"]
+    service = converter_pb2_DESCRIPTOR.services_by_name["ConverterService"]
     return {method.name for method in service.methods}
 
 
@@ -111,7 +124,7 @@ def test_schema_mapping_for_convert_request_is_explicit() -> None:
     """Validate HTTP multipart fields map cleanly to gRPC metadata fields."""
     app = create_app()
     http_fields = _http_upload_form_fields(app)
-    grpc_fields = _fields(converter_pb2.ConvertMetadata)
+    grpc_fields = _fields(converter_pb2_ConvertMetadata)
 
     # `artifact` is transport-only in HTTP; gRPC carries raw bytes as chunk data.
     # `filename` comes from uploaded file metadata in HTTP, not an explicit form field.
@@ -122,9 +135,9 @@ def test_schema_mapping_for_convert_request_is_explicit() -> None:
 
 def test_grpc_contract_for_convert_messages() -> None:
     """Validate gRPC request/reply payload contracts."""
-    metadata_fields = _fields(converter_pb2.ConvertMetadata)
-    request_fields = _fields(converter_pb2.ConvertRequestChunk)
-    result_fields = _fields(converter_pb2.ConvertResult)
+    metadata_fields = _fields(converter_pb2_ConvertMetadata)
+    request_fields = _fields(converter_pb2_ConvertRequestChunk)
+    result_fields = _fields(converter_pb2_ConvertResult)
 
     assert metadata_fields == {
         "framework",
@@ -143,12 +156,12 @@ def test_grpc_contract_for_convert_messages() -> None:
     }
 
 
-@pytest.mark.asyncio
+@pytest_mark.asyncio
 async def test_health_and_ready_parity() -> None:
     """Ensure standardized health/readiness endpoints are available."""
     app = create_app()
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    transport = httpx_ASGITransport(app=app)
+    async with httpx_AsyncClient(transport=transport, base_url="http://test") as client:
         health = await client.get("/healthz")
         ready = await client.get("/readyz")
 
@@ -158,8 +171,8 @@ async def test_health_and_ready_parity() -> None:
     assert ready.json() == {"status": "ready"}
 
 
-@pytest.mark.asyncio
-async def test_http_and_grpc_success_parity(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest_mark.asyncio
+async def test_http_and_grpc_success_parity(monkeypatch: pytest_MonkeyPatch) -> None:
     """Compare successful conversion outputs between HTTP and gRPC."""
     expected_payload = b"artifact-bytes"
 
@@ -194,8 +207,8 @@ async def test_http_and_grpc_success_parity(monkeypatch: pytest.MonkeyPatch) -> 
     )
 
     app = create_app()
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    transport = httpx_ASGITransport(app=app)
+    async with httpx_AsyncClient(transport=transport, base_url="http://test") as client:
         http_response = await client.post(
             "/v1/convert/upload",
             files={
@@ -214,14 +227,14 @@ async def test_http_and_grpc_success_parity(monkeypatch: pytest.MonkeyPatch) -> 
         service.Convert(
             iter(
                 [
-                    converter_pb2.ConvertRequestChunk(
-                        metadata=converter_pb2.ConvertMetadata(
+                    converter_pb2_ConvertRequestChunk(
+                        metadata=converter_pb2_ConvertMetadata(
                             framework="sklearn",
                             filename="model.joblib",
                             n_features=4,
                         )
                     ),
-                    converter_pb2.ConvertRequestChunk(data=expected_payload),
+                    converter_pb2_ConvertRequestChunk(data=expected_payload),
                 ]
             ),
             context,
@@ -240,12 +253,12 @@ async def test_http_and_grpc_success_parity(monkeypatch: pytest.MonkeyPatch) -> 
     assert http_response.content == grpc_output
 
 
-@pytest.mark.asyncio
+@pytest_mark.asyncio
 async def test_http_and_grpc_error_category_parity() -> None:
     """Map missing payload errors to equivalent client-error semantics."""
     app = create_app()
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    transport = httpx_ASGITransport(app=app)
+    async with httpx_AsyncClient(transport=transport, base_url="http://test") as client:
         http_response = await client.post(
             "/v1/convert/upload",
             files={"artifact": ("model.bin", b"", "application/octet-stream")},
@@ -255,13 +268,13 @@ async def test_http_and_grpc_error_category_parity() -> None:
     service = ConverterGrpcService()
     context = _AbortRecorder()
 
-    with pytest.raises(RuntimeError, match="missing artifact payload"):
+    with pytest_raises(RuntimeError, match="missing artifact payload"):
         list(
             service.Convert(
                 iter(
                     [
-                        converter_pb2.ConvertRequestChunk(
-                            metadata=converter_pb2.ConvertMetadata(
+                        converter_pb2_ConvertRequestChunk(
+                            metadata=converter_pb2_ConvertMetadata(
                                 framework="tensorflow",
                                 filename="model.savedmodel",
                             )
@@ -274,18 +287,18 @@ async def test_http_and_grpc_error_category_parity() -> None:
 
     assert http_response.status_code == 400
     assert "empty" in http_response.json()["detail"]
-    assert context.code == grpc.StatusCode.INVALID_ARGUMENT.name
+    assert context.code == grpc_StatusCode.INVALID_ARGUMENT.name
 
 
-@pytest.mark.asyncio
+@pytest_mark.asyncio
 async def test_http_and_grpc_error_parity_for_input_sha_mismatch() -> None:
     """Map SHA mismatch errors to equivalent HTTP/gRPC client-error category."""
     payload = b"artifact-bytes"
     wrong_sha = "0" * 64
 
     app = create_app()
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+    transport = httpx_ASGITransport(app=app)
+    async with httpx_AsyncClient(transport=transport, base_url="http://test") as client:
         http_response = await client.post(
             "/v1/convert/upload",
             files={"artifact": ("model.bin", payload, "application/octet-stream")},
@@ -298,19 +311,19 @@ async def test_http_and_grpc_error_parity_for_input_sha_mismatch() -> None:
     service = ConverterGrpcService()
     context = _AbortRecorder()
 
-    with pytest.raises(RuntimeError, match="input SHA-256 mismatch"):
+    with pytest_raises(RuntimeError, match="input SHA-256 mismatch"):
         list(
             service.Convert(
                 iter(
                     [
-                        converter_pb2.ConvertRequestChunk(
-                            metadata=converter_pb2.ConvertMetadata(
+                        converter_pb2_ConvertRequestChunk(
+                            metadata=converter_pb2_ConvertMetadata(
                                 framework="tensorflow",
                                 filename="model.savedmodel",
                                 expected_sha256=wrong_sha,
                             )
                         ),
-                        converter_pb2.ConvertRequestChunk(data=payload),
+                        converter_pb2_ConvertRequestChunk(data=payload),
                     ]
                 ),
                 context,
@@ -319,10 +332,10 @@ async def test_http_and_grpc_error_parity_for_input_sha_mismatch() -> None:
 
     assert http_response.status_code == 400
     assert "mismatch" in http_response.json()["detail"].lower()
-    assert context.code == grpc.StatusCode.INVALID_ARGUMENT.name
+    assert context.code == grpc_StatusCode.INVALID_ARGUMENT.name
 
 
-@pytest.mark.property
+@pytest_mark.property
 @settings(
     max_examples=_HYPOTHESIS_MAX_EXAMPLES,
     deadline=None,
@@ -335,7 +348,7 @@ async def test_http_and_grpc_error_parity_for_input_sha_mismatch() -> None:
 )
 @no_type_check
 def test_http_and_grpc_property_parity_for_successful_convert(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
     payload: bytes,
     framework: str,
     n_features: int,
@@ -382,14 +395,14 @@ def test_http_and_grpc_property_parity_for_successful_convert(
         service.Convert(
             iter(
                 [
-                    converter_pb2.ConvertRequestChunk(
-                        metadata=converter_pb2.ConvertMetadata(
+                    converter_pb2_ConvertRequestChunk(
+                        metadata=converter_pb2_ConvertMetadata(
                             framework=framework,
                             filename="model.bin",
                             n_features=n_features,
                         )
                     ),
-                    converter_pb2.ConvertRequestChunk(data=payload),
+                    converter_pb2_ConvertRequestChunk(data=payload),
                 ]
             ),
             context,

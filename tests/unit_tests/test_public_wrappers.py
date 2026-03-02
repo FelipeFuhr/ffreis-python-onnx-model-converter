@@ -2,18 +2,29 @@
 
 from __future__ import annotations
 
-import sys
-import types
 from pathlib import Path
+from sys import modules as sys_modules
+from types import SimpleNamespace as types_SimpleNamespace
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
 
-import onnx_converter
 from onnx_converter import application
+from onnx_converter import (
+    convert_custom_file_to_onnx as onnx_converter_convert_custom_file_to_onnx,
+)
+from onnx_converter import (
+    convert_pytorch_to_onnx as onnx_converter_convert_pytorch_to_onnx,
+)
+from onnx_converter import (
+    convert_sklearn_to_onnx as onnx_converter_convert_sklearn_to_onnx,
+)
+from onnx_converter import (
+    convert_tensorflow_to_onnx as onnx_converter_convert_tensorflow_to_onnx,
+)
 
 
 def test_top_level_pytorch_wrapper_forwards(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Forward PyTorch wrapper arguments to the converter module implementation."""
     called: dict[str, object] = {}
@@ -22,14 +33,14 @@ def test_top_level_pytorch_wrapper_forwards(
         called.update(kwargs)
         return "ok.onnx"
 
-    fake_module = types.SimpleNamespace(convert_pytorch_to_onnx=fake_impl)
+    fake_module = types_SimpleNamespace(convert_pytorch_to_onnx=fake_impl)
     monkeypatch.setitem(
-        sys.modules,
+        sys_modules,
         "onnx_converter.converters.pytorch_converter",
         fake_module,
     )
 
-    out = onnx_converter.convert_pytorch_to_onnx(
+    out = onnx_converter_convert_pytorch_to_onnx(
         model=object(),
         output_path="out.onnx",
         input_shape=(1, 3),
@@ -47,7 +58,7 @@ def test_top_level_pytorch_wrapper_forwards(
 
 
 def test_top_level_tensorflow_wrapper_forwards(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Forward TensorFlow wrapper arguments to the converter module implementation."""
     called: dict[str, object] = {}
@@ -56,14 +67,14 @@ def test_top_level_tensorflow_wrapper_forwards(
         called.update(kwargs)
         return "tf.onnx"
 
-    fake_module = types.SimpleNamespace(convert_tensorflow_to_onnx=fake_impl)
+    fake_module = types_SimpleNamespace(convert_tensorflow_to_onnx=fake_impl)
     monkeypatch.setitem(
-        sys.modules,
+        sys_modules,
         "onnx_converter.converters.tensorflow_converter",
         fake_module,
     )
 
-    out = onnx_converter.convert_tensorflow_to_onnx(
+    out = onnx_converter_convert_tensorflow_to_onnx(
         model=object(),
         output_path="tf.onnx",
         input_signature="sig",
@@ -77,7 +88,7 @@ def test_top_level_tensorflow_wrapper_forwards(
 
 
 def test_top_level_sklearn_wrapper_forwards(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Forward sklearn wrapper arguments to the converter module implementation."""
     called: dict[str, object] = {}
@@ -86,14 +97,14 @@ def test_top_level_sklearn_wrapper_forwards(
         called.update(kwargs)
         return "sk.onnx"
 
-    fake_module = types.SimpleNamespace(convert_sklearn_to_onnx=fake_impl)
+    fake_module = types_SimpleNamespace(convert_sklearn_to_onnx=fake_impl)
     monkeypatch.setitem(
-        sys.modules,
+        sys_modules,
         "onnx_converter.converters.sklearn_converter",
         fake_module,
     )
 
-    out = onnx_converter.convert_sklearn_to_onnx(
+    out = onnx_converter_convert_sklearn_to_onnx(
         model=object(),
         output_path="sk.onnx",
         initial_types=[("input", object())],
@@ -106,7 +117,7 @@ def test_top_level_sklearn_wrapper_forwards(
     assert called["compress"] is True
 
 
-def test_application_build_options_forwards(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_application_build_options_forwards(monkeypatch: pytest_MonkeyPatch) -> None:
     """Forward option construction call to use-case layer implementation."""
     sentinel = object()
 
@@ -123,7 +134,7 @@ def test_application_build_options_forwards(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_application_convert_torch_file_forwards(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Forward PyTorch file conversion call to use-case layer implementation."""
     called: dict[str, object] = {}
@@ -149,7 +160,7 @@ def test_application_convert_torch_file_forwards(
     assert called["output_path"] == tmp_path / "m.onnx"
 
 
-def test_top_level_custom_wrapper_forwards(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_top_level_custom_wrapper_forwards(monkeypatch: pytest_MonkeyPatch) -> None:
     """Forward custom wrapper call to file-based API implementation."""
     called: dict[str, object] = {}
 
@@ -160,13 +171,13 @@ def test_top_level_custom_wrapper_forwards(monkeypatch: pytest.MonkeyPatch) -> N
     import onnx_converter.api as api_module
 
     monkeypatch.setattr(api_module, "convert_custom_file_to_onnx", fake_impl)
-    out = onnx_converter.convert_custom_file_to_onnx(model_path=Path("a.bin"))
+    out = onnx_converter_convert_custom_file_to_onnx(model_path=Path("a.bin"))
     assert out == Path("custom.onnx")
     assert called["model_path"] == Path("a.bin")
 
 
 def test_application_convert_tf_sklearn_custom_forwards(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Forward remaining application wrappers to use-case layer implementations."""
     called: dict[str, object] = {}

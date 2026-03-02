@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import sys
-import types
 from pathlib import Path
+from sys import modules as sys_modules
+from types import ModuleType as types_ModuleType
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import raises as pytest_raises
 
 from onnx_converter.adapters.converters import (
     SklearnModelConverter,
@@ -17,7 +18,7 @@ from onnx_converter.errors import UnsupportedModelError
 
 
 def test_torch_adapter_roundtrip_contract(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Ensure Torch adapter forwards expected arguments and output path."""
     out = tmp_path / "out.onnx"
@@ -49,7 +50,7 @@ def test_torch_adapter_roundtrip_contract(
 
 
 def test_tensorflow_adapter_roundtrip_contract(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Ensure TensorFlow adapter forwards expected arguments and output path."""
     out = tmp_path / "out.onnx"
@@ -75,7 +76,7 @@ def test_tensorflow_adapter_roundtrip_contract(
 
 
 def test_sklearn_adapter_roundtrip_contract(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Ensure sklearn adapter forwards expected arguments and output path."""
     out = tmp_path / "out.onnx"
@@ -106,7 +107,7 @@ def test_sklearn_adapter_roundtrip_contract(
 
 def test_sklearn_adapter_requires_positive_n_features(tmp_path: Path) -> None:
     """Raise when sklearn adapter receives invalid n_features option."""
-    with pytest.raises(UnsupportedModelError, match="n_features is required"):
+    with pytest_raises(UnsupportedModelError, match="n_features is required"):
         SklearnModelConverter().convert(
             model=object(),
             output_path=tmp_path / "x.onnx",
@@ -115,7 +116,7 @@ def test_sklearn_adapter_requires_positive_n_features(tmp_path: Path) -> None:
 
 
 def test_sklearn_adapter_requires_skl2onnx_for_inference(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Raise when inferred initial types require missing skl2onnx dependency."""
     import builtins
@@ -129,7 +130,7 @@ def test_sklearn_adapter_requires_skl2onnx_for_inference(
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
 
-    with pytest.raises(UnsupportedModelError, match="skl2onnx is required"):
+    with pytest_raises(UnsupportedModelError, match="skl2onnx is required"):
         SklearnModelConverter().convert(
             model=object(),
             output_path=tmp_path / "x.onnx",
@@ -139,7 +140,7 @@ def test_sklearn_adapter_requires_skl2onnx_for_inference(
 
 def test_torch_adapter_requires_input_shape(tmp_path: Path) -> None:
     """Raise when torch adapter is called without an input shape."""
-    with pytest.raises(UnsupportedModelError, match="input_shape is required"):
+    with pytest_raises(UnsupportedModelError, match="input_shape is required"):
         TorchModelConverter().convert(
             model=object(),
             output_path=tmp_path / "x.onnx",
@@ -149,7 +150,7 @@ def test_torch_adapter_requires_input_shape(tmp_path: Path) -> None:
 
 def test_torch_adapter_requires_integer_opset(tmp_path: Path) -> None:
     """Raise when torch adapter receives a non-integer opset value."""
-    with pytest.raises(UnsupportedModelError, match="opset_version must be an integer"):
+    with pytest_raises(UnsupportedModelError, match="opset_version must be an integer"):
         TorchModelConverter().convert(
             model=object(),
             output_path=tmp_path / "x.onnx",
@@ -159,7 +160,7 @@ def test_torch_adapter_requires_integer_opset(tmp_path: Path) -> None:
 
 def test_tensorflow_adapter_requires_integer_opset(tmp_path: Path) -> None:
     """Raise when TensorFlow adapter receives a non-integer opset value."""
-    with pytest.raises(UnsupportedModelError, match="opset_version must be an integer"):
+    with pytest_raises(UnsupportedModelError, match="opset_version must be an integer"):
         TensorflowModelConverter().convert(
             model=object(),
             output_path=tmp_path / "x.onnx",
@@ -168,7 +169,7 @@ def test_tensorflow_adapter_requires_integer_opset(tmp_path: Path) -> None:
 
 
 def test_sklearn_adapter_infers_initial_types_when_dependency_present(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Infer sklearn initial_types from n_features when not explicitly provided."""
     out = tmp_path / "out.onnx"
@@ -178,13 +179,13 @@ def test_sklearn_adapter_infers_initial_types_when_dependency_present(
         def __init__(self, shape: object) -> None:
             self.shape = shape
 
-    fake_data_types = types.ModuleType("skl2onnx.common.data_types")
+    fake_data_types = types_ModuleType("skl2onnx.common.data_types")
     fake_data_types.FloatTensorType = _FakeFloatTensorType  # type: ignore[attr-defined]
-    fake_common = types.ModuleType("skl2onnx.common")
-    fake_root = types.ModuleType("skl2onnx")
-    monkeypatch.setitem(sys.modules, "skl2onnx", fake_root)
-    monkeypatch.setitem(sys.modules, "skl2onnx.common", fake_common)
-    monkeypatch.setitem(sys.modules, "skl2onnx.common.data_types", fake_data_types)
+    fake_common = types_ModuleType("skl2onnx.common")
+    fake_root = types_ModuleType("skl2onnx")
+    monkeypatch.setitem(sys_modules, "skl2onnx", fake_root)
+    monkeypatch.setitem(sys_modules, "skl2onnx.common", fake_common)
+    monkeypatch.setitem(sys_modules, "skl2onnx.common.data_types", fake_data_types)
 
     def fake_convert(**kwargs: object) -> str:
         called.update(kwargs)
