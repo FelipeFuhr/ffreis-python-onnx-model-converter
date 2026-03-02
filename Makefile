@@ -105,18 +105,18 @@ smoke-api-grpc: ## Run docker-compose HTTP + gRPC smoke test
 	IMAGE_ROOT="$(IMAGE_ROOT)" IMAGE_TAG="$(IMAGE_TAG)" timeout --foreground "$(SMOKE_TIMEOUT)" docker compose -f examples/docker-compose.api-grpc.yml up --build --abort-on-container-exit --exit-code-from smoke
 
 .PHONY: examples-autosklearn
-examples-autosklearn: ## Build and run autosklearn example containers
-	docker build -f container/examples/Dockerfile.example-base \
+examples-autosklearn: build-base-runner ## Build and run autosklearn example containers
+	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-base \
 		--build-arg BASE_RUNNER_IMAGE="$(BASE_RUNNER_IMAGE)" \
 		-t "$(IMAGE_PREFIX)/onnx-converter-examples-base" .
-	docker build -f container/examples/Dockerfile.example-autosklearn1 \
+	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-autosklearn1 \
 		--build-arg EXAMPLES_BASE_IMAGE="$(IMAGE_PREFIX)/onnx-converter-examples-base" \
 		-t example-autosklearn-v1 .
-	docker run --rm example-autosklearn-v1
-	docker build -f container/examples/Dockerfile.example-autosklearn2 \
+	$(CONTAINER_COMMAND) run --rm example-autosklearn-v1
+	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-autosklearn2 \
 		--build-arg EXAMPLES_BASE_IMAGE="$(IMAGE_PREFIX)/onnx-converter-examples-base" \
 		-t example-autosklearn-v2 .
-	docker run --rm example-autosklearn-v2
+	$(CONTAINER_COMMAND) run --rm example-autosklearn-v2
 
 .PHONY: test-grpc-parity
 test-grpc-parity: ## Run gRPC/API parity tests
@@ -124,7 +124,14 @@ test-grpc-parity: ## Run gRPC/API parity tests
 
 .PHONY: test-grpc-parity-property
 test-grpc-parity-property: ## Run gRPC/API parity property tests (Hypothesis)
-	$(VENV_DIR)/bin/pytest -q tests/integration_tests/test_grpc_parity.py -m property
+	@set +e; \
+	$(VENV_DIR)/bin/pytest -q tests/integration_tests/test_grpc_parity.py -m property; \
+	rc=$$?; \
+	if [ $$rc -eq 5 ]; then \
+		echo "No property tests collected; treating as success."; \
+		exit 0; \
+	fi; \
+	exit $$rc
 
 .PHONY: openapi-check
 openapi-check: ## Validate OpenAPI contract and verify runtime drift

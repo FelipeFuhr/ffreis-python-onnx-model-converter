@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from argparse import ArgumentParser as argparse_ArgumentParser
+from asyncio import sleep as asyncio_sleep
 from importlib import import_module as importlib_import_module
 from logging import getLogger as logging_getLogger
 from os import getenv as os_getenv
@@ -32,6 +33,7 @@ else:
 
         async def read(self) -> bytes:
             """Read uploaded content bytes."""
+            await asyncio_sleep(0)
             return b""
 
     class Response:

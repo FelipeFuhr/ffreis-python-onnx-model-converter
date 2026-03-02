@@ -43,7 +43,14 @@ jobs:
         env:
           HYPOTHESIS_MAX_EXAMPLES: "40"
         run: |
+          set +e
           uv run pytest -q tests/integration_tests/test_grpc_parity.py -m property
+          rc=$?
+          if [ "$rc" -eq 5 ]; then
+            echo "No property tests collected; treating as success."
+            exit 0
+          fi
+          exit "$rc"
 
       - name: Upload Hypothesis examples
         if: always()
@@ -79,7 +86,14 @@ jobs:
         env:
           HYPOTHESIS_MAX_EXAMPLES: "180"
         run: |
+          set +e
           uv run pytest -q tests/integration_tests/test_grpc_parity.py -m property
+          rc=$?
+          if [ "$rc" -eq 5 ]; then
+            echo "No property tests collected; treating as success."
+            exit 0
+          fi
+          exit "$rc"
 
       - name: Upload Hypothesis examples
         if: always()

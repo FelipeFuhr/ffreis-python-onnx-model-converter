@@ -52,7 +52,9 @@ jobs:
             --build-arg BASE_IMAGE="${base_image}" \
             --build-arg BASE_DIGEST="${base_digest}" .
           docker build -f container/Dockerfile.base-runner -t ffreis/base-runner:local .
-          docker build -f container/examples/Dockerfile.example-base -t onnx-converter/examples-base:local .
+          docker build -f container/examples/Dockerfile.example-base \
+            --build-arg BASE_RUNNER_IMAGE=ffreis/base-runner:local \
+            -t onnx-converter/examples-base:local .
 
           fast_examples=(
             "container/examples/Dockerfile.example-sklearn example-sklearn"
@@ -95,7 +97,9 @@ jobs:
             --build-arg BASE_IMAGE="${base_image}" \
             --build-arg BASE_DIGEST="${base_digest}" .
           docker build -f container/Dockerfile.base-runner -t ffreis/base-runner:local .
-          docker build -f container/examples/Dockerfile.example-base -t onnx-converter/examples-base:local .
+          docker build -f container/examples/Dockerfile.example-base \
+            --build-arg BASE_RUNNER_IMAGE=ffreis/base-runner:local \
+            -t onnx-converter/examples-base:local .
 
           autosklearn_examples=(
             "container/examples/Dockerfile.example-autosklearn1 example-autosklearn-v1"

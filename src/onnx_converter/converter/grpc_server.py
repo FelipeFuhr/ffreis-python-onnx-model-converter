@@ -342,10 +342,11 @@ class ConverterGrpcService:
             output_bytes=outcome.output_bytes,
         )
 
-    # gRPC generated server registration expects a `Convert` attribute.
-    # Keep the canonical implementation in snake_case and provide a
-    # class-level alias for compatibility with generated stubs.
-    Convert = convert
+    def __getattr__(self, name: str) -> object:
+        """Provide gRPC compatibility alias for generated stubs."""
+        if name == "Convert":
+            return self.convert
+        raise AttributeError(name)
 
 
 def create_server(*, host: str, port: int, max_workers: int = 8) -> _GrpcServer:

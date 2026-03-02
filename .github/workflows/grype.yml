@@ -73,8 +73,14 @@ jobs:
           for image in "${images[@]}"; do
             name="${image##*/}"
             out="grype-results/${name}.sarif"
+            archive="grype-results/${name}.oci.tar"
+            rm -f "$archive"
 
-            ./bin/grype "podman:${image}" -o sarif --file "$out" --fail-on high
+            if ! ./bin/grype "podman:${image}" -o sarif --file "$out" --fail-on high; then
+              echo "Falling back to OCI archive scan for ${image}"
+              podman save --format oci-archive -o "$archive" "$image"
+              ./bin/grype "oci-archive:${archive}" -o sarif --file "$out" --fail-on high
+            fi
 
             test -s "$out"
           done

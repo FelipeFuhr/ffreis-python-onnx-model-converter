@@ -54,7 +54,7 @@ jobs:
             "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_INSTALL_REF}/contrib/install.sh" \
             | sudo sh -s -- -b /usr/local/bin
           trivy --version
-      - name: Scan images (sequential, Podman)
+      - name: Scan images (sequential, OCI archives)
         run: |
           set -euo pipefail
           mkdir -p trivy-results
@@ -65,11 +65,14 @@ jobs:
 
           for image in "${images[@]}"; do
             name="${image##*/}"
+            archive="trivy-results/${name}.oci.tar"
+            rm -f "$archive"
+            podman save --format oci-archive -o "$archive" "$image"
 
             # 1) Always produce SARIF for all severities so GitHub code scanning
             # has complete visibility, regardless of pass/fail gate outcome.
             trivy image \
-              --image-src podman \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -78,13 +81,12 @@ jobs:
               --ignore-unfixed \
               --exit-code 0 \
               --format sarif \
-              --output "trivy-results/${name}.sarif" \
-              "$image"
+              --output "trivy-results/${name}.sarif"
             test -s "trivy-results/${name}.sarif"
 
             # 1b) Export JSON for trend analysis and triage automation.
             trivy image \
-              --image-src podman \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -93,14 +95,13 @@ jobs:
               --ignore-unfixed \
               --exit-code 0 \
               --format json \
-              --output "trivy-results/${name}.json" \
-              "$image"
+              --output "trivy-results/${name}.json"
             test -s "trivy-results/${name}.json"
 
             # 2) Print a human-readable full report in CI logs (all severities).
             echo "Full vulnerability report for ${image} (all severities):"
             trivy image \
-              --image-src podman \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -108,13 +109,12 @@ jobs:
               --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL \
               --ignore-unfixed \
               --exit-code 0 \
-              --format table \
-              "$image"
+              --format table
 
             # 3) Enforce policy: fail only when HIGH/CRITICAL vulnerabilities exist.
             echo "Gating ${image} on HIGH/CRITICAL vulnerabilities..."
             trivy image \
-              --image-src podman \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -122,8 +122,7 @@ jobs:
               --severity HIGH,CRITICAL \
               --ignore-unfixed \
               --exit-code 1 \
-              --format table \
-              "$image"
+              --format table
           done
       - name: Upload Trivy JSON reports
         uses: actions/upload-artifact@v4

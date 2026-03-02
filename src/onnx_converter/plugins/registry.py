@@ -6,6 +6,7 @@ import importlib
 from collections.abc import Iterable
 from importlib import util as importlib_util
 from pathlib import Path
+from re import ASCII as re_ASCII
 from re import compile as re_compile
 from sys import modules as sys_modules
 from types import ModuleType
@@ -17,7 +18,7 @@ from onnx_converter.plugins.base import ConverterPlugin, PluginOptions
 from onnx_converter.plugins.builtins import SklearnFilePlugin
 from onnx_converter.schemas import PluginResolutionConfig
 
-_MODULE_PATH_RE = re_compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$")
+_MODULE_PATH_RE = re_compile(r"^[A-Za-z_]\w*(\.[A-Za-z_]\w*)*$", flags=re_ASCII)
 
 
 class PluginRegistry:
