@@ -32,6 +32,10 @@ permissions:
 jobs:
   grype:
     runs-on: ubuntu-latest
+    env:
+      # Keep a margin below Syft/Grype's 2 GiB archive read limit.
+      # 1.5 GiB = 1610612736 bytes.
+      MAX_SCAN_IMAGE_BYTES: "1610612736"
 
     steps:
       - uses: actions/checkout@v6
@@ -46,6 +50,21 @@ jobs:
         run: |
           set -euo pipefail
           CONTAINER_COMMAND=podman PYTHON_VERSION=3.13 make build
+
+      - name: Start Podman API service
+        run: |
+          set -euo pipefail
+          podman system service --time=0 unix:///tmp/podman.sock >/tmp/podman-service.log 2>&1 &
+          echo "CONTAINER_HOST=unix:///tmp/podman.sock" >> "$GITHUB_ENV"
+          for _ in $(seq 1 20); do
+            if podman --url unix:///tmp/podman.sock info >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Podman API service did not become ready"
+          cat /tmp/podman-service.log || true
+          exit 1
 
       - name: Install Grype
         run: |
@@ -73,14 +92,14 @@ jobs:
           for image in "${images[@]}"; do
             name="${image##*/}"
             out="grype-results/${name}.sarif"
-            archive="grype-results/${name}.oci.tar"
-            rm -f "$archive"
-
-            if ! ./bin/grype "podman:${image}" -o sarif --file "$out" --fail-on high; then
-              echo "Falling back to OCI archive scan for ${image}"
-              podman save --format oci-archive -o "$archive" "$image"
-              ./bin/grype "oci-archive:${archive}" -o sarif --file "$out" --fail-on high
+            size_bytes="$(podman image inspect "$image" --format '{{.Size}}')"
+            if [ "$size_bytes" -gt "$MAX_SCAN_IMAGE_BYTES" ]; then
+              echo "::error::Image $image is ${size_bytes} bytes, above safe scan limit ${MAX_SCAN_IMAGE_BYTES} bytes."
+              echo "::error::Refuse OCI fallback to avoid decompression limit failures. Slim image or increase MAX_SCAN_IMAGE_BYTES explicitly."
+              exit 1
             fi
+
+            ./bin/grype "podman:${image}" -o sarif --file "$out" --fail-on high
 
             test -s "$out"
           done
