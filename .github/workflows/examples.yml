@@ -54,6 +54,7 @@ jobs:
           docker build -f container/Dockerfile.base-runner -t ffreis/base-runner:local .
           docker build -f container/examples/Dockerfile.example-base \
             --build-arg BASE_RUNNER_IMAGE=ffreis/base-runner:local \
+            --build-arg PYTHON_VERSION=3.10 \
             -t onnx-converter/examples-base:local .
 
           fast_examples=(
@@ -101,6 +102,7 @@ jobs:
           docker build -f container/Dockerfile.base-runner -t ffreis/base-runner:local .
           docker build -f container/examples/Dockerfile.example-base \
             --build-arg BASE_RUNNER_IMAGE=ffreis/base-runner:local \
+            --build-arg PYTHON_VERSION=3.10 \
             -t onnx-converter/examples-base:local .
 
           autosklearn_examples=(

@@ -108,7 +108,7 @@ smoke-api-grpc: ## Run docker-compose HTTP + gRPC smoke test
 examples-autosklearn: build-base-runner ## Build and run autosklearn example containers
 	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-base \
 		--build-arg BASE_RUNNER_IMAGE="$(BASE_RUNNER_IMAGE)" \
-		--build-arg PYTHON_VERSION="3.12" \
+		--build-arg PYTHON_VERSION="3.10" \
 		-t "$(IMAGE_PREFIX)/onnx-converter-examples-base" .
 	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-autosklearn1 \
 		--build-arg EXAMPLES_BASE_IMAGE="$(IMAGE_PREFIX)/onnx-converter-examples-base" \
