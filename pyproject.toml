@@ -59,6 +59,7 @@ autosklearn_legacy = [
     "scikit-learn>=0.24,<0.25; python_version >= '3.10' and python_version < '3.11'",
     "skl2onnx>=1.10,<1.12; python_version >= '3.10' and python_version < '3.11'",
     "joblib>=1.1,<1.5; python_version >= '3.10' and python_version < '3.11'",
+    "onnxruntime>=1.17,<1.24; python_version >= '3.10' and python_version < '3.11'",
 ]
 # TensorFlow example-only dependency set pinned for compatibility.
 tf_example = [
@@ -197,3 +198,17 @@ fail_under = 90
 
 [tool.uv]
 resolution = "highest"
+conflicts = [
+    [
+        { extra = "all" },
+        { extra = "autosklearn_legacy" },
+    ],
+    [
+        { extra = "sklearn" },
+        { extra = "autosklearn_legacy" },
+    ],
+    [
+        { extra = "runtime" },
+        { extra = "autosklearn_legacy" },
+    ],
+]

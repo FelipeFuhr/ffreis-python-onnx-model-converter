@@ -7,6 +7,16 @@ resolution-markers = [
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
 ]
+conflicts = [[
+    { package = "onnx-model-converter", extra = "all" },
+    { package = "onnx-model-converter", extra = "autosklearn-legacy" },
+], [
+    { package = "onnx-model-converter", extra = "autosklearn-legacy" },
+    { package = "onnx-model-converter", extra = "sklearn" },
+], [
+    { package = "onnx-model-converter", extra = "autosklearn-legacy" },
+    { package = "onnx-model-converter", extra = "runtime" },
+]]
 
 [[package]]
 name = "absl-py"
@@ -24,7 +34,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mako" },
     { name = "sqlalchemy" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
+    { name = "tomli", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/94/13/8b084e0f2efb0275a1d534838844926f798bd766566b1375174e2448cd31/alembic-1.18.4.tar.gz", hash = "sha256:cb6e1fd84b6174ab8dbb2329f86d631ba9559dd78df550b57804d607672cedbc", size = 2056725, upload-time = "2026-02-10T16:00:47.195Z" }
@@ -55,9 +65,9 @@ name = "anyio"
 version = "4.12.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
+    { name = "exceptiongroup", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "idna" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/96/f0/5eb65b2bb0d09ac6776f2eb54adee6abe8228ea05b20a5ad0e4945de8aac/anyio-4.12.1.tar.gz", hash = "sha256:41cfcc3a4c85d3f05c932da7c26d0201ac36f72abd4435ba90d0464a3ffed703", size = 228685, upload-time = "2026-01-06T11:45:21.246Z" }
 wheels = [
@@ -69,8 +79,8 @@ name = "astunparse"
 version = "1.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "six", marker = "python_full_version < '3.13'" },
-    { name = "wheel", marker = "python_full_version < '3.13'" },
+    { name = "six", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "wheel", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f3/af/4182184d3c338792894f34a62672919db7ca008c89abee9b564dd34d8029/astunparse-1.6.3.tar.gz", hash = "sha256:5ad93a8456f0d084c3456d059fd9a92cce667963232cbf763eac3bc5b7940872", size = 18290, upload-time = "2019-12-22T18:12:13.129Z" }
 wheels = [
@@ -82,23 +92,24 @@ name = "auto-sklearn"
 version = "0.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "configspace", marker = "python_full_version < '3.11'" },
-    { name = "dask", marker = "python_full_version < '3.11'" },
-    { name = "distributed", marker = "python_full_version < '3.11'" },
-    { name = "distro", marker = "python_full_version < '3.11'" },
-    { name = "joblib", version = "1.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "liac-arff", marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pandas", marker = "python_full_version < '3.11'" },
-    { name = "pynisher", marker = "python_full_version < '3.11'" },
-    { name = "pyrfr", marker = "python_full_version < '3.11'" },
-    { name = "pyyaml", marker = "python_full_version < '3.11'" },
-    { name = "scikit-learn", version = "0.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "setuptools", marker = "python_full_version < '3.11'" },
-    { name = "smac", marker = "python_full_version < '3.11'" },
-    { name = "threadpoolctl", marker = "python_full_version < '3.11'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "configspace", marker = "python_full_version < '3.13'" },
+    { name = "dask", marker = "python_full_version < '3.13'" },
+    { name = "distributed", marker = "python_full_version < '3.13'" },
+    { name = "distro", marker = "python_full_version < '3.13'" },
+    { name = "joblib", version = "1.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "liac-arff", marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "pandas", marker = "python_full_version < '3.13'" },
+    { name = "pynisher", marker = "python_full_version < '3.13'" },
+    { name = "pyrfr", marker = "python_full_version < '3.13'" },
+    { name = "pyyaml", marker = "python_full_version < '3.13'" },
+    { name = "scikit-learn", version = "0.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "scipy", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "setuptools", marker = "python_full_version < '3.13'" },
+    { name = "smac", marker = "python_full_version < '3.13'" },
+    { name = "threadpoolctl", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e5/0f/abac227b48edd7f4d9309492b35bdb7a4f70d4d643a60244cac83fd96029/auto-sklearn-0.15.0.tar.gz", hash = "sha256:082941a56acfc93a83e221e08ef5d5b2083b1ff58d18be7c27d003a11e4a41d0", size = 6472485, upload-time = "2022-09-20T10:30:34.459Z" }
 
@@ -122,8 +133,8 @@ dependencies = [
     { name = "pathspec" },
     { name = "platformdirs" },
     { name = "pytokens" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "tomli", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/13/88/560b11e521c522440af991d46848a2bde64b5f7202ec14e1f46f9509d328/black-26.1.0.tar.gz", hash = "sha256:d294ac3340eef9c9eb5d29288e96dc719ff269a88e27b396340459dd85da4c58", size = 658785, upload-time = "2026-01-18T04:50:11.993Z" }
 wheels = [
@@ -258,7 +269,7 @@ name = "click"
 version = "8.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/3d/fa/656b739db8587d7b5dfa22e22ed02566950fbfbcdc20311993483657a5c0/click-8.3.1.tar.gz", hash = "sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a", size = 295065, upload-time = "2025-11-15T20:45:42.706Z" }
 wheels = [
@@ -284,11 +295,23 @@ wheels = [
 ]
 
 [[package]]
+name = "coloredlogs"
+version = "15.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "humanfriendly", marker = "python_full_version < '3.13'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cc/c7/eed8f27100517e8c0e6b923d5f0845d0cb99763da6fdee00478f91db7325/coloredlogs-15.0.1.tar.gz", hash = "sha256:7c991aa71a4577af2f82600d8f8f3a89f936baeaf9b50a9c197da014e5bf16b0", size = 278520, upload-time = "2021-06-11T10:22:45.202Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/06/3d6badcf13db419e25b07041d9c7b4a2c331d3f4e7134445ec5df57714cd/coloredlogs-15.0.1-py2.py3-none-any.whl", hash = "sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934", size = 46018, upload-time = "2021-06-11T10:22:42.561Z" },
+]
+
+[[package]]
 name = "colorlog"
 version = "6.10.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a2/61/f083b5ac52e505dfc1c624eafbf8c7589a0d7f32daa398d2e7590efa5fda/colorlog-6.10.1.tar.gz", hash = "sha256:eb4ae5cb65fe7fec7773c2306061a8e63e02efc2c72eba9d27b0fa23c94f1321", size = 17162, upload-time = "2025-10-16T16:14:11.978Z" }
 wheels = [
@@ -300,10 +323,11 @@ name = "configspace"
 version = "0.4.21"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cython", marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "pyparsing", marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "cython", marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "pyparsing", marker = "python_full_version < '3.13'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "scipy", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/54/97/740da7e032edb390d0a9c0eaa6a512ccd18f5616695b7e56bc2b9cd01e96/ConfigSpace-0.4.21.tar.gz", hash = "sha256:09c5ee343f2850865609cc91f2ab27da0a6182f7f196354f9550f6da578ea827", size = 106651, upload-time = "2022-02-03T11:09:06.618Z" }
 wheels = [
@@ -429,7 +453,7 @@ wheels = [
 
 [package.optional-dependencies]
 toml = [
-    { name = "tomli", marker = "python_full_version <= '3.11'" },
+    { name = "tomli", marker = "python_full_version <= '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 
 [[package]]
@@ -440,13 +464,27 @@ dependencies = [
     { name = "cuda-pathfinder" },
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/37/31/bfcc870f69c6a017c4ad5c42316207fc7551940db6f3639aa4466ec5faf3/cuda_bindings-12.9.4-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a022c96b8bd847e8dc0675523431149a4c3e872f440e3002213dbb9e08f0331a", size = 11800959, upload-time = "2025-10-21T14:51:26.458Z" },
     { url = "https://files.pythonhosted.org/packages/7a/d8/b546104b8da3f562c1ff8ab36d130c8fe1dd6a045ced80b4f6ad74f7d4e1/cuda_bindings-12.9.4-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:4d3c842c2a4303b2a580fe955018e31aea30278be19795ae05226235268032e5", size = 12148218, upload-time = "2025-10-21T14:51:28.855Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/1e/9c8ed3f3dbed7b7d038805fdc65cbc65fda9983e84437778a9571e7092bc/cuda_bindings-12.9.4-cp310-cp310-win_amd64.whl", hash = "sha256:f69107389e6b9948969bfd0a20c4f571fd1aefcfb1d2e1b72cc8ba5ecb7918ab", size = 11464568, upload-time = "2025-10-21T14:51:31.454Z" },
+    { url = "https://files.pythonhosted.org/packages/a9/2b/ebcbb60aa6dba830474cd360c42e10282f7a343c0a1f58d24fbd3b7c2d77/cuda_bindings-12.9.4-cp311-cp311-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a6a429dc6c13148ff1e27c44f40a3dd23203823e637b87fd0854205195988306", size = 11840604, upload-time = "2025-10-21T14:51:34.565Z" },
     { url = "https://files.pythonhosted.org/packages/45/e7/b47792cc2d01c7e1d37c32402182524774dadd2d26339bd224e0e913832e/cuda_bindings-12.9.4-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c912a3d9e6b6651853eed8eed96d6800d69c08e94052c292fec3f282c5a817c9", size = 12210593, upload-time = "2025-10-21T14:51:36.574Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/be/90d32049e06abcfba4b2e7df1dbcb5e16215c8852eef0cd8b25f38a66bd4/cuda_bindings-12.9.4-cp311-cp311-win_amd64.whl", hash = "sha256:443b0875916879c2e4c3722941e25e42d5ab9bcbf34c9e83404fb100fa1f6913", size = 11490933, upload-time = "2025-10-21T14:51:38.792Z" },
+    { url = "https://files.pythonhosted.org/packages/0c/c2/65bfd79292b8ff18be4dd7f7442cea37bcbc1a228c1886f1dea515c45b67/cuda_bindings-12.9.4-cp312-cp312-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:694ba35023846625ef471257e6b5a4bc8af690f961d197d77d34b1d1db393f56", size = 11760260, upload-time = "2025-10-21T14:51:40.79Z" },
     { url = "https://files.pythonhosted.org/packages/a9/c1/dabe88f52c3e3760d861401bb994df08f672ec893b8f7592dc91626adcf3/cuda_bindings-12.9.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:fda147a344e8eaeca0c6ff113d2851ffca8f7dfc0a6c932374ee5c47caa649c8", size = 12151019, upload-time = "2025-10-21T14:51:43.167Z" },
+    { url = "https://files.pythonhosted.org/packages/df/6b/9c1b1a6c01392bfdd758e9486f52a1a72bc8f49e98f9355774ef98b5fb4e/cuda_bindings-12.9.4-cp312-cp312-win_amd64.whl", hash = "sha256:696ca75d249ddf287d01b9a698b8e2d8a05046495a9c051ca15659dc52d17615", size = 11586961, upload-time = "2025-10-21T14:51:45.394Z" },
+    { url = "https://files.pythonhosted.org/packages/05/8b/b4b2d1c7775fa403b64333e720cfcfccef8dcb9cdeb99947061ca5a77628/cuda_bindings-12.9.4-cp313-cp313-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:cf8bfaedc238f3b115d957d1fd6562b7e8435ba57f6d0e2f87d0e7149ccb2da5", size = 11570071, upload-time = "2025-10-21T14:51:47.472Z" },
     { url = "https://files.pythonhosted.org/packages/63/56/e465c31dc9111be3441a9ba7df1941fe98f4aa6e71e8788a3fb4534ce24d/cuda_bindings-12.9.4-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:32bdc5a76906be4c61eb98f546a6786c5773a881f3b166486449b5d141e4a39f", size = 11906628, upload-time = "2025-10-21T14:51:49.905Z" },
+    { url = "https://files.pythonhosted.org/packages/05/d0/d0e4e2e047d8e899f023fa15ad5e9894ce951253f4c894f1cd68490fdb14/cuda_bindings-12.9.4-cp313-cp313-win_amd64.whl", hash = "sha256:a2e82c8985948f953c2be51df45c3fe11c812a928fca525154fb9503190b3e64", size = 11556719, upload-time = "2025-10-21T14:51:52.248Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/07/6aff13bc1e977e35aaa6b22f52b172e2890c608c6db22438cf7ed2bf43a6/cuda_bindings-12.9.4-cp313-cp313t-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:3adf4958dcf68ae7801a59b73fb00a8b37f8d0595060d66ceae111b1002de38d", size = 11566797, upload-time = "2025-10-21T14:51:54.581Z" },
     { url = "https://files.pythonhosted.org/packages/a3/84/1e6be415e37478070aeeee5884c2022713c1ecc735e6d82d744de0252eee/cuda_bindings-12.9.4-cp313-cp313t-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:56e0043c457a99ac473ddc926fe0dc4046694d99caef633e92601ab52cbe17eb", size = 11925991, upload-time = "2025-10-21T14:51:56.535Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/3c/972edfddb4ae8a9fccd3c3766ed47453b6f805b6026b32f10209dd4b8ad4/cuda_bindings-12.9.4-cp313-cp313t-win_amd64.whl", hash = "sha256:b32d8b685f0e66f5658bcf4601ef034e89fc2843582886f0a58784a4302da06c", size = 11894363, upload-time = "2025-10-21T14:51:58.633Z" },
+    { url = "https://files.pythonhosted.org/packages/1e/b5/96a6696e20c4ffd2b327f54c7d0fde2259bdb998d045c25d5dedbbe30290/cuda_bindings-12.9.4-cp314-cp314-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:1f53a7f453d4b2643d8663d036bafe29b5ba89eb904c133180f295df6dc151e5", size = 11624530, upload-time = "2025-10-21T14:52:01.539Z" },
     { url = "https://files.pythonhosted.org/packages/d1/af/6dfd8f2ed90b1d4719bc053ff8940e494640fe4212dc3dd72f383e4992da/cuda_bindings-12.9.4-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8b72ee72a9cc1b531db31eebaaee5c69a8ec3500e32c6933f2d3b15297b53686", size = 11922703, upload-time = "2025-10-21T14:52:03.585Z" },
+    { url = "https://files.pythonhosted.org/packages/e6/87/652796522cc1a7af559460e1ce59b642e05c1468b9c08522a9a096b4cf04/cuda_bindings-12.9.4-cp314-cp314-win_amd64.whl", hash = "sha256:53a10c71fdbdb743e0268d07964e5a996dd00b4e43831cbfce9804515d97d575", size = 11517716, upload-time = "2025-10-21T14:52:06.013Z" },
+    { url = "https://files.pythonhosted.org/packages/39/73/d2fc40c043bac699c3880bf88d3cebe9d88410cd043795382826c93a89f0/cuda_bindings-12.9.4-cp314-cp314t-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:20f2699d61d724de3eb3f3369d57e2b245f93085cab44fd37c3bea036cea1a6f", size = 11565056, upload-time = "2025-10-21T14:52:08.338Z" },
     { url = "https://files.pythonhosted.org/packages/6c/19/90ac264acc00f6df8a49378eedec9fd2db3061bf9263bf9f39fd3d8377c3/cuda_bindings-12.9.4-cp314-cp314t-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d80bffc357df9988dca279734bc9674c3934a654cab10cadeed27ce17d8635ee", size = 11924658, upload-time = "2025-10-21T14:52:10.411Z" },
+    { url = "https://files.pythonhosted.org/packages/ab/52/a30f46e822bfa6b4a659d1e8de8c4a4adf908ea075dac568b55362541bd8/cuda_bindings-12.9.4-cp314-cp314t-win_amd64.whl", hash = "sha256:53e11991a92ff6f26a0c8a98554cd5d6721c308a6b7bfb08bebac9201e039e43", size = 12055608, upload-time = "2025-10-21T14:52:12.335Z" },
 ]
 
 [[package]]
@@ -500,14 +538,14 @@ name = "dask"
 version = "2026.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click", marker = "python_full_version < '3.11'" },
-    { name = "cloudpickle", marker = "python_full_version < '3.11'" },
-    { name = "fsspec", marker = "python_full_version < '3.11'" },
-    { name = "importlib-metadata", marker = "python_full_version < '3.11'" },
-    { name = "packaging", marker = "python_full_version < '3.11'" },
-    { name = "partd", marker = "python_full_version < '3.11'" },
-    { name = "pyyaml", marker = "python_full_version < '3.11'" },
-    { name = "toolz", marker = "python_full_version < '3.11'" },
+    { name = "click", marker = "python_full_version < '3.13'" },
+    { name = "cloudpickle", marker = "python_full_version < '3.13'" },
+    { name = "fsspec", marker = "python_full_version < '3.13'" },
+    { name = "importlib-metadata", marker = "python_full_version < '3.12'" },
+    { name = "packaging", marker = "python_full_version < '3.13'" },
+    { name = "partd", marker = "python_full_version < '3.13'" },
+    { name = "pyyaml", marker = "python_full_version < '3.13'" },
+    { name = "toolz", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/bd/52/b0f9172b22778def907db1ff173249e4eb41f054b46a9c83b1528aaf811f/dask-2026.1.2.tar.gz", hash = "sha256:1136683de2750d98ea792670f7434e6c1cfce90cab2cc2f2495a9e60fd25a4fc", size = 10997838, upload-time = "2026-01-30T21:04:20.54Z" }
 wheels = [
@@ -519,21 +557,21 @@ name = "distributed"
 version = "2026.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click", marker = "python_full_version < '3.11'" },
-    { name = "cloudpickle", marker = "python_full_version < '3.11'" },
-    { name = "dask", marker = "python_full_version < '3.11'" },
-    { name = "jinja2", marker = "python_full_version < '3.11'" },
-    { name = "locket", marker = "python_full_version < '3.11'" },
-    { name = "msgpack", marker = "python_full_version < '3.11'" },
-    { name = "packaging", marker = "python_full_version < '3.11'" },
-    { name = "psutil", marker = "python_full_version < '3.11'" },
-    { name = "pyyaml", marker = "python_full_version < '3.11'" },
-    { name = "sortedcontainers", marker = "python_full_version < '3.11'" },
-    { name = "tblib", marker = "python_full_version < '3.11'" },
-    { name = "toolz", marker = "python_full_version < '3.11'" },
-    { name = "tornado", marker = "python_full_version < '3.11'" },
-    { name = "urllib3", marker = "python_full_version < '3.11'" },
-    { name = "zict", marker = "python_full_version < '3.11'" },
+    { name = "click", marker = "python_full_version < '3.13'" },
+    { name = "cloudpickle", marker = "python_full_version < '3.13'" },
+    { name = "dask", marker = "python_full_version < '3.13'" },
+    { name = "jinja2", marker = "python_full_version < '3.13'" },
+    { name = "locket", marker = "python_full_version < '3.13'" },
+    { name = "msgpack", marker = "python_full_version < '3.13'" },
+    { name = "packaging", marker = "python_full_version < '3.13'" },
+    { name = "psutil", marker = "python_full_version < '3.13'" },
+    { name = "pyyaml", marker = "python_full_version < '3.13'" },
+    { name = "sortedcontainers", marker = "python_full_version < '3.13'" },
+    { name = "tblib", marker = "python_full_version < '3.13'" },
+    { name = "toolz", marker = "python_full_version < '3.13'" },
+    { name = "tornado", marker = "python_full_version < '3.13'" },
+    { name = "urllib3", marker = "python_full_version < '3.13'" },
+    { name = "zict", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/4e/75/b6e5b77229097ff03dd5ba6a07c77e2da87e7e991ccfef412549bba78746/distributed-2026.1.2.tar.gz", hash = "sha256:8333fa7a34151ed3b4cf1a03136fe1f1799eca706a5e47bdb63022c8795d853b", size = 2103721, upload-time = "2026-01-30T21:07:03.307Z" }
 wheels = [
@@ -554,7 +592,7 @@ name = "emcee"
 version = "3.1.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/cb/53/1045ee878cb24281387079f8ee4f0ade1622c6aae1ed1fd91a53e4fa5b19/emcee-3.1.6.tar.gz", hash = "sha256:11af4daf6ab8f9ca69681e3c29054665db7bbd87fd4eb8e437d2c3a1248c637d", size = 2871117, upload-time = "2024-04-19T10:03:19.555Z" }
 wheels = [
@@ -566,7 +604,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11' or (python_full_version == '3.11.*' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version == '3.11.*' and extra != 'extra-20-onnx-model-converter-sklearn') or (python_full_version == '3.12.*' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version == '3.12.*' and extra != 'extra-20-onnx-model-converter-all' and extra != 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -643,7 +681,7 @@ name = "google-pasta"
 version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "six", marker = "python_full_version < '3.13'" },
+    { name = "six", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/35/4a/0bd53b36ff0323d10d5f24ebd67af2de10a1117f5cf4d7add90df92756f1/google-pasta-0.2.0.tar.gz", hash = "sha256:c9f2c8dfc8f96d0d5808299920721be30c9eec37f2389f28904f454565c8a16e", size = 40430, upload-time = "2020-03-13T18:57:50.34Z" }
 wheels = [
@@ -785,7 +823,7 @@ name = "h5py"
 version = "3.15.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/4d/6a/0d79de0b025aa85dc8864de8e97659c94cf3d23148394a954dc5ca52f8c8/h5py-3.15.1.tar.gz", hash = "sha256:c86e3ed45c4473564de55aa83b6fc9e5ead86578773dfbd93047380042e26b69", size = 426236, upload-time = "2025-10-16T10:35:27.404Z" }
 wheels = [
@@ -859,11 +897,23 @@ wheels = [
 ]
 
 [[package]]
+name = "humanfriendly"
+version = "10.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyreadline3", marker = "python_full_version < '3.13' and sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cc/3f/2c29224acb2e2df4d2046e4c73ee2662023c58ff5b113c4c1adac0886c43/humanfriendly-10.0.tar.gz", hash = "sha256:6b0b831ce8f15f7300721aa49829fc4e83921a9a301cc7f606be6686a2288ddc", size = 360702, upload-time = "2021-09-17T21:40:43.31Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f0/0f/310fb31e39e2d734ccaa2c0fb981ee41f7bd5056ce9bc29b2248bd569169/humanfriendly-10.0-py2.py3-none-any.whl", hash = "sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477", size = 86794, upload-time = "2021-09-17T21:40:39.897Z" },
+]
+
+[[package]]
 name = "hypothesis"
 version = "6.151.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
+    { name = "exceptiongroup", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "sortedcontainers" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/19/e1/ef365ff480903b929d28e057f57b76cae51a30375943e33374ec9a165d9c/hypothesis-6.151.9.tar.gz", hash = "sha256:2f284428dda6c3c48c580de0e18470ff9c7f5ef628a647ee8002f38c3f9097ca", size = 463534, upload-time = "2026-02-16T22:59:23.09Z" }
@@ -885,7 +935,7 @@ name = "importlib-metadata"
 version = "8.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp", marker = "python_full_version < '3.11'" },
+    { name = "zipp", marker = "python_full_version < '3.12'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f3/49/3b30cad09e7771a4982d9975a8cbf64f00d4a1ececb53297f1d9a7be1b10/importlib_metadata-8.7.1.tar.gz", hash = "sha256:49fef1ae6440c182052f407c8d34a68f72efc36db9ca90dc0113398f2fdde8bb", size = 57107, upload-time = "2025-12-21T10:00:19.278Z" }
 wheels = [
@@ -956,14 +1006,14 @@ resolution-markers = [
     "python_full_version < '3.11'",
 ]
 dependencies = [
-    { name = "absl-py", marker = "python_full_version < '3.11'" },
-    { name = "h5py", marker = "python_full_version < '3.11'" },
-    { name = "ml-dtypes", marker = "python_full_version < '3.11'" },
-    { name = "namex", marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "optree", marker = "python_full_version < '3.11'" },
-    { name = "packaging", marker = "python_full_version < '3.11'" },
-    { name = "rich", marker = "python_full_version < '3.11'" },
+    { name = "absl-py", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "h5py", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "ml-dtypes", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "namex", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "optree", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "packaging", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "rich", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/85/1d/b64986120f5de68b921aa9bc2b69cb53ad20c1a6ebe5431a73def28525ef/keras-3.12.1.tar.gz", hash = "sha256:3cb760b3fec105db4d893dd717daafdd0e35457a8201502c1ba8bedfaf334a71", size = 1127003, upload-time = "2026-01-30T18:28:57.087Z" }
 wheels = [
@@ -979,14 +1029,14 @@ resolution-markers = [
     "python_full_version == '3.11.*'",
 ]
 dependencies = [
-    { name = "absl-py", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "h5py", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "ml-dtypes", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "namex", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "optree", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "packaging", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "rich", marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
+    { name = "absl-py", marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "h5py", marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "ml-dtypes", marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "namex", marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "optree", marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "packaging", marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "rich", marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/09/e9/400582e5f3dbd815d2a373f7de7717dd1bc8349274e9ac1b9ac47410b123/keras-3.13.2.tar.gz", hash = "sha256:62f0123488ac87c929c988617e14f293f7bc993811837d08bb37eff77adc85a9", size = 1155875, upload-time = "2026-01-30T00:35:13.796Z" }
 wheels = [
@@ -1251,8 +1301,8 @@ name = "ml-dtypes"
 version = "0.5.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0e/4a/c27b42ed9b1c7d13d9ba8b6905dece787d6259152f2309338aed29b2447b/ml_dtypes-0.5.4.tar.gz", hash = "sha256:8ab06a50fb9bf9666dd0fe5dfb4676fa2b0ac0f31ecff72a6c3af8e22c063453", size = 692314, upload-time = "2025-11-17T22:32:31.031Z" }
 wheels = [
@@ -1367,10 +1417,10 @@ name = "mypy"
 version = "1.19.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "librt", marker = "platform_python_implementation != 'PyPy'" },
+    { name = "librt", marker = "platform_python_implementation != 'PyPy' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "mypy-extensions" },
     { name = "pathspec" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
+    { name = "tomli", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f5/db/4efed9504bc01309ab9c2da7e352cc223569f05478012b5d9ece38fd44d2/mypy-1.19.1.tar.gz", hash = "sha256:19d88bb05303fe63f71dd2c6270daca27cb9401c4ca8255fe50d1d920e0eb9ba", size = 3582404, upload-time = "2025-12-15T05:03:48.42Z" }
@@ -1606,7 +1656,9 @@ name = "nvidia-cublas-cu12"
 version = "12.8.4.1"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/29/99/db44d685f0e257ff0e213ade1964fc459b4a690a73293220e98feb3307cf/nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:b86f6dd8935884615a0683b663891d43781b819ac4f2ba2b0c9604676af346d0", size = 590537124, upload-time = "2025-03-07T01:43:53.556Z" },
     { url = "https://files.pythonhosted.org/packages/dc/61/e24b560ab2e2eaeb3c839129175fb330dfcfc29e5203196e5541a4c44682/nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:8ac4e771d5a348c551b2a426eda6193c19aa630236b418086020df5ba9667142", size = 594346921, upload-time = "2025-03-07T01:44:31.254Z" },
+    { url = "https://files.pythonhosted.org/packages/70/61/7d7b3c70186fb651d0fbd35b01dbfc8e755f69fd58f817f3d0f642df20c3/nvidia_cublas_cu12-12.8.4.1-py3-none-win_amd64.whl", hash = "sha256:47e9b82132fa8d2b4944e708049229601448aaad7e6f296f630f2d1a32de35af", size = 567544208, upload-time = "2025-03-07T01:53:30.535Z" },
 ]
 
 [[package]]
@@ -1614,7 +1666,9 @@ name = "nvidia-cuda-cupti-cu12"
 version = "12.8.90"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/1f/b3bd73445e5cb342727fd24fe1f7b748f690b460acadc27ea22f904502c8/nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:4412396548808ddfed3f17a467b104ba7751e6b58678a4b840675c56d21cf7ed", size = 9533318, upload-time = "2025-03-07T01:40:10.421Z" },
     { url = "https://files.pythonhosted.org/packages/f8/02/2adcaa145158bf1a8295d83591d22e4103dbfd821bcaf6f3f53151ca4ffa/nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:ea0cb07ebda26bb9b29ba82cda34849e73c166c18162d3913575b0c9db9a6182", size = 10248621, upload-time = "2025-03-07T01:40:21.213Z" },
+    { url = "https://files.pythonhosted.org/packages/41/bc/83f5426095d93694ae39fe1311431b5d5a9bb82e48bf0dd8e19be2765942/nvidia_cuda_cupti_cu12-12.8.90-py3-none-win_amd64.whl", hash = "sha256:bb479dcdf7e6d4f8b0b01b115260399bf34154a1a2e9fe11c85c517d87efd98e", size = 7015759, upload-time = "2025-03-07T01:51:11.355Z" },
 ]
 
 [[package]]
@@ -1623,6 +1677,8 @@ version = "12.8.93"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/05/6b/32f747947df2da6994e999492ab306a903659555dddc0fbdeb9d71f75e52/nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:a7756528852ef889772a84c6cd89d41dfa74667e24cca16bb31f8f061e3e9994", size = 88040029, upload-time = "2025-03-07T01:42:13.562Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/d1/e50d0acaab360482034b84b6e27ee83c6738f7d32182b987f9c7a4e32962/nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:fc1fec1e1637854b4c0a65fb9a8346b51dd9ee69e61ebaccc82058441f15bce8", size = 43106076, upload-time = "2025-03-07T01:41:59.817Z" },
+    { url = "https://files.pythonhosted.org/packages/45/51/52a3d84baa2136cc8df15500ad731d74d3a1114d4c123e043cb608d4a32b/nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-win_amd64.whl", hash = "sha256:7a4b6b2904850fe78e0bd179c4b655c404d4bb799ef03ddc60804247099ae909", size = 73586838, upload-time = "2025-03-07T01:52:13.483Z" },
 ]
 
 [[package]]
@@ -1630,7 +1686,9 @@ name = "nvidia-cuda-runtime-cu12"
 version = "12.8.90"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/7c/75/f865a3b236e4647605ea34cc450900854ba123834a5f1598e160b9530c3a/nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:52bf7bbee900262ffefe5e9d5a2a69a30d97e2bc5bb6cc866688caa976966e3d", size = 965265, upload-time = "2025-03-07T01:39:43.533Z" },
     { url = "https://files.pythonhosted.org/packages/0d/9b/a997b638fcd068ad6e4d53b8551a7d30fe8b404d6f1804abf1df69838932/nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:adade8dcbd0edf427b7204d480d6066d33902cab2a4707dcfc48a2d0fd44ab90", size = 954765, upload-time = "2025-03-07T01:40:01.615Z" },
+    { url = "https://files.pythonhosted.org/packages/30/a5/a515b7600ad361ea14bfa13fb4d6687abf500adc270f19e89849c0590492/nvidia_cuda_runtime_cu12-12.8.90-py3-none-win_amd64.whl", hash = "sha256:c0c6027f01505bfed6c3b21ec546f69c687689aad5f1a377554bc6ca4aa993a8", size = 944318, upload-time = "2025-03-07T01:51:01.794Z" },
 ]
 
 [[package]]
@@ -1641,7 +1699,9 @@ dependencies = [
     { name = "nvidia-cublas-cu12" },
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/41/e79269ce215c857c935fd86bcfe91a451a584dfc27f1e068f568b9ad1ab7/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:c9132cc3f8958447b4910a1720036d9eff5928cc3179b0a51fb6d167c6cc87d8", size = 705026878, upload-time = "2025-06-06T21:52:51.348Z" },
     { url = "https://files.pythonhosted.org/packages/ba/51/e123d997aa098c61d029f76663dedbfb9bc8dcf8c60cbd6adbe42f76d049/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:949452be657fa16687d0930933f032835951ef0892b37d2d53824d1a84dc97a8", size = 706758467, upload-time = "2025-06-06T21:54:08.597Z" },
+    { url = "https://files.pythonhosted.org/packages/3d/90/0bd6e586701b3a890fd38aa71c387dab4883d619d6e5ad912ccbd05bfd67/nvidia_cudnn_cu12-9.10.2.21-py3-none-win_amd64.whl", hash = "sha256:c6288de7d63e6cf62988f0923f96dc339cea362decb1bf5b3141883392a7d65e", size = 692992268, upload-time = "2025-06-06T21:55:18.114Z" },
 ]
 
 [[package]]
@@ -1652,7 +1712,9 @@ dependencies = [
     { name = "nvidia-nvjitlink-cu12" },
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/60/bc/7771846d3a0272026c416fbb7e5f4c1f146d6d80704534d0b187dd6f4800/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:848ef7224d6305cdb2a4df928759dca7b1201874787083b6e7550dd6765ce69a", size = 193109211, upload-time = "2025-03-07T01:44:56.873Z" },
     { url = "https://files.pythonhosted.org/packages/1f/13/ee4e00f30e676b66ae65b4f08cb5bcbb8392c03f54f2d5413ea99a5d1c80/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:4d2dd21ec0b88cf61b62e6b43564355e5222e4a3fb394cac0db101f2dd0d4f74", size = 193118695, upload-time = "2025-03-07T01:45:27.821Z" },
+    { url = "https://files.pythonhosted.org/packages/7d/ec/ce1629f1e478bb5ccd208986b5f9e0316a78538dd6ab1d0484f012f8e2a1/nvidia_cufft_cu12-11.3.3.83-py3-none-win_amd64.whl", hash = "sha256:7a64a98ef2a7c47f905aaf8931b69a3a43f27c55530c698bb2ed7c75c0b42cb7", size = 192216559, upload-time = "2025-03-07T01:53:57.106Z" },
 ]
 
 [[package]]
@@ -1661,6 +1723,7 @@ version = "1.13.1.3"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bb/fe/1bcba1dfbfb8d01be8d93f07bfc502c93fa23afa6fd5ab3fc7c1df71038a/nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:1d069003be650e131b21c932ec3d8969c1715379251f8d23a1860554b1cb24fc", size = 1197834, upload-time = "2025-03-07T01:45:50.723Z" },
+    { url = "https://files.pythonhosted.org/packages/1e/f5/5607710447a6fe9fd9b3283956fceeee8a06cda1d2f56ce31371f595db2a/nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:4beb6d4cce47c1a0f1013d72e02b0994730359e17801d395bdcbf20cfb3bb00a", size = 1120705, upload-time = "2025-03-07T01:45:41.434Z" },
 ]
 
 [[package]]
@@ -1668,7 +1731,9 @@ name = "nvidia-curand-cu12"
 version = "10.3.9.90"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/45/5e/92aa15eca622a388b80fbf8375d4760738df6285b1e92c43d37390a33a9a/nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:dfab99248034673b779bc6decafdc3404a8a6f502462201f2f31f11354204acd", size = 63625754, upload-time = "2025-03-07T01:46:10.735Z" },
     { url = "https://files.pythonhosted.org/packages/fb/aa/6584b56dc84ebe9cf93226a5cde4d99080c8e90ab40f0c27bda7a0f29aa1/nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:b32331d4f4df5d6eefa0554c565b626c7216f87a06a4f56fab27c3b68a830ec9", size = 63619976, upload-time = "2025-03-07T01:46:23.323Z" },
+    { url = "https://files.pythonhosted.org/packages/b9/75/70c05b2f3ed5be3bb30b7102b6eb78e100da4bbf6944fd6725c012831cab/nvidia_curand_cu12-10.3.9.90-py3-none-win_amd64.whl", hash = "sha256:f149a8ca457277da854f89cf282d6ef43176861926c7ac85b2a0fbd237c587ec", size = 62765309, upload-time = "2025-03-07T01:54:20.478Z" },
 ]
 
 [[package]]
@@ -1681,7 +1746,9 @@ dependencies = [
     { name = "nvidia-nvjitlink-cu12" },
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/32/f7cd6ce8a7690544d084ea21c26e910a97e077c9b7f07bf5de623ee19981/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:db9ed69dbef9715071232caa9b69c52ac7de3a95773c2db65bdba85916e4e5c0", size = 267229841, upload-time = "2025-03-07T01:46:54.356Z" },
     { url = "https://files.pythonhosted.org/packages/85/48/9a13d2975803e8cf2777d5ed57b87a0b6ca2cc795f9a4f59796a910bfb80/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:4376c11ad263152bd50ea295c05370360776f8c3427b30991df774f9fb26c450", size = 267506905, upload-time = "2025-03-07T01:47:16.273Z" },
+    { url = "https://files.pythonhosted.org/packages/13/c0/76ca8551b8a84146ffa189fec81c26d04adba4bc0dbe09cd6e6fd9b7de04/nvidia_cusolver_cu12-11.7.3.90-py3-none-win_amd64.whl", hash = "sha256:4a550db115fcabc4d495eb7d39ac8b58d4ab5d8e63274d3754df1c0ad6a22d34", size = 256720438, upload-time = "2025-03-07T01:54:39.898Z" },
 ]
 
 [[package]]
@@ -1692,7 +1759,9 @@ dependencies = [
     { name = "nvidia-nvjitlink-cu12" },
 ]
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/bc/f7/cd777c4109681367721b00a106f491e0d0d15cfa1fd59672ce580ce42a97/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:9b6c161cb130be1a07a27ea6923df8141f3c295852f4b260c65f18f3e0a091dc", size = 288117129, upload-time = "2025-03-07T01:47:40.407Z" },
     { url = "https://files.pythonhosted.org/packages/c2/f5/e1854cb2f2bcd4280c44736c93550cc300ff4b8c95ebe370d0aa7d2b473d/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:1ec05d76bbbd8b61b06a80e1eaf8cf4959c3d4ce8e711b65ebd0443bb0ebb13b", size = 288216466, upload-time = "2025-03-07T01:48:13.779Z" },
+    { url = "https://files.pythonhosted.org/packages/62/07/f3b2ad63f8e3d257a599f422ae34eb565e70c41031aecefa3d18b62cabd1/nvidia_cusparse_cu12-12.5.8.93-py3-none-win_amd64.whl", hash = "sha256:9a33604331cb2cac199f2e7f5104dfbb8a5a898c367a53dfda9ff2acb6b6b4dd", size = 284937404, upload-time = "2025-03-07T01:55:07.742Z" },
 ]
 
 [[package]]
@@ -1700,7 +1769,9 @@ name = "nvidia-cusparselt-cu12"
 version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/73/b9/598f6ff36faaece4b3c50d26f50e38661499ff34346f00e057760b35cc9d/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_aarch64.whl", hash = "sha256:8878dce784d0fac90131b6817b607e803c36e629ba34dc5b433471382196b6a5", size = 283835557, upload-time = "2025-02-26T00:16:54.265Z" },
     { url = "https://files.pythonhosted.org/packages/56/79/12978b96bd44274fe38b5dde5cfb660b1d114f70a65ef962bcbbed99b549/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl", hash = "sha256:f1bb701d6b930d5a7cea44c19ceb973311500847f81b634d802b7b539dc55623", size = 287193691, upload-time = "2025-02-26T00:15:44.104Z" },
+    { url = "https://files.pythonhosted.org/packages/2f/d8/a6b0d0d0c2435e9310f3e2bb0d9c9dd4c33daef86aa5f30b3681defd37ea/nvidia_cusparselt_cu12-0.7.1-py3-none-win_amd64.whl", hash = "sha256:f67fbb5831940ec829c9117b7f33807db9f9678dc2a617fbe781cac17b4e1075", size = 271020911, upload-time = "2025-02-26T00:14:47.204Z" },
 ]
 
 [[package]]
@@ -1708,6 +1779,7 @@ name = "nvidia-nccl-cu12"
 version = "2.27.5"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/bb/1c/857979db0ef194ca5e21478a0612bcdbbe59458d7694361882279947b349/nvidia_nccl_cu12-2.27.5-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:31432ad4d1fb1004eb0c56203dc9bc2178a1ba69d1d9e02d64a6938ab5e40e7a", size = 322400625, upload-time = "2025-06-26T04:11:04.496Z" },
     { url = "https://files.pythonhosted.org/packages/6e/89/f7a07dc961b60645dbbf42e80f2bc85ade7feb9a491b11a1e973aa00071f/nvidia_nccl_cu12-2.27.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:ad730cf15cb5d25fe849c6e6ca9eb5b76db16a80f13f425ac68d8e2e55624457", size = 322348229, upload-time = "2025-06-26T04:11:28.385Z" },
 ]
 
@@ -1717,6 +1789,8 @@ version = "12.8.93"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f6/74/86a07f1d0f42998ca31312f998bd3b9a7eff7f52378f4f270c8679c77fb9/nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:81ff63371a7ebd6e6451970684f916be2eab07321b73c9d244dc2b4da7f73b88", size = 39254836, upload-time = "2025-03-07T01:49:55.661Z" },
+    { url = "https://files.pythonhosted.org/packages/2a/a2/8cee5da30d13430e87bf99bb33455d2724d0a4a9cb5d7926d80ccb96d008/nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:adccd7161ace7261e01bb91e44e88da350895c270d23f744f0820c818b7229e7", size = 38386204, upload-time = "2025-03-07T01:49:43.612Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/d7/34f02dad2e30c31b10a51f6b04e025e5dd60e5f936af9045a9b858a05383/nvidia_nvjitlink_cu12-12.8.93-py3-none-win_amd64.whl", hash = "sha256:bd93fbeeee850917903583587f4fc3a4eafa022e34572251368238ab5e6bd67f", size = 268553710, upload-time = "2025-03-07T01:56:24.13Z" },
 ]
 
 [[package]]
@@ -1724,6 +1798,7 @@ name = "nvidia-nvshmem-cu12"
 version = "3.4.5"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/1d/6a/03aa43cc9bd3ad91553a88b5f6fb25ed6a3752ae86ce2180221962bc2aa5/nvidia_nvshmem_cu12-3.4.5-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:0b48363fc6964dede448029434c6abed6c5e37f823cb43c3bcde7ecfc0457e15", size = 138936938, upload-time = "2025-09-06T00:32:05.589Z" },
     { url = "https://files.pythonhosted.org/packages/b5/09/6ea3ea725f82e1e76684f0708bbedd871fc96da89945adeba65c3835a64c/nvidia_nvshmem_cu12-3.4.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:042f2500f24c021db8a06c5eec2539027d57460e1c1a762055a6554f72c369bd", size = 139103095, upload-time = "2025-09-06T00:32:31.266Z" },
 ]
 
@@ -1732,7 +1807,9 @@ name = "nvidia-nvtx-cu12"
 version = "12.8.90"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/10/c0/1b303feea90d296f6176f32a2a70b5ef230f9bdeb3a72bddb0dc922dc137/nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:d7ad891da111ebafbf7e015d34879f7112832fc239ff0d7d776b6cb685274615", size = 91161, upload-time = "2025-03-07T01:42:23.922Z" },
     { url = "https://files.pythonhosted.org/packages/a2/eb/86626c1bbc2edb86323022371c39aa48df6fd8b0a1647bc274577f72e90b/nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:5b17e2001cc0d751a5bc2c6ec6d26ad95913324a4adb86788c944f8ce9ba441f", size = 89954, upload-time = "2025-03-07T01:42:44.131Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/99/4c9c0c329bf9fc125008c3b54c7c94c0023518d06fc025ae36431375e1fe/nvidia_nvtx_cu12-12.8.90-py3-none-win_amd64.whl", hash = "sha256:619c8304aedc69f02ea82dd244541a83c3d9d40993381b3b590f1adaed3db41e", size = 56492, upload-time = "2025-03-07T01:52:24.69Z" },
 ]
 
 [[package]]
@@ -1745,8 +1822,8 @@ resolution-markers = [
     "python_full_version < '3.11'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9a/54/0e385c26bf230d223810a9c7d06628d954008a5e5e4b73ee26ef02327282/onnx-1.17.0.tar.gz", hash = "sha256:48ca1a91ff73c1d5e3ea2eef20ae5d0e709bb8a2355ed798ffc2169753013fd3", size = 12165120, upload-time = "2024-10-01T21:48:40.63Z" }
 wheels = [
@@ -1775,10 +1852,10 @@ resolution-markers = [
     "python_full_version >= '3.13'",
 ]
 dependencies = [
-    { name = "ml-dtypes", marker = "python_full_version >= '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "protobuf", version = "6.33.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "typing-extensions", marker = "python_full_version >= '3.13'" },
+    { name = "ml-dtypes", marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "protobuf", version = "6.33.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "typing-extensions", marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/3b/8a/335c03a8683a88a32f9a6bb98899ea6df241a41df64b37b9696772414794/onnx-1.20.1.tar.gz", hash = "sha256:ded16de1df563d51fbc1ad885f2a426f814039d8b5f4feb77febe09c0295ad67", size = 12048980, upload-time = "2026-01-10T01:40:03.043Z" }
 wheels = [
@@ -1812,10 +1889,10 @@ version = "0.1.16"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ml-dtypes" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d5/19/367df21add30ba9a3e0b183e8327f0424d13e4415450682ef3a7f1a0d163/onnx_ir-0.1.16.tar.gz", hash = "sha256:dda5c90f9d941767d3bba43adca20923b7fc020eee0cbf947b847a21701f93d9", size = 137287, upload-time = "2026-02-09T21:04:23.285Z" }
@@ -1828,17 +1905,17 @@ name = "onnx-model-converter"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "pydantic" },
 ]
 
 [package.optional-dependencies]
 all = [
     { name = "onnxoptimizer" },
-    { name = "onnxruntime" },
+    { name = "onnxruntime", version = "1.24.1", source = { registry = "https://pypi.org/simple" } },
     { name = "onnxscript" },
     { name = "optuna" },
     { name = "rich" },
@@ -1849,6 +1926,7 @@ all = [
 autosklearn-legacy = [
     { name = "auto-sklearn", marker = "python_full_version < '3.11'" },
     { name = "joblib", version = "1.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "onnxruntime", version = "1.23.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scikit-learn", version = "0.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "skl2onnx", version = "1.11.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
 ]
@@ -1870,15 +1948,15 @@ dev = [
 ]
 grpc = [
     { name = "grpcio" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "protobuf", version = "6.33.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "protobuf", version = "6.33.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 optuna = [
     { name = "optuna" },
 ]
 runtime = [
     { name = "onnxoptimizer" },
-    { name = "onnxruntime" },
+    { name = "onnxruntime", version = "1.24.1", source = { registry = "https://pypi.org/simple" } },
 ]
 server = [
     { name = "fastapi" },
@@ -1892,17 +1970,17 @@ sklearn = [
     { name = "skops", marker = "python_full_version >= '3.11'" },
 ]
 tensorflow = [
-    { name = "tensorflow", marker = "python_full_version < '3.13'" },
-    { name = "tf2onnx", marker = "python_full_version < '3.13'" },
+    { name = "tensorflow", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "tf2onnx", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 tf-example = [
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' and sys_platform != 'win32'" },
-    { name = "tensorflow", marker = "python_full_version < '3.13'" },
-    { name = "tf2onnx", marker = "python_full_version < '3.13' and sys_platform != 'win32'" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.13' and sys_platform != 'win32') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform == 'win32' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform == 'win32' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform == 'win32' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "tensorflow", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "tf2onnx", marker = "(python_full_version < '3.13' and sys_platform != 'win32') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform == 'win32' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform == 'win32' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform == 'win32' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 tf-legacy = [
-    { name = "tensorflow", marker = "python_full_version < '3.13'" },
-    { name = "tf2onnx", marker = "python_full_version < '3.13'" },
+    { name = "tensorflow", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "tf2onnx", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 torch = [
     { name = "onnxscript" },
@@ -1928,6 +2006,7 @@ requires-dist = [
     { name = "onnx", marker = "python_full_version >= '3.13'", specifier = ">=1.20.1" },
     { name = "onnxoptimizer", marker = "extra == 'all'", specifier = ">=0.4.2" },
     { name = "onnxoptimizer", marker = "extra == 'runtime'", specifier = ">=0.4.2" },
+    { name = "onnxruntime", marker = "python_full_version == '3.10.*' and extra == 'autosklearn-legacy'", specifier = ">=1.17,<1.24" },
     { name = "onnxruntime", marker = "extra == 'all'", specifier = ">=1.24.1" },
     { name = "onnxruntime", marker = "extra == 'runtime'", specifier = ">=1.24.1" },
     { name = "onnxscript", marker = "extra == 'all'", specifier = ">=0.6.2" },
@@ -1971,10 +2050,10 @@ name = "onnxconverter-common"
 version = "1.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "packaging", marker = "python_full_version < '3.11'" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "packaging", marker = "python_full_version < '3.13'" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4a/67/8dca1868a6e226f8d3f7d666cb6a48b79a60aad5267b16b24627cd8d9eb8/onnxconverter_common-1.16.0-py2.py3-none-any.whl", hash = "sha256:df39ee96f17fff119dff10dd245467651b60b9e8a96020eb93402239794852f7", size = 89511, upload-time = "2025-08-28T19:37:46.988Z" },
@@ -1985,8 +2064,8 @@ name = "onnxoptimizer"
 version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-all') or (python_full_version < '3.13' and extra != 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/5b/a7/e4f0e67a7e077d7cc65b968febfc53f8f52d3a22257624aa7977f14fff8c/onnxoptimizer-0.4.2.tar.gz", hash = "sha256:dac4a972b5dc80a870b930e85e4b043d090d4546d7878106ef8448e07f94622e", size = 12062394, upload-time = "2026-01-07T14:24:39.048Z" }
 wheels = [
@@ -2003,15 +2082,61 @@ wheels = [
 
 [[package]]
 name = "onnxruntime"
+version = "1.23.2"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.11'",
+]
+dependencies = [
+    { name = "coloredlogs", marker = "python_full_version < '3.13'" },
+    { name = "flatbuffers", marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "packaging", marker = "python_full_version < '3.13'" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "sympy", marker = "python_full_version < '3.13'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/35/d6/311b1afea060015b56c742f3531168c1644650767f27ef40062569960587/onnxruntime-1.23.2-cp310-cp310-macosx_13_0_arm64.whl", hash = "sha256:a7730122afe186a784660f6ec5807138bf9d792fa1df76556b27307ea9ebcbe3", size = 17195934, upload-time = "2025-10-27T23:06:14.143Z" },
+    { url = "https://files.pythonhosted.org/packages/db/db/81bf3d7cecfbfed9092b6b4052e857a769d62ed90561b410014e0aae18db/onnxruntime-1.23.2-cp310-cp310-macosx_13_0_x86_64.whl", hash = "sha256:b28740f4ecef1738ea8f807461dd541b8287d5650b5be33bca7b474e3cbd1f36", size = 19153079, upload-time = "2025-10-27T23:05:57.686Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/4d/a382452b17cf70a2313153c520ea4c96ab670c996cb3a95cc5d5ac7bfdac/onnxruntime-1.23.2-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8f7d1fe034090a1e371b7f3ca9d3ccae2fabae8c1d8844fb7371d1ea38e8e8d2", size = 15219883, upload-time = "2025-10-22T03:46:21.66Z" },
+    { url = "https://files.pythonhosted.org/packages/fb/56/179bf90679984c85b417664c26aae4f427cba7514bd2d65c43b181b7b08b/onnxruntime-1.23.2-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:4ca88747e708e5c67337b0f65eed4b7d0dd70d22ac332038c9fc4635760018f7", size = 17370357, upload-time = "2025-10-22T03:46:57.968Z" },
+    { url = "https://files.pythonhosted.org/packages/cd/6d/738e50c47c2fd285b1e6c8083f15dac1a5f6199213378a5f14092497296d/onnxruntime-1.23.2-cp310-cp310-win_amd64.whl", hash = "sha256:0be6a37a45e6719db5120e9986fcd30ea205ac8103fd1fb74b6c33348327a0cc", size = 13467651, upload-time = "2025-10-27T23:06:11.904Z" },
+    { url = "https://files.pythonhosted.org/packages/44/be/467b00f09061572f022ffd17e49e49e5a7a789056bad95b54dfd3bee73ff/onnxruntime-1.23.2-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:6f91d2c9b0965e86827a5ba01531d5b669770b01775b23199565d6c1f136616c", size = 17196113, upload-time = "2025-10-22T03:47:33.526Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/a8/3c23a8f75f93122d2b3410bfb74d06d0f8da4ac663185f91866b03f7da1b/onnxruntime-1.23.2-cp311-cp311-macosx_13_0_x86_64.whl", hash = "sha256:87d8b6eaf0fbeb6835a60a4265fde7a3b60157cf1b2764773ac47237b4d48612", size = 19153857, upload-time = "2025-10-22T03:46:37.578Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/d8/506eed9af03d86f8db4880a4c47cd0dffee973ef7e4f4cff9f1d4bcf7d22/onnxruntime-1.23.2-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:bbfd2fca76c855317568c1b36a885ddea2272c13cb0e395002c402f2360429a6", size = 15220095, upload-time = "2025-10-22T03:46:24.769Z" },
+    { url = "https://files.pythonhosted.org/packages/e9/80/113381ba832d5e777accedc6cb41d10f9eca82321ae31ebb6bcede530cea/onnxruntime-1.23.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:da44b99206e77734c5819aa2142c69e64f3b46edc3bd314f6a45a932defc0b3e", size = 17372080, upload-time = "2025-10-22T03:47:00.265Z" },
+    { url = "https://files.pythonhosted.org/packages/3a/db/1b4a62e23183a0c3fe441782462c0ede9a2a65c6bbffb9582fab7c7a0d38/onnxruntime-1.23.2-cp311-cp311-win_amd64.whl", hash = "sha256:902c756d8b633ce0dedd889b7c08459433fbcf35e9c38d1c03ddc020f0648c6e", size = 13468349, upload-time = "2025-10-22T03:47:25.783Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/9e/f748cd64161213adeef83d0cb16cb8ace1e62fa501033acdd9f9341fff57/onnxruntime-1.23.2-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:b8f029a6b98d3cf5be564d52802bb50a8489ab73409fa9db0bf583eabb7c2321", size = 17195929, upload-time = "2025-10-22T03:47:36.24Z" },
+    { url = "https://files.pythonhosted.org/packages/91/9d/a81aafd899b900101988ead7fb14974c8a58695338ab6a0f3d6b0100f30b/onnxruntime-1.23.2-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:218295a8acae83905f6f1aed8cacb8e3eb3bd7513a13fe4ba3b2664a19fc4a6b", size = 19157705, upload-time = "2025-10-22T03:46:40.415Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/35/4e40f2fba272a6698d62be2cd21ddc3675edfc1a4b9ddefcc4648f115315/onnxruntime-1.23.2-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:76ff670550dc23e58ea9bc53b5149b99a44e63b34b524f7b8547469aaa0dcb8c", size = 15226915, upload-time = "2025-10-22T03:46:27.773Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/88/9cc25d2bafe6bc0d4d3c1db3ade98196d5b355c0b273e6a5dc09c5d5d0d5/onnxruntime-1.23.2-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0f9b4ae77f8e3c9bee50c27bc1beede83f786fe1d52e99ac85aa8d65a01e9b77", size = 17382649, upload-time = "2025-10-22T03:47:02.782Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/b4/569d298f9fc4d286c11c45e85d9ffa9e877af12ace98af8cab52396e8f46/onnxruntime-1.23.2-cp312-cp312-win_amd64.whl", hash = "sha256:25de5214923ce941a3523739d34a520aac30f21e631de53bba9174dc9c004435", size = 13470528, upload-time = "2025-10-22T03:47:28.106Z" },
+    { url = "https://files.pythonhosted.org/packages/3d/41/fba0cabccecefe4a1b5fc8020c44febb334637f133acefc7ec492029dd2c/onnxruntime-1.23.2-cp313-cp313-macosx_13_0_arm64.whl", hash = "sha256:2ff531ad8496281b4297f32b83b01cdd719617e2351ffe0dba5684fb283afa1f", size = 17196337, upload-time = "2025-10-22T03:46:35.168Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/f9/2d49ca491c6a986acce9f1d1d5fc2099108958cc1710c28e89a032c9cfe9/onnxruntime-1.23.2-cp313-cp313-macosx_13_0_x86_64.whl", hash = "sha256:162f4ca894ec3de1a6fd53589e511e06ecdc3ff646849b62a9da7489dee9ce95", size = 19157691, upload-time = "2025-10-22T03:46:43.518Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/a1/428ee29c6eaf09a6f6be56f836213f104618fb35ac6cc586ff0f477263eb/onnxruntime-1.23.2-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:45d127d6e1e9b99d1ebeae9bcd8f98617a812f53f46699eafeb976275744826b", size = 15226898, upload-time = "2025-10-22T03:46:30.039Z" },
+    { url = "https://files.pythonhosted.org/packages/f2/2b/b57c8a2466a3126dbe0a792f56ad7290949b02f47b86216cd47d857e4b77/onnxruntime-1.23.2-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8bace4e0d46480fbeeb7bbe1ffe1f080e6663a42d1086ff95c1551f2d39e7872", size = 17382518, upload-time = "2025-10-22T03:47:05.407Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/93/aba75358133b3a941d736816dd392f687e7eab77215a6e429879080b76b6/onnxruntime-1.23.2-cp313-cp313-win_amd64.whl", hash = "sha256:1f9cc0a55349c584f083c1c076e611a7c35d5b867d5d6e6d6c823bf821978088", size = 13470276, upload-time = "2025-10-22T03:47:31.193Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/3d/6830fa61c69ca8e905f237001dbfc01689a4e4ab06147020a4518318881f/onnxruntime-1.23.2-cp313-cp313t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9d2385e774f46ac38f02b3a91a91e30263d41b2f1f4f26ae34805b2a9ddef466", size = 15229610, upload-time = "2025-10-22T03:46:32.239Z" },
+    { url = "https://files.pythonhosted.org/packages/b6/ca/862b1e7a639460f0ca25fd5b6135fb42cf9deea86d398a92e44dfda2279d/onnxruntime-1.23.2-cp313-cp313t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e2b9233c4947907fd1818d0e581c049c41ccc39b2856cc942ff6d26317cee145", size = 17394184, upload-time = "2025-10-22T03:47:08.127Z" },
+]
+
+[[package]]
+name = "onnxruntime"
 version = "1.24.1"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.13'",
+    "python_full_version == '3.12.*'",
+    "python_full_version == '3.11.*'",
+    "python_full_version < '3.11'",
+]
 dependencies = [
     { name = "flatbuffers" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-all') or (python_full_version < '3.13' and extra != 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "packaging" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "protobuf", version = "6.33.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-all') or (python_full_version < '3.13' and extra != 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "protobuf", version = "6.33.5", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "sympy" },
 ]
 wheels = [
@@ -2043,10 +2168,10 @@ version = "0.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ml-dtypes" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "onnx-ir" },
     { name = "packaging" },
     { name = "typing-extensions" },
@@ -2070,7 +2195,7 @@ name = "optree"
 version = "0.18.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/83/8e/09d899ad531d50b79aa24e7558f604980fe4048350172e643bb1b9983aec/optree-0.18.0.tar.gz", hash = "sha256:3804fb6ddc923855db2dc4805b4524c66e00f1ef30b166be4aadd52822b13e06", size = 165178, upload-time = "2025-11-14T08:58:31.234Z" }
 wheels = [
@@ -2172,8 +2297,8 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "alembic" },
     { name = "colorlog" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "packaging" },
     { name = "pyyaml" },
     { name = "sqlalchemy" },
@@ -2198,10 +2323,10 @@ name = "pandas"
 version = "2.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "python-dateutil", marker = "python_full_version < '3.11'" },
-    { name = "pytz", marker = "python_full_version < '3.11'" },
-    { name = "tzdata", marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "python-dateutil", marker = "python_full_version < '3.13'" },
+    { name = "pytz", marker = "python_full_version < '3.13'" },
+    { name = "tzdata", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/33/01/d40b85317f86cf08d853a4f495195c73815fdf205eef3993821720274518/pandas-2.3.3.tar.gz", hash = "sha256:e05e1af93b977f7eafa636d043f9f94c7ee3ac81af99c13508215942e64c993b", size = 4495223, upload-time = "2025-09-29T23:34:51.853Z" }
 wheels = [
@@ -2259,8 +2384,8 @@ name = "partd"
 version = "1.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "locket", marker = "python_full_version < '3.11'" },
-    { name = "toolz", marker = "python_full_version < '3.11'" },
+    { name = "locket", marker = "python_full_version < '3.13'" },
+    { name = "toolz", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b2/3a/3f06f34820a31257ddcabdfafc2672c5816be79c7e353b02c1f318daa7d4/partd-1.4.2.tar.gz", hash = "sha256:d022c33afbdc8405c226621b015e8067888173d85f7f5ecebb3cafed9a20f02c", size = 21029, upload-time = "2024-05-06T19:51:41.945Z" }
 wheels = [
@@ -2633,8 +2758,8 @@ name = "pynisher"
 version = "0.6.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "psutil", marker = "python_full_version < '3.11'" },
-    { name = "setuptools", marker = "python_full_version < '3.11'" },
+    { name = "psutil", marker = "python_full_version < '3.13'" },
+    { name = "setuptools", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8d/39/edac9acf3bd245ecf475151014cce3652c25ca3c2352eac725502cfce6ea/pynisher-0.6.4.tar.gz", hash = "sha256:111d91aad471375c0509a912415ff90053ef909100facf412511383af107c124", size = 11594, upload-time = "2021-02-24T19:58:20.089Z" }
 
@@ -2645,6 +2770,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f3/91/9c6ee907786a473bf81c5f53cf703ba0957b23ab84c264080fb5a450416f/pyparsing-3.3.2.tar.gz", hash = "sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc", size = 6851574, upload-time = "2026-01-21T03:57:59.36Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/10/bd/c038d7cc38edc1aa5bf91ab8068b63d4308c66c4c8bb3cbba7dfbc049f9c/pyparsing-3.3.2-py3-none-any.whl", hash = "sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d", size = 122781, upload-time = "2026-01-21T03:57:55.912Z" },
+]
+
+[[package]]
+name = "pyreadline3"
+version = "3.5.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0f/49/4cea918a08f02817aabae639e3d0ac046fef9f9180518a3ad394e22da148/pyreadline3-3.5.4.tar.gz", hash = "sha256:8d57d53039a1c75adba8e50dd3d992b28143480816187ea5efbd5c78e6c885b7", size = 99839, upload-time = "2024-09-19T02:40:10.062Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/dc/491b7661614ab97483abf2056be1deee4dc2490ecbf7bff9ab5cdbac86e1/pyreadline3-3.5.4-py3-none-any.whl", hash = "sha256:eaf8e6cc3c49bcccf145fc6067ba8643d1df34d604a1ec0eccbf7a18e6d3fae6", size = 83178, upload-time = "2024-09-19T02:40:08.598Z" },
 ]
 
 [[package]]
@@ -2662,13 +2796,13 @@ name = "pytest"
 version = "9.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
-    { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "exceptiongroup", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },
     { name = "pygments" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
+    { name = "tomli", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d1/db/7ef3487e0fb0049ddb5ce41d3a49c235bf9ad299b6a25d5780a89f19230f/pytest-9.0.2.tar.gz", hash = "sha256:75186651a92bd89611d1d9fc20f0b4345fd827c41ccd5c299a868a05d70edf11", size = 1568901, upload-time = "2025-12-06T21:30:51.014Z" }
 wheels = [
@@ -2680,9 +2814,9 @@ name = "pytest-asyncio"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "backports-asyncio-runner", marker = "python_full_version < '3.11'" },
+    { name = "backports-asyncio-runner", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "pytest" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/90/2c/8af215c0f776415f3590cac4f9086ccefd6fd463befeae41cd4d3f193e5a/pytest_asyncio-1.3.0.tar.gz", hash = "sha256:d7f52f36d231b80ee124cd216ffb19369aa168fc10095013c6b014a34d3ee9e5", size = 50087, upload-time = "2025-11-10T16:07:47.256Z" }
 wheels = [
@@ -2708,7 +2842,7 @@ name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "six", marker = "python_full_version < '3.11'" },
+    { name = "six", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
 wheels = [
@@ -2841,10 +2975,10 @@ name = "requests"
 version = "2.32.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "certifi", marker = "python_full_version < '3.13'" },
-    { name = "charset-normalizer", marker = "python_full_version < '3.13'" },
-    { name = "idna", marker = "python_full_version < '3.13'" },
-    { name = "urllib3", marker = "python_full_version < '3.13'" },
+    { name = "certifi", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "charset-normalizer", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "idna", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "urllib3", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c9/74/b3ff8e6c8446842c3f5c837e9c3dfcfe2018ea6ecef224c710c85ef728f4/requests-2.32.5.tar.gz", hash = "sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf", size = 134517, upload-time = "2025-08-18T20:46:02.573Z" }
 wheels = [
@@ -2897,10 +3031,11 @@ resolution-markers = [
     "python_full_version < '3.11'",
 ]
 dependencies = [
-    { name = "joblib", version = "1.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "threadpoolctl", marker = "python_full_version < '3.11'" },
+    { name = "joblib", version = "1.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "scipy", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "threadpoolctl", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/05/04/507280f20fafc8bc94b41e0592938c6f4a910d0e066be7c8ff1299628f5d/scikit-learn-0.24.2.tar.gz", hash = "sha256:d14701a12417930392cd3898e9646cf5670c190b933625ebe7511b1f7d7b8736", size = 7524030, upload-time = "2021-04-28T11:19:40.561Z" }
 
@@ -2915,8 +3050,8 @@ resolution-markers = [
 ]
 dependencies = [
     { name = "joblib", version = "1.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "scipy", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "threadpoolctl", marker = "python_full_version >= '3.11'" },
 ]
@@ -3029,8 +3164,8 @@ resolution-markers = [
     "python_full_version == '3.11.*'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/56/3e/9cca699f3486ce6bc12ff46dc2031f1ec8eb9ccc9a320fdaf925f1417426/scipy-1.17.0.tar.gz", hash = "sha256:2591060c8e648d8b96439e111ac41fd8342fdeff1876be2e19dea3fe8930454e", size = 30396830, upload-time = "2026-01-10T21:34:23.009Z" }
 wheels = [
@@ -3131,12 +3266,13 @@ resolution-markers = [
     "python_full_version < '3.11'",
 ]
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "onnxconverter-common", marker = "python_full_version < '3.11'" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scikit-learn", version = "0.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "onnxconverter-common", marker = "python_full_version < '3.13'" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "scikit-learn", version = "0.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "scipy", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a8/0f/39a22ea2f0fadd252357eb333e487fe229ec03af24823f4090ff714ef54d/skl2onnx-1.11.2-py2.py3-none-any.whl", hash = "sha256:2c5a16c52a5df06a7ac431de1071de298d02c5a2706151583d5823599f0370b5", size = 278070, upload-time = "2022-05-24T12:43:29.173Z" },
@@ -3152,8 +3288,8 @@ resolution-markers = [
     "python_full_version == '3.11.*'",
 ]
 dependencies = [
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.20.1", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "scikit-learn", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/cb/39/a5015fefb613d5172541740540851a301c53392b57051cf4d313cb6d5718/skl2onnx-1.20.0.tar.gz", hash = "sha256:c74ea827d92ba186fe659695e8fc989cd97bfc320edce3d32b9936a5878da10a", size = 956369, upload-time = "2026-01-30T10:52:07.694Z" }
@@ -3166,8 +3302,8 @@ name = "skops"
 version = "0.13.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-sklearn') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "packaging", marker = "python_full_version >= '3.11'" },
     { name = "prettytable", marker = "python_full_version >= '3.11'" },
     { name = "scikit-learn", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -3183,17 +3319,18 @@ name = "smac"
 version = "1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "configspace", marker = "python_full_version < '3.11'" },
-    { name = "dask", marker = "python_full_version < '3.11'" },
-    { name = "distributed", marker = "python_full_version < '3.11'" },
-    { name = "emcee", marker = "python_full_version < '3.11'" },
-    { name = "joblib", version = "1.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "psutil", marker = "python_full_version < '3.11'" },
-    { name = "pynisher", marker = "python_full_version < '3.11'" },
-    { name = "pyrfr", marker = "python_full_version < '3.11'" },
-    { name = "scikit-learn", version = "0.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "configspace", marker = "python_full_version < '3.13'" },
+    { name = "dask", marker = "python_full_version < '3.13'" },
+    { name = "distributed", marker = "python_full_version < '3.13'" },
+    { name = "emcee", marker = "python_full_version < '3.13'" },
+    { name = "joblib", version = "1.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "psutil", marker = "python_full_version < '3.13'" },
+    { name = "pynisher", marker = "python_full_version < '3.13'" },
+    { name = "pyrfr", marker = "python_full_version < '3.13'" },
+    { name = "scikit-learn", version = "0.24.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
+    { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "scipy", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/09/4c/23922dbb37f0165819133f06ceefa79a529d75f00c59645ac0ade28c778a/smac-1.2.tar.gz", hash = "sha256:f98e2c6baa91dd275ca4f0fedb47a0d38fe5875564a0805b6b1c6b8866561c24", size = 260855, upload-time = "2022-02-17T16:04:52.173Z" }
 
@@ -3211,7 +3348,7 @@ name = "sqlalchemy"
 version = "2.0.46"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'" },
+    { name = "greenlet", marker = "platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/06/aa/9ce0f3e7a9829ead5c8ce549392f33a12c4555a6c0609bb27d882e9c7ddf/sqlalchemy-2.0.46.tar.gz", hash = "sha256:cf36851ee7219c170bb0793dbc3da3e80c582e04a5437bc601bfe8c85c9216d7", size = 9865393, upload-time = "2026-01-21T18:03:45.119Z" }
@@ -3268,7 +3405,7 @@ version = "0.52.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c4/68/79977123bb7be889ad680d79a40f339082c1978b5cfcf62c2d8d196873ac/starlette-0.52.1.tar.gz", hash = "sha256:834edd1b0a23167694292e94f597773bc3f89f362be6effee198165a35d62933", size = 2653702, upload-time = "2026-01-18T13:34:11.062Z" }
 wheels = [
@@ -3301,16 +3438,16 @@ name = "tensorboard"
 version = "2.19.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "absl-py", marker = "python_full_version < '3.13'" },
-    { name = "grpcio", marker = "python_full_version < '3.13'" },
-    { name = "markdown", marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "packaging", marker = "python_full_version < '3.13'" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "setuptools", marker = "python_full_version < '3.13'" },
-    { name = "six", marker = "python_full_version < '3.13'" },
-    { name = "tensorboard-data-server", marker = "python_full_version < '3.13'" },
-    { name = "werkzeug", marker = "python_full_version < '3.13'" },
+    { name = "absl-py", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "grpcio", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "markdown", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "packaging", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "setuptools", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "six", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "tensorboard-data-server", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "werkzeug", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5d/12/4f70e8e2ba0dbe72ea978429d8530b0333f0ed2140cc571a48802878ef99/tensorboard-2.19.0-py3-none-any.whl", hash = "sha256:5e71b98663a641a7ce8a6e70b0be8e1a4c0c45d48760b076383ac4755c35b9a0", size = 5503412, upload-time = "2025-02-12T08:17:27.21Z" },
@@ -3331,29 +3468,29 @@ name = "tensorflow"
 version = "2.19.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "absl-py", marker = "python_full_version < '3.13'" },
-    { name = "astunparse", marker = "python_full_version < '3.13'" },
-    { name = "flatbuffers", marker = "python_full_version < '3.13'" },
-    { name = "gast", marker = "python_full_version < '3.13'" },
-    { name = "google-pasta", marker = "python_full_version < '3.13'" },
-    { name = "grpcio", marker = "python_full_version < '3.13'" },
-    { name = "h5py", marker = "python_full_version < '3.13'" },
-    { name = "keras", version = "3.12.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "keras", version = "3.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and python_full_version < '3.13'" },
-    { name = "libclang", marker = "python_full_version < '3.13'" },
-    { name = "ml-dtypes", marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "opt-einsum", marker = "python_full_version < '3.13'" },
-    { name = "packaging", marker = "python_full_version < '3.13'" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "requests", marker = "python_full_version < '3.13'" },
-    { name = "setuptools", marker = "python_full_version < '3.13'" },
-    { name = "six", marker = "python_full_version < '3.13'" },
-    { name = "tensorboard", marker = "python_full_version < '3.13'" },
-    { name = "tensorflow-io-gcs-filesystem", marker = "python_full_version < '3.12'" },
-    { name = "termcolor", marker = "python_full_version < '3.13'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
-    { name = "wrapt", marker = "python_full_version < '3.13'" },
+    { name = "absl-py", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "astunparse", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "flatbuffers", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "gast", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "google-pasta", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "grpcio", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "h5py", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "keras", version = "3.12.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "keras", version = "3.13.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version >= '3.11' and python_full_version < '3.13') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version < '3.11' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (python_full_version >= '3.13' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "libclang", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "ml-dtypes", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "opt-einsum", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "packaging", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "requests", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "setuptools", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "six", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "tensorboard", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "tensorflow-io-gcs-filesystem", marker = "python_full_version < '3.12' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "termcolor", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "typing-extensions", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "wrapt", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/6e/8613ef1cea8013b899adae32bb7cc5218434d84a3a2d6f41937e6d7251af/tensorflow-2.19.1-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:ed3148ee523cb46badd30ea04a6b7fb6056b9bdb7e082de294a86b2fdc01f9e4", size = 252466041, upload-time = "2025-08-13T16:27:10.511Z" },
@@ -3403,12 +3540,12 @@ name = "tf2onnx"
 version = "1.16.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "flatbuffers", marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "requests", marker = "python_full_version < '3.13'" },
-    { name = "six", marker = "python_full_version < '3.13'" },
+    { name = "flatbuffers", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "onnx", version = "1.17.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "protobuf", version = "3.20.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "requests", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "six", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3f/48/826db3d02645d84e7ee5d5ce8407f771057d40fe224d9c3e89536674ccef/tf2onnx-1.16.1-py3-none-any.whl", hash = "sha256:90fb5f62575896d47884d27dc313cfebff36b8783e1094335ad00824ce923a8a", size = 455820, upload-time = "2024-01-16T10:30:19.345Z" },
@@ -3491,30 +3628,30 @@ name = "torch"
 version = "2.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cuda-bindings", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "cuda-bindings", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "filelock" },
     { name = "fsspec" },
     { name = "jinja2" },
-    { name = "networkx", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "networkx", version = "3.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "nvidia-cublas-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cuda-cupti-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cuda-nvrtc-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cuda-runtime-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cudnn-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cufft-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cufile-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-curand-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cusolver-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cusparse-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-cusparselt-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-nccl-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-nvjitlink-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-nvshmem-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "nvidia-nvtx-cu12", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "setuptools", marker = "python_full_version >= '3.12'" },
+    { name = "networkx", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "networkx", version = "3.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cufile-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-cusparselt-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-nvshmem-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "setuptools", marker = "python_full_version >= '3.12' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "sympy" },
-    { name = "triton", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (platform_machine != 'x86_64' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (sys_platform != 'linux' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "typing-extensions" },
 ]
 wheels = [
@@ -3557,8 +3694,8 @@ name = "torchvision"
 version = "0.25.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13'" },
-    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13'" },
+    { name = "numpy", version = "2.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
+    { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
     { name = "pillow" },
     { name = "torch" },
 ]
@@ -3617,7 +3754,7 @@ name = "tqdm"
 version = "4.67.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/09/a9/6ba95a270c6f1fbcd8dac228323f2777d886cb206987444e4bce66338dd4/tqdm-4.67.3.tar.gz", hash = "sha256:7d825f03f89244ef73f1d4ce193cb1774a8179fd96f31d7e1dcde62092b960bb", size = 169598, upload-time = "2026-02-03T17:35:53.048Z" }
 wheels = [
@@ -3629,12 +3766,19 @@ name = "triton"
 version = "3.6.0"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
+    { url = "https://files.pythonhosted.org/packages/44/ba/b1b04f4b291a3205d95ebd24465de0e5bf010a2df27a4e58a9b5f039d8f2/triton-3.6.0-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6c723cfb12f6842a0ae94ac307dba7e7a44741d720a40cf0e270ed4a4e3be781", size = 175972180, upload-time = "2026-01-20T16:15:53.664Z" },
     { url = "https://files.pythonhosted.org/packages/8c/f7/f1c9d3424ab199ac53c2da567b859bcddbb9c9e7154805119f8bd95ec36f/triton-3.6.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a6550fae429e0667e397e5de64b332d1e5695b73650ee75a6146e2e902770bea", size = 188105201, upload-time = "2026-01-20T16:00:29.272Z" },
+    { url = "https://files.pythonhosted.org/packages/0f/2c/96f92f3c60387e14cc45aed49487f3486f89ea27106c1b1376913c62abe4/triton-3.6.0-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:49df5ef37379c0c2b5c0012286f80174fcf0e073e5ade1ca9a86c36814553651", size = 176081190, upload-time = "2026-01-20T16:16:00.523Z" },
     { url = "https://files.pythonhosted.org/packages/e0/12/b05ba554d2c623bffa59922b94b0775673de251f468a9609bc9e45de95e9/triton-3.6.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e8e323d608e3a9bfcc2d9efcc90ceefb764a82b99dea12a86d643c72539ad5d3", size = 188214640, upload-time = "2026-01-20T16:00:35.869Z" },
+    { url = "https://files.pythonhosted.org/packages/17/5d/08201db32823bdf77a0e2b9039540080b2e5c23a20706ddba942924ebcd6/triton-3.6.0-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:374f52c11a711fd062b4bfbb201fd9ac0a5febd28a96fb41b4a0f51dde3157f4", size = 176128243, upload-time = "2026-01-20T16:16:07.857Z" },
     { url = "https://files.pythonhosted.org/packages/ab/a8/cdf8b3e4c98132f965f88c2313a4b493266832ad47fb52f23d14d4f86bb5/triton-3.6.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:74caf5e34b66d9f3a429af689c1c7128daba1d8208df60e81106b115c00d6fca", size = 188266850, upload-time = "2026-01-20T16:00:43.041Z" },
+    { url = "https://files.pythonhosted.org/packages/3c/12/34d71b350e89a204c2c7777a9bba0dcf2f19a5bfdd70b57c4dbc5ffd7154/triton-3.6.0-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:448e02fe6dc898e9e5aa89cf0ee5c371e99df5aa5e8ad976a80b93334f3494fd", size = 176133521, upload-time = "2026-01-20T16:16:13.321Z" },
     { url = "https://files.pythonhosted.org/packages/f9/0b/37d991d8c130ce81a8728ae3c25b6e60935838e9be1b58791f5997b24a54/triton-3.6.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:10c7f76c6e72d2ef08df639e3d0d30729112f47a56b0c81672edc05ee5116ac9", size = 188289450, upload-time = "2026-01-20T16:00:49.136Z" },
+    { url = "https://files.pythonhosted.org/packages/ce/4e/41b0c8033b503fd3cfcd12392cdd256945026a91ff02452bef40ec34bee7/triton-3.6.0-cp313-cp313t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:1722e172d34e32abc3eb7711d0025bb69d7959ebea84e3b7f7a341cd7ed694d6", size = 176276087, upload-time = "2026-01-20T16:16:18.989Z" },
     { url = "https://files.pythonhosted.org/packages/35/f8/9c66bfc55361ec6d0e4040a0337fb5924ceb23de4648b8a81ae9d33b2b38/triton-3.6.0-cp313-cp313t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d002e07d7180fd65e622134fbd980c9a3d4211fb85224b56a0a0efbd422ab72f", size = 188400296, upload-time = "2026-01-20T16:00:56.042Z" },
+    { url = "https://files.pythonhosted.org/packages/49/55/5ecf0dcaa0f2fbbd4420f7ef227ee3cb172e91e5fede9d0ecaddc43363b4/triton-3.6.0-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ef5523241e7d1abca00f1d240949eebdd7c673b005edbbce0aca95b8191f1d43", size = 176138577, upload-time = "2026-01-20T16:16:25.426Z" },
     { url = "https://files.pythonhosted.org/packages/df/3d/9e7eee57b37c80cec63322c0231bb6da3cfe535a91d7a4d64896fcb89357/triton-3.6.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a17a5d5985f0ac494ed8a8e54568f092f7057ef60e1b0fa09d3fd1512064e803", size = 188273063, upload-time = "2026-01-20T16:01:07.278Z" },
+    { url = "https://files.pythonhosted.org/packages/48/db/56ee649cab5eaff4757541325aca81f52d02d4a7cd3506776cad2451e060/triton-3.6.0-cp314-cp314t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:0b3a97e8ed304dfa9bd23bb41ca04cdf6b2e617d5e782a8653d616037a5d537d", size = 176274804, upload-time = "2026-01-20T16:16:31.528Z" },
     { url = "https://files.pythonhosted.org/packages/f6/56/6113c23ff46c00aae423333eb58b3e60bdfe9179d542781955a5e1514cb3/triton-3.6.0-cp314-cp314t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:46bd1c1af4b6704e554cad2eeb3b0a6513a980d470ccfa63189737340c7746a7", size = 188397994, upload-time = "2026-01-20T16:01:14.236Z" },
 ]
 
@@ -3699,7 +3843,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "h11" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/32/ce/eeb58ae4ac36fe09e3842eb02e0eb676bf2c53ae062b98f1b2531673efdd/uvicorn-0.41.0.tar.gz", hash = "sha256:09d11cf7008da33113824ee5a1c6422d89fbc2ff476540d69a34c87fab8b571a", size = 82633, upload-time = "2026-02-16T23:07:24.1Z" }
 wheels = [
@@ -3720,7 +3864,7 @@ name = "werkzeug"
 version = "3.1.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "markupsafe", marker = "python_full_version < '3.13'" },
+    { name = "markupsafe", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/5a/70/1469ef1d3542ae7c2c7b72bd5e3a4e6ee69d7978fa8a3af05a38eca5becf/werkzeug-3.1.5.tar.gz", hash = "sha256:6a548b0e88955dd07ccb25539d7d0cc97417ee9e179677d22c7041c8f078ce67", size = 864754, upload-time = "2026-01-08T17:49:23.247Z" }
 wheels = [
@@ -3732,7 +3876,7 @@ name = "wheel"
 version = "0.46.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "packaging", marker = "python_full_version < '3.13'" },
+    { name = "packaging", marker = "python_full_version < '3.13' or (extra == 'extra-20-onnx-model-converter-all' and extra == 'extra-20-onnx-model-converter-autosklearn-legacy') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-runtime') or (extra == 'extra-20-onnx-model-converter-autosklearn-legacy' and extra == 'extra-20-onnx-model-converter-sklearn')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/89/24/a2eb353a6edac9a0303977c4cb048134959dd2a51b48a269dfc9dde00c8a/wheel-0.46.3.tar.gz", hash = "sha256:e3e79874b07d776c40bd6033f8ddf76a7dad46a7b8aa1b2787a83083519a1803", size = 60605, upload-time = "2026-01-22T12:39:49.136Z" }
 wheels = [
