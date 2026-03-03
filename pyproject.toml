@@ -212,8 +212,3 @@ conflicts = [
         { extra = "autosklearn_legacy" },
     ],
 ]
-
-[tool.uv.extra-build-dependencies]
-# scikit-learn 0.24.x sdist build path imports pkg_resources from setuptools.
-# Use a setuptools line that still ships pkg_resources.
-scikit-learn = ["setuptools<81", "wheel"]
