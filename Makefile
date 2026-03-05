@@ -21,6 +21,7 @@ UV_VENV_IMAGE ?= $(IMAGE_PREFIX)/onnx-converter-uv-venv
 PACKAGE_IMAGE ?= $(IMAGE_PREFIX)/onnx-converter-package
 CLI_IMAGE ?= $(IMAGE_PREFIX)/onnx-converter-cli
 EXTRAS ?= all
+CONTAINER_BUILD_FLAGS ?=
 
 BASE_IMAGE_VALUE := $(shell grep '^BASE_IMAGE=' $(CONTAINER_DIR)/digests.env | cut -d= -f2)
 BASE_DIGEST_VALUE := $(shell grep '^BASE_DIGEST=' $(CONTAINER_DIR)/digests.env | cut -d= -f2)
@@ -103,21 +104,6 @@ smoke-api-grpc: ## Run docker-compose HTTP + gRPC smoke test
 	}; \
 	trap cleanup EXIT; \
 	IMAGE_ROOT="$(IMAGE_ROOT)" IMAGE_TAG="$(IMAGE_TAG)" timeout --foreground "$(SMOKE_TIMEOUT)" docker compose -f examples/docker-compose.api-grpc.yml up --build --abort-on-container-exit --exit-code-from smoke
-
-.PHONY: examples-autosklearn
-examples-autosklearn: build-base-runner ## Build and run autosklearn example containers
-	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-base \
-		--build-arg BASE_RUNNER_IMAGE="$(BASE_RUNNER_IMAGE)" \
-		--build-arg PYTHON_VERSION="3.10" \
-		-t "$(IMAGE_PREFIX)/onnx-converter-examples-base" .
-	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-autosklearn1 \
-		--build-arg EXAMPLES_BASE_IMAGE="$(IMAGE_PREFIX)/onnx-converter-examples-base" \
-		-t example-autosklearn-v1 .
-	$(CONTAINER_COMMAND) run --rm example-autosklearn-v1
-	$(CONTAINER_COMMAND) build -f container/examples/Dockerfile.example-autosklearn2 \
-		--build-arg EXAMPLES_BASE_IMAGE="$(IMAGE_PREFIX)/onnx-converter-examples-base" \
-		-t example-autosklearn-v2 .
-	$(CONTAINER_COMMAND) run --rm example-autosklearn-v2
 
 .PHONY: test-grpc-parity
 test-grpc-parity: ## Run gRPC/API parity tests

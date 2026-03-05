@@ -9,10 +9,10 @@ description = "Convert PyTorch, TensorFlow/Keras, and scikit-learn models to ONN
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "numpy>=1.26.4",
+    "numpy>=1.26.4; python_version >= '3.11'",
     # tf2onnx (Python <3.13 path) still constrains protobuf<4, which conflicts
     # with onnx>=1.20 (protobuf>=4). Keep latest where possible.
-    "onnx>=1.17.0,<1.20; python_version < '3.13'",
+    "onnx>=1.17.0,<1.20; python_version >= '3.11' and python_version < '3.13'",
     "onnx>=1.20.1; python_version >= '3.13'",
     "pydantic>=2.12.5",
 ]
@@ -52,15 +52,7 @@ sklearn = [
     # recommended for safer sklearn serialization:
     "skops>=0.13.0; python_version >= '3.11'",
 ]
-# Dedicated legacy stack for AutoSklearn roundtrip examples.
-# Kept separate from modern sklearn extra to avoid resolver conflicts.
-autosklearn_legacy = [
-    "auto-sklearn==0.15.0; python_version >= '3.10' and python_version < '3.11'",
-    "scikit-learn>=0.24,<0.25; python_version >= '3.10' and python_version < '3.11'",
-    "skl2onnx>=1.10,<1.12; python_version >= '3.10' and python_version < '3.11'",
-    "joblib>=1.1,<1.5; python_version >= '3.10' and python_version < '3.11'",
-    "onnxruntime>=1.17,<1.24; python_version >= '3.10' and python_version < '3.11'",
-]
+
 # TensorFlow example-only dependency set pinned for compatibility.
 tf_example = [
     "tensorflow>=2.19,<2.20; python_version < '3.13'",
@@ -104,6 +96,8 @@ all = [
     "onnxscript>=0.6.2",
     "optuna>=4.7.0",
 ]
+
+[dependency-groups]
 
 [project.scripts]
 # Typer app entrypoint (recommended)
@@ -198,17 +192,4 @@ fail_under = 90
 
 [tool.uv]
 resolution = "highest"
-conflicts = [
-    [
-        { extra = "all" },
-        { extra = "autosklearn_legacy" },
-    ],
-    [
-        { extra = "sklearn" },
-        { extra = "autosklearn_legacy" },
-    ],
-    [
-        { extra = "runtime" },
-        { extra = "autosklearn_legacy" },
-    ],
-]
+conflicts = []

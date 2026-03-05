@@ -77,6 +77,29 @@ pip install -e ".[all]"         # secure default bundle (excludes tf_legacy)
 
 gRPC server reflection is intentionally not enabled in runtime paths.
 
+### Recommended AutoSklearn Installs
+
+```bash
+# AutoSklearn 1 (current supported stack in this repo)
+uv pip install ".[autosklearn_legacy]"
+
+# Container-compatible install path (keeps all legacy pins in pyproject groups)
+uv pip install --group autosklearn1_build --group autosklearn_legacy_bootstrap --group autosklearn_legacy_runtime
+```
+
+Why split stacks are preferred for AutoSklearn:
+
+| Component | ASKL1 | ASKL2 |
+| --- | --- | --- |
+| sklearn | 0.24 | 1.3+ |
+| smac | 0.x | 1.x |
+| protobuf | <4 | >=4 |
+| Python | 3.10 | <=3.11 |
+| ONNX stack | old | modern |
+
+Trying to unify these into one dependency profile causes frequent resolver conflicts.
+
+
 ## CLI usage
 
 ```bash
