@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import raises as pytest_raises
 
 from onnx_converter.errors import PluginError
 from onnx_converter.plugins import builtins
@@ -86,14 +87,14 @@ class DummyPost:
 def test_requires_n_features() -> None:
     """Require n_features option for sklearn plugin conversion."""
     plugin = SklearnFilePlugin()
-    with pytest.raises(PluginError):
+    with pytest_raises(PluginError):
         plugin.convert(Path("model.joblib"), Path("out.onnx"), options={})
 
 
 def test_rejects_bad_metadata_type() -> None:
     """Reject non-mapping metadata payloads in plugin options."""
     plugin = SklearnFilePlugin()
-    with pytest.raises(PluginError):
+    with pytest_raises(PluginError):
         plugin.convert(
             Path("model.joblib"),
             Path("out.onnx"),
@@ -104,7 +105,7 @@ def test_rejects_bad_metadata_type() -> None:
 def test_rejects_non_path_parity_input() -> None:
     """Reject parity_input_path values that are not path-like."""
     plugin = SklearnFilePlugin()
-    with pytest.raises(PluginError):
+    with pytest_raises(PluginError):
         plugin.convert(
             Path("model.joblib"),
             Path("out.onnx"),
@@ -115,7 +116,7 @@ def test_rejects_non_path_parity_input() -> None:
 def test_rejects_bad_opset_type() -> None:
     """Reject non-integer opset values in plugin options."""
     plugin = SklearnFilePlugin()
-    with pytest.raises(PluginError):
+    with pytest_raises(PluginError):
         plugin.convert(
             Path("model.joblib"),
             Path("out.onnx"),
@@ -123,7 +124,7 @@ def test_rejects_bad_opset_type() -> None:
         )
 
 
-def test_calls_adapters(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_calls_adapters(monkeypatch: pytest_MonkeyPatch, tmp_path: Path) -> None:
     """Verify plugin wires loader, converter, parity, and postprocess adapters."""
     loader = DummyLoader()
     converter = DummyConverter(out=tmp_path / "out.onnx")
@@ -168,7 +169,7 @@ def test_can_handle_model_type_and_suffix() -> None:
 
 
 def test_calls_adapters_without_opset_version(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Do not inject target_opset when plugin opset_version is omitted."""
     loader = DummyLoader()

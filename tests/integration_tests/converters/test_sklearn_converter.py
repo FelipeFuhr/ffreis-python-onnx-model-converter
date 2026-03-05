@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import importorskip as pytest_importorskip
 
 
 def test_sklearn_convert(tmp_path: Path) -> None:
     """Convert a fitted sklearn estimator and verify ONNX output exists."""
-    pytest.importorskip("sklearn")
-    pytest.importorskip("skl2onnx")
-    pytest.importorskip("onnxruntime")
+    pytest_importorskip("sklearn")
+    pytest_importorskip("skl2onnx")
+    pytest_importorskip("onnxruntime")
 
     from skl2onnx.common.data_types import FloatTensorType
     from sklearn.datasets import load_iris

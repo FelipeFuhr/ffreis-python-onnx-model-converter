@@ -31,6 +31,8 @@ permissions:
 jobs:
   image-scan:
     runs-on: ubuntu-latest
+    env:
+      TRIVY_SCAN_TIMEOUT: 30m
     steps:
       - uses: actions/checkout@v6
       - name: Install Podman
@@ -54,10 +56,10 @@ jobs:
             "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_INSTALL_REF}/contrib/install.sh" \
             | sudo sh -s -- -b /usr/local/bin
           trivy --version
-      - name: Save images and scan (sequential, Podman)
+      - name: Scan images (sequential, OCI archives)
         run: |
           set -euo pipefail
-          mkdir -p artifacts trivy-results
+          mkdir -p trivy-results
           images=(ffreis/base ffreis/base-runner ffreis/onnx-converter-uv-venv ffreis/onnx-converter-package ffreis/onnx-converter-cli)
 
           # Warm DB once.
@@ -65,15 +67,16 @@ jobs:
 
           for image in "${images[@]}"; do
             name="${image##*/}"
-            tar="artifacts/${name}.tar"
-
-            podman save -o "$tar" "$image"
-            test -s "$tar"
+            archive="trivy-results/${name}.docker.tar"
+            rm -f "$archive"
+            echo "[$(date -u +%FT%TZ)] exporting ${image} -> ${archive}"
+            podman save -o "$archive" "$image"
+            echo "[$(date -u +%FT%TZ)] scanning ${archive}"
 
             # 1) Always produce SARIF for all severities so GitHub code scanning
             # has complete visibility, regardless of pass/fail gate outcome.
-            trivy image \
-              --input "$tar" \
+            timeout --foreground "${TRIVY_SCAN_TIMEOUT}" trivy image \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -86,8 +89,8 @@ jobs:
             test -s "trivy-results/${name}.sarif"
 
             # 1b) Export JSON for trend analysis and triage automation.
-            trivy image \
-              --input "$tar" \
+            timeout --foreground "${TRIVY_SCAN_TIMEOUT}" trivy image \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -101,8 +104,8 @@ jobs:
 
             # 2) Print a human-readable full report in CI logs (all severities).
             echo "Full vulnerability report for ${image} (all severities):"
-            trivy image \
-              --input "$tar" \
+            timeout --foreground "${TRIVY_SCAN_TIMEOUT}" trivy image \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -114,8 +117,8 @@ jobs:
 
             # 3) Enforce policy: fail only when HIGH/CRITICAL vulnerabilities exist.
             echo "Gating ${image} on HIGH/CRITICAL vulnerabilities..."
-            trivy image \
-              --input "$tar" \
+            timeout --foreground "${TRIVY_SCAN_TIMEOUT}" trivy image \
+              --input "$archive" \
               --skip-db-update \
               --no-progress \
               --ignorefile .trivyignore.yaml \
@@ -124,10 +127,9 @@ jobs:
               --ignore-unfixed \
               --exit-code 1 \
               --format table
-
-            # Avoid disk exhaustion on hosted runners.
-            rm -f "$tar"
+            echo "[$(date -u +%FT%TZ)] completed ${image}"
           done
+          echo "[$(date -u +%FT%TZ)] all image scans completed"
       - name: Upload Trivy JSON reports
         uses: actions/upload-artifact@v7
         with:
@@ -139,16 +141,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in trivy-results/*.sarif; do
+          shopt -s nullglob
+          files=(trivy-results/*.sarif)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::warning::No Trivy SARIF files found to upload."
+            exit 0
+          fi
+          failures=0
+          for f in "${files[@]}"; do
             name="$(basename "$f" .sarif)"
             echo "Uploading $f with category trivy-$name"
             sarif_payload="$(gzip -c "$f" | base64 | tr -d '\n')"
-            gh api \
+            if ! response="$(gh api \
               -X POST \
               /repos/${{ github.repository }}/code-scanning/sarifs \
               -f sarif="${sarif_payload}" \
               -f commit_sha="${{ github.sha }}" \
-              -f ref="${{ github.ref }}"
+              -f ref="${{ github.ref }}" 2>&1)"; then
+              failures=$((failures + 1))
+              echo "::warning title=Trivy SARIF upload failed::${f}: ${response}"
+              continue
+            fi
+            echo "${response}"
           done
+          if [ "$failures" -gt 0 ]; then
+            echo "::warning::${failures} Trivy SARIF upload(s) failed; vulnerability scan results were still generated."
+          fi
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import Config as pytest_Config
+from pytest import Item as pytest_Item
+from pytest import mark as pytest_mark
 
 
 def pytest_collection_modifyitems(
-    config: pytest.Config, items: list[pytest.Item]
+    config: pytest_Config, items: list[pytest_Item]
 ) -> None:
     """Attach suite markers based on test file path."""
     del config
@@ -16,8 +18,8 @@ def pytest_collection_modifyitems(
         path = Path(str(item.fspath))
         parts = set(path.parts)
         if "e2e_tests" in parts:
-            item.add_marker(pytest.mark.e2e)
+            item.add_marker(pytest_mark.e2e)
         elif "integration_tests" in parts:
-            item.add_marker(pytest.mark.integration)
+            item.add_marker(pytest_mark.integration)
         elif "unit_tests" in parts:
-            item.add_marker(pytest.mark.unit)
+            item.add_marker(pytest_mark.unit)

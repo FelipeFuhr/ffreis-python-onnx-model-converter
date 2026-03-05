@@ -2,20 +2,21 @@
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
+from subprocess import run as subprocess_run
 
-import onnx
-import pytest
+from onnx import checker as onnx_checker
+from onnx import load as onnx_load
+from pytest import importorskip as pytest_importorskip
 
 
 def test_cli_sklearn_roundtrip(tmp_path: Path) -> None:
     """Run a full sklearn -> ONNX conversion through the public CLI."""
-    pytest.importorskip("joblib")
-    pytest.importorskip("sklearn")
-    pytest.importorskip("skl2onnx")
-    pytest.importorskip("onnxruntime")
-    import joblib
+    pytest_importorskip("joblib")
+    pytest_importorskip("sklearn")
+    pytest_importorskip("skl2onnx")
+    pytest_importorskip("onnxruntime")
+    from joblib import dump as joblib_dump
     from sklearn.datasets import load_iris
     from sklearn.linear_model import LogisticRegression
 
@@ -24,7 +25,7 @@ def test_cli_sklearn_roundtrip(tmp_path: Path) -> None:
 
     model_path = tmp_path / "model.joblib"
     onnx_path = tmp_path / "model.onnx"
-    joblib.dump(model, model_path)
+    joblib_dump(model, model_path)
 
     cmd = [
         "convert-to-onnx",
@@ -35,8 +36,8 @@ def test_cli_sklearn_roundtrip(tmp_path: Path) -> None:
         str(features.shape[1]),
         "--allow-unsafe",
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    result = subprocess_run(cmd, capture_output=True, text=True, check=False)
 
     assert result.returncode == 0, result.stderr
     assert onnx_path.exists()
-    onnx.checker.check_model(onnx.load(str(onnx_path)))
+    onnx_checker.check_model(onnx_load(str(onnx_path)))

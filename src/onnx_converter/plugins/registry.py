@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import importlib
-import importlib.util
 from collections.abc import Iterable
+from importlib import util as importlib_util
 from pathlib import Path
+from re import ASCII as re_ASCII
+from re import compile as re_compile
+from sys import modules as sys_modules
 from types import ModuleType
 
 from pydantic import ValidationError
@@ -14,6 +17,8 @@ from onnx_converter.errors import PluginError
 from onnx_converter.plugins.base import ConverterPlugin, PluginOptions
 from onnx_converter.plugins.builtins import SklearnFilePlugin
 from onnx_converter.schemas import PluginResolutionConfig
+
+_MODULE_PATH_RE = re_compile(r"^[A-Za-z_]\w*(\.[A-Za-z_]\w*)*$", flags=re_ASCII)
 
 
 class PluginRegistry:
@@ -92,7 +97,7 @@ class PluginRegistry:
             Optional model family hint.
         plugin_name : str | None
             Explicit plugin name.
-        options : Mapping[str, Any]
+        options : PluginOptions
             Raw plugin options.
 
         Returns
@@ -188,15 +193,29 @@ def _import_module_or_path(module_or_path: str) -> ModuleType:
     """
     candidate = Path(module_or_path)
     if candidate.exists():
-        spec = importlib.util.spec_from_file_location(candidate.stem, candidate)
+        spec = importlib_util.spec_from_file_location(candidate.stem, candidate)
         if spec is None or spec.loader is None:
             raise PluginError(f"Unable to load plugin module from {candidate}.")
-        module = importlib.util.module_from_spec(spec)
+        module = importlib_util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module
 
     try:
-        return importlib.import_module(module_or_path)
+        if not _MODULE_PATH_RE.fullmatch(module_or_path):
+            raise PluginError(
+                "Invalid plugin module path. Use dotted module path format "
+                "(e.g., package.subpackage.module)."
+            )
+        loaded = sys_modules.get(module_or_path)
+        if isinstance(loaded, ModuleType):
+            return loaded
+        spec = importlib.util.find_spec(module_or_path)
+        if spec is None or spec.loader is None:
+            raise PluginError(f"Unable to import plugin module '{module_or_path}'.")
+        module = importlib_util.module_from_spec(spec)
+        sys_modules[module_or_path] = module
+        spec.loader.exec_module(module)
+        return module
     except Exception as exc:
         raise PluginError(
             f"Unable to import plugin module '{module_or_path}': {exc}"

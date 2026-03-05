@@ -1,0 +1,97 @@
+from __future__ import annotations
+
+from http.client import HTTPConnection as http_client_HTTPConnection
+from http.client import HTTPSConnection as http_client_HTTPSConnection
+from json import loads as json_loads
+from os import getenv as os_getenv
+from time import sleep as time_sleep
+from time import time as time_time
+from urllib.parse import urlsplit
+
+from grpc import RpcError as grpc_RpcError
+from grpc import StatusCode as grpc_StatusCode
+from grpc import insecure_channel as grpc_insecure_channel
+
+from converter_grpc import converter_pb2
+
+
+def _wait_http_ok(url: str, timeout_seconds: float = 40.0) -> bytes:
+    parts = urlsplit(url)
+    if parts.scheme not in {"http", "https"}:
+        raise ValueError("only http/https URLs are allowed")
+    if not parts.netloc:
+        raise ValueError("URL must include a network location")
+    path = parts.path or "/"
+    if parts.query:
+        path = f"{path}?{parts.query}"
+
+    deadline = time_time() + timeout_seconds
+    last_error: Exception | None = None
+    while time_time() < deadline:
+        try:
+            connection_cls = (
+                http_client_HTTPSConnection
+                if parts.scheme == "https"
+                else http_client_HTTPConnection
+            )
+            connection = connection_cls(parts.netloc, timeout=3.0)
+            connection.request("GET", path)
+            response = connection.getresponse()
+            body = response.read()
+            connection.close()
+            if response.status == 200:
+                return body
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+        time_sleep(0.5)
+    raise RuntimeError(f"timed out waiting for HTTP 200 at {url}: {last_error}")
+
+
+def _assert_http(api_base: str) -> None:
+    health_raw = _wait_http_ok(f"{api_base}/healthz")
+    ready_raw = _wait_http_ok(f"{api_base}/readyz")
+    health_payload = json_loads(health_raw.decode("utf-8"))
+    ready_payload = json_loads(ready_raw.decode("utf-8"))
+    assert health_payload.get("status") == "ok", health_payload
+    assert ready_payload.get("status") == "ready", ready_payload
+
+
+def _assert_grpc(grpc_target: str) -> None:
+    with grpc_insecure_channel(grpc_target) as channel:
+        convert_rpc = channel.stream_stream(
+            "/converter.grpc.ConverterService/Convert",
+            request_serializer=converter_pb2.ConvertRequestChunk.SerializeToString,
+            response_deserializer=converter_pb2.ConvertReplyChunk.FromString,
+        )
+        requests = iter(
+            [
+                converter_pb2.ConvertRequestChunk(
+                    metadata=converter_pb2.ConvertMetadata(
+                        framework="sklearn",
+                        filename="dummy.pkl",
+                        n_features=4,
+                    )
+                ),
+            ]
+        )
+        try:
+            list(convert_rpc(requests, timeout=5.0))
+        except grpc_RpcError as exc:
+            assert exc.code() == grpc_StatusCode.INVALID_ARGUMENT, exc
+            assert "missing artifact payload" in (exc.details() or ""), exc
+            return
+    raise AssertionError("expected INVALID_ARGUMENT for missing artifact payload")
+
+
+def main() -> None:
+    api_base = os_getenv("CONVERTER_API_BASE", "http://converter-api:8090")
+    grpc_target = os_getenv("CONVERTER_GRPC_TARGET", "converter-grpc:8091")
+
+    _assert_http(api_base)
+    _assert_grpc(grpc_target)
+
+    print("converter API and gRPC smoke checks passed")
+
+
+if __name__ == "__main__":
+    main()

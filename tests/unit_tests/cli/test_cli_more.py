@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import CaptureFixture as pytest_CaptureFixture
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import raises as pytest_raises
 from typer.testing import CliRunner
 
 from onnx_converter.cli import cli as cli_module
@@ -14,17 +16,17 @@ from onnx_converter.errors import ConversionError
 def test_parse_metadata_and_options_helpers() -> None:
     """Parse helper inputs and validate error handling."""
     assert cli_module._parse_metadata(["a=1", "b=two"]) == {"a": "1", "b": "two"}
-    with pytest.raises(Exception, match="KEY=VALUE"):
+    with pytest_raises(Exception, match="KEY=VALUE"):
         cli_module._parse_metadata(["bad"])
 
     parsed = cli_module._parse_model_options(["x=1", "y=true", "z=1.2", "s=txt"])
     assert parsed == {"x": 1, "y": True, "z": 1.2, "s": "txt"}
-    with pytest.raises(Exception, match="KEY=VALUE"):
+    with pytest_raises(Exception, match="KEY=VALUE"):
         cli_module._parse_model_options(["missing"])
 
 
 def test_is_importable_handles_resolver_exception(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Return False when importlib spec resolution unexpectedly fails."""
     import importlib.util
@@ -38,7 +40,7 @@ def test_is_importable_handles_resolver_exception(
 
 
 def test_import_custom_module_wraps_plugin_error(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Convert PluginError into typer.BadParameter for user-facing CLI output."""
     import onnx_converter.plugins.registry as registry
@@ -48,11 +50,11 @@ def test_import_custom_module_wraps_plugin_error(
         "_import_module_or_path",
         lambda _value: (_ for _ in ()).throw(cli_module.PluginError("bad plugin")),
     )
-    with pytest.raises(Exception, match="bad plugin"):
+    with pytest_raises(Exception, match="bad plugin"):
         cli_module._import_custom_module("bad.module")
 
 
-def test_print_conversion_error_debug_path(capsys: pytest.CaptureFixture[str]) -> None:
+def test_print_conversion_error_debug_path(capsys: pytest_CaptureFixture[str]) -> None:
     """Print traceback details in debug mode and return configured exit code."""
     error = ConversionError("boom")
     error.exit_code = 7
@@ -63,7 +65,7 @@ def test_print_conversion_error_debug_path(capsys: pytest.CaptureFixture[str]) -
 
 
 def test_validate_if_requested_paths(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Skip validate when disabled and call validator when enabled."""
     called: dict[str, object] = {}
@@ -85,7 +87,7 @@ def test_validate_if_requested_paths(
 
 
 def test_tensorflow_command_invokes_api(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Invoke tensorflow command and verify forwarded options."""
     runner = CliRunner()
@@ -133,7 +135,7 @@ def test_tensorflow_command_invokes_api(
 
 
 def test_tensorflow_command_handles_conversion_error(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Return non-zero when TensorFlow conversion raises ConversionError."""
     runner = CliRunner()
@@ -157,7 +159,7 @@ def test_tensorflow_command_handles_conversion_error(
 
 
 def test_sklearn_command_with_custom_module(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Invoke sklearn command path that imports custom converter module."""
     runner = CliRunner()
@@ -203,7 +205,7 @@ def test_sklearn_command_with_custom_module(
 
 
 def test_sklearn_command_handles_conversion_error(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Return non-zero when sklearn conversion raises ConversionError."""
     runner = CliRunner()
@@ -228,7 +230,7 @@ def test_sklearn_command_handles_conversion_error(
 
 
 def test_custom_command_and_error_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Invoke custom command success and conversion error path handling."""
     runner = CliRunner()
@@ -273,7 +275,7 @@ def test_custom_command_and_error_path(
 
 
 def test_custom_command_sets_n_features_and_parity_input(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Populate custom option payload with n_features and parity_input_path."""
     runner = CliRunner()
@@ -310,7 +312,7 @@ def test_custom_command_sets_n_features_and_parity_input(
 
 
 def test_doctor_command_handles_registry_failure(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
 ) -> None:
     """Print plugin unavailable marker when registry construction fails."""
     runner = CliRunner()

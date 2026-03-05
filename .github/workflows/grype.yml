@@ -32,6 +32,8 @@ permissions:
 jobs:
   grype:
     runs-on: ubuntu-latest
+    env:
+      GRYPE_SCAN_TIMEOUT: 30m
 
     steps:
       - uses: actions/checkout@v6
@@ -45,7 +47,24 @@ jobs:
       - name: Build images (local)
         run: |
           set -euo pipefail
-          CONTAINER_COMMAND=podman PYTHON_VERSION=3.13 make build
+          # Use a lean profile for vulnerability scanning to keep image size
+          # manageable while still covering CLI/runtime dependencies.
+          CONTAINER_COMMAND=podman PYTHON_VERSION=3.13 EXTRAS=cli,runtime make build
+
+      - name: Start Podman API service
+        run: |
+          set -euo pipefail
+          podman system service --time=0 unix:///tmp/podman.sock >/tmp/podman-service.log 2>&1 &
+          echo "CONTAINER_HOST=unix:///tmp/podman.sock" >> "$GITHUB_ENV"
+          for _ in $(seq 1 20); do
+            if podman --url unix:///tmp/podman.sock info >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Podman API service did not become ready"
+          cat /tmp/podman-service.log || true
+          exit 1
 
       - name: Install Grype
         run: |
@@ -66,46 +85,73 @@ jobs:
       - name: Grype scan (SARIF)
         run: |
           set -euo pipefail
-          mkdir -p artifacts grype-results
+          mkdir -p grype-results
 
           images=(ffreis/base ffreis/base-runner ffreis/onnx-converter-uv-venv ffreis/onnx-converter-package ffreis/onnx-converter-cli)
+          high_or_critical_found=0
 
           for image in "${images[@]}"; do
             name="${image##*/}"
-            tar="artifacts/${name}.tar"
             out="grype-results/${name}.sarif"
+            echo "[$(date -u +%FT%TZ)] scanning ${image} -> ${out}"
 
-            podman save -o "$tar" "$image"
-            test -s "$tar"
-
-            # Try as OCI archive first (podman default), fallback to docker archive.
-            if ./bin/grype "oci-archive:${tar}" -o sarif --file "$out" --fail-on high; then
-              :
-            else
-              ./bin/grype "docker-archive:${tar}" -o sarif --file "$out" --fail-on high
+            # 1) Verbose console report: print all vulnerabilities.
+            #    Keep fail threshold at high/critical, but defer failing the job
+            #    so SARIF exports for every image are still produced.
+            if ! timeout --foreground "${GRYPE_SCAN_TIMEOUT}" \
+              ./bin/grype "podman:${image}" -o table --fail-on high; then
+              rc=$?
+              if [ "$rc" -eq 124 ]; then
+                echo "::error::Grype scan timed out for ${image} after ${GRYPE_SCAN_TIMEOUT}."
+                exit "$rc"
+              fi
+              high_or_critical_found=1
+              echo "::warning::High/Critical vulnerabilities detected in ${image}."
             fi
 
+            # 2) Always export complete SARIF for code-scanning upload.
+            timeout --foreground "${GRYPE_SCAN_TIMEOUT}" \
+              ./bin/grype "podman:${image}" -o sarif --file "$out"
+
             test -s "$out"
+            echo "[$(date -u +%FT%TZ)] completed ${image}"
           done
+
+          if [ "$high_or_critical_found" -ne 0 ]; then
+            echo "::error::High/Critical vulnerabilities were detected. See logs and uploaded SARIF."
+            exit 1
+          fi
       - name: Upload Grype SARIF (per image)
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
-        permissions:
-          security-events: write
-          contents: read
+        if: ${{ always() && hashFiles('grype-results/*.sarif') != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false) }}
         run: |
           set -euo pipefail
-          for f in grype-results/*.sarif; do
+          shopt -s nullglob
+          files=(grype-results/*.sarif)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::warning::No Grype SARIF files found to upload."
+            exit 0
+          fi
+          failures=0
+          for f in "${files[@]}"; do
             name="$(basename "$f" .sarif)"
             echo "Uploading $f with category grype-$name"
 
             sarif_payload="$(gzip -c "$f" | base64 | tr -d '\n')"
 
-            gh api \
+            if ! response="$(gh api \
               -X POST \
               /repos/${{ github.repository }}/code-scanning/sarifs \
               -f sarif="${sarif_payload}" \
               -f commit_sha="${{ github.sha }}" \
-              -f ref="${{ github.ref }}"
+              -f ref="${{ github.ref }}" 2>&1)"; then
+              failures=$((failures + 1))
+              echo "::warning title=Grype SARIF upload failed::${f}: ${response}"
+              continue
+            fi
+            echo "${response}"
           done
+          if [ "$failures" -gt 0 ]; then
+            echo "::warning::${failures} Grype SARIF upload(s) failed; vulnerability scan results were still generated."
+          fi
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

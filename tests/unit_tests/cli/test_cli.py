@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
 from typer.testing import CliRunner
 
 from onnx_converter.cli import cli as cli_module
@@ -22,7 +22,7 @@ def test_help_shows_commands() -> None:
     assert "sklearn" in result.output
 
 
-def test_pytorch_missing_deps(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_pytorch_missing_deps(tmp_path: Path, monkeypatch: pytest_MonkeyPatch) -> None:
     """Ensure missing optional deps surface a user-facing CLI error."""
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")
@@ -51,7 +51,7 @@ def test_pytorch_missing_deps(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     assert "Missing optional dependencies" in result.output
 
 
-def test_pytorch_invokes_api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_pytorch_invokes_api(tmp_path: Path, monkeypatch: pytest_MonkeyPatch) -> None:
     """Ensure the PyTorch CLI command forwards expected args to API layer."""
     model_path = tmp_path / "model.pt"
     model_path.write_text("dummy")
@@ -106,11 +106,19 @@ def test_pytorch_invokes_api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     assert called["input_shape"] == (1, 3, 224, 224)
     assert called["opset_version"] == 14
     assert called["allow_unsafe"] is False
-    assert called["kwargs"] == {}
+    assert called["kwargs"] == {
+        "input_names": None,
+        "output_names": None,
+        "dynamic_batch": False,
+        "optimize": False,
+        "quantize_dynamic": False,
+        "metadata": None,
+        "parity_input_path": None,
+    }
 
 
 def test_pytorch_handles_conversion_error(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest_MonkeyPatch
 ) -> None:
     """Return non-zero and print conversion error details when API fails."""
     model_path = tmp_path / "model.pt"

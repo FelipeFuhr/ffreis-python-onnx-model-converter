@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import importorskip as pytest_importorskip
 
 
 def test_tensorflow_convert(tmp_path: Path) -> None:
     """Convert a simple Keras model and verify ONNX output exists."""
-    tf = pytest.importorskip("tensorflow")
-    pytest.importorskip("tf2onnx")
-    pytest.importorskip("onnxruntime")
+    tf = pytest_importorskip("tensorflow")
+    pytest_importorskip("tf2onnx")
+    pytest_importorskip("onnxruntime")
 
     from onnx_converter.converters.tensorflow_converter import (
         convert_tensorflow_to_onnx,
