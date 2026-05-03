@@ -51,7 +51,7 @@ jobs:
           echo "SONAR_PROJECT_KEY=${{ vars.SONAR_PROJECT_KEY || 'FelipeFuhr_ffreis-python-onnx-model-converter' }}" >> "$GITHUB_ENV"
           echo "SONAR_ORGANIZATION=${{ vars.SONAR_ORGANIZATION || 'felipefuhr' }}" >> "$GITHUB_ENV"
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4
+        uses: SonarSource/sonarqube-scan-action@59db25f34e16620e48ab4bb9e4a5dce155cb5432
         with:
           args: >
             -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
