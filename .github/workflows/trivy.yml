@@ -131,7 +131,7 @@ jobs:
           done
           echo "[$(date -u +%FT%TZ)] all image scans completed"
       - name: Upload Trivy JSON reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trivy-json-reports
           path: trivy-results/*.json
