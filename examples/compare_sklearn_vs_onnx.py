@@ -3,12 +3,18 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
+from sys import path as sys_path
 
-import joblib
-import numpy as np
-import onnxruntime as ort
+from joblib import dump as joblib_dump
+from numpy import abs as np_abs
+from numpy import array as np_array
+from numpy import array_equal as np_array_equal
+from numpy import asarray as np_asarray
+from numpy import float32 as np_float32
+from numpy import max as np_max
+from numpy import ndarray as np_ndarray
+from onnxruntime import InferenceSession as ort_InferenceSession
 from skl2onnx.common.data_types import FloatTensorType
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
@@ -22,21 +28,21 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 def _to_proba_matrix(
     raw_output: object,
-    class_labels: np.ndarray,
-) -> np.ndarray:
+    class_labels: np_ndarray,
+) -> np_ndarray:
     """Normalize ONNX probability output to a 2D float matrix."""
     if isinstance(raw_output, list) and raw_output and isinstance(raw_output[0], dict):
-        return np.array(
+        return np_array(
             [[row[int(cls)] for cls in class_labels] for row in raw_output],
-            dtype=np.float32,
+            dtype=np_float32,
         )
-    return np.asarray(raw_output, dtype=np.float32)
+    return np_asarray(raw_output, dtype=np_float32)
 
 
 def main() -> None:
     """Run a full sklearn-vs-ONNX comparison workflow."""
-    if str(PROJECT_ROOT) not in sys.path:
-        sys.path.insert(0, str(PROJECT_ROOT))
+    if str(PROJECT_ROOT) not in sys_path:
+        sys_path.insert(0, str(PROJECT_ROOT))
     from examples.custom_sklearn_transformer import MultiplyByConstant
 
     output_dir = Path("outputs")
@@ -63,7 +69,7 @@ def main() -> None:
         memory=str(cache_dir),
     )
     pipeline.fit(X_train, y_train)
-    joblib.dump(pipeline, model_path)
+    joblib_dump(pipeline, model_path)
 
     print(f"Saved sklearn model: {model_path}")
 
@@ -78,18 +84,18 @@ def main() -> None:
 
     # 3) Compare sklearn vs ONNX inference
     sklearn_pred = pipeline.predict(X_test)
-    sklearn_proba = pipeline.predict_proba(X_test).astype(np.float32)
+    sklearn_proba = pipeline.predict_proba(X_test).astype(np_float32)
 
-    session = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
+    session = ort_InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
     output_names = [output.name for output in session.get_outputs()]
-    onnx_outputs = session.run(output_names, {input_name: X_test.astype(np.float32)})
+    onnx_outputs = session.run(output_names, {input_name: X_test.astype(np_float32)})
 
-    onnx_pred = np.asarray(onnx_outputs[0])
+    onnx_pred = np_asarray(onnx_outputs[0])
     onnx_proba = _to_proba_matrix(onnx_outputs[1], pipeline.classes_)
 
-    labels_equal = np.array_equal(sklearn_pred, onnx_pred)
-    max_abs_diff = float(np.max(np.abs(sklearn_proba - onnx_proba)))
+    labels_equal = np_array_equal(sklearn_pred, onnx_pred)
+    max_abs_diff = float(np_max(np_abs(sklearn_proba - onnx_proba)))
 
     print("--- Comparison ---")
     print(f"Test samples: {len(X_test)}")

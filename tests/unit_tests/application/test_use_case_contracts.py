@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import raises as pytest_raises
 
 from onnx_converter.application.use_cases import (
     build_conversion_options,
@@ -112,7 +112,7 @@ def test_tensorflow_use_case_parity_failure_is_deterministic(tmp_path: Path) -> 
     model_path.write_text("dummy")
     output_path = tmp_path / "out.onnx"
 
-    with pytest.raises(ParityError):
+    with pytest_raises(ParityError):
         convert_tensorflow_file(
             model_path=model_path,
             output_path=output_path,

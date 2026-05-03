@@ -24,18 +24,26 @@ Install everything:
 
 from __future__ import annotations
 
-import sys
-import traceback
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from sys import version as sys_version
+from sys import version_info as sys_version_info
+from traceback import format_exception as traceback_format_exception
+from typing import cast
 
-import typer
+from typer import Argument as typer_Argument
+from typer import BadParameter as typer_BadParameter
+from typer import Context as typer_Context
+from typer import Exit as typer_Exit
+from typer import Option as typer_Option
+from typer import Typer as typer_Typer
+from typer import echo as typer_echo
 
 from onnx_converter.errors import ConversionError, PluginError
+from onnx_converter.types import MutableOptionMap, OptionValue
 
-app = typer.Typer(
+app = typer_Typer(
     name="convert-to-onnx",
     help="Convert ML models (PyTorch / TensorFlow / sklearn) to ONNX.",
     no_args_is_help=True,
@@ -116,7 +124,7 @@ def _require_deps(missing: Sequence[MissingDep]) -> None:
         "Or with pip:\n"
         f"  {pip_hint}\n"
     )
-    raise typer.BadParameter(msg)
+    raise typer_BadParameter(msg)
 
 
 def _import_custom_module(module_or_path: str) -> None:
@@ -137,7 +145,7 @@ def _import_custom_module(module_or_path: str) -> None:
     try:
         _import_module_or_path(module_or_path)
     except PluginError as exc:
-        raise typer.BadParameter(str(exc)) from exc
+        raise typer_BadParameter(str(exc)) from exc
 
 
 def _print_conversion_error(exc: Exception, debug: bool) -> int:
@@ -155,11 +163,11 @@ def _print_conversion_error(exc: Exception, debug: bool) -> int:
     int
         Process exit code.
     """
-    typer.echo(f"[red]✗ {type(exc).__name__}:[/red] {exc}", err=True)
+    typer_echo(f"[red]✗ {type(exc).__name__}:[/red] {exc}", err=True)
     if debug:
-        typer.echo("\n[dim]Traceback:[/dim]", err=True)
-        typer.echo(
-            "".join(traceback.format_exception(type(exc), exc, exc.__traceback__)),
+        typer_echo("\n[dim]Traceback:[/dim]", err=True)
+        typer_echo(
+            "".join(traceback_format_exception(type(exc), exc, exc.__traceback__)),
             err=True,
         )
     code = getattr(exc, "exit_code", None)
@@ -173,18 +181,18 @@ def _parse_metadata(metadata_items: list[str] | None) -> dict[str, str]:
     parsed: dict[str, str] = {}
     for item in metadata_items or []:
         if "=" not in item:
-            raise typer.BadParameter(
+            raise typer_BadParameter(
                 f"Invalid metadata entry '{item}'. Use KEY=VALUE format."
             )
         key, value = item.split("=", 1)
         key = key.strip()
         if not key:
-            raise typer.BadParameter("Metadata key cannot be empty.")
+            raise typer_BadParameter("Metadata key cannot be empty.")
         parsed[key] = value
     return parsed
 
 
-def _coerce_option_value(raw: str) -> object:
+def _coerce_option_value(raw: str) -> OptionValue:
     """Best-effort coercion for CLI key/value options."""
     lowered = raw.lower()
     if lowered in {"true", "false"}:
@@ -197,18 +205,18 @@ def _coerce_option_value(raw: str) -> object:
         return raw
 
 
-def _parse_model_options(option_items: list[str] | None) -> dict[str, object]:
+def _parse_model_options(option_items: list[str] | None) -> MutableOptionMap:
     """Parse repeatable KEY=VALUE options for custom plugin command."""
-    parsed: dict[str, object] = {}
+    parsed: MutableOptionMap = {}
     for item in option_items or []:
         if "=" not in item:
-            raise typer.BadParameter(
+            raise typer_BadParameter(
                 f"Invalid option entry '{item}'. Use KEY=VALUE format."
             )
         key, raw_value = item.split("=", 1)
         key = key.strip()
         if not key:
-            raise typer.BadParameter("Option key cannot be empty.")
+            raise typer_BadParameter("Option key cannot be empty.")
         parsed[key] = _coerce_option_value(raw_value)
     return parsed
 
@@ -248,8 +256,8 @@ def _validate_if_requested(output_path: Path, validate: bool) -> None:
 # -----------------------------
 @app.callback()
 def _main(
-    ctx: typer.Context,
-    debug: bool = typer.Option(False, "--debug", help="Show full tracebacks on error."),
+    ctx: typer_Context,
+    debug: bool = typer_Option(False, "--debug", help="Show full tracebacks on error."),
 ) -> None:
     """Initialize shared CLI state.
 
@@ -268,32 +276,32 @@ def _main(
 # -----------------------------
 @app.command("pytorch")
 def pytorch_cmd(
-    ctx: typer.Context,
-    model_path: Path = typer.Argument(
+    ctx: typer_Context,
+    model_path: Path = typer_Argument(
         ...,
         exists=True,
         readable=True,
         help="Path to a .pt/.pth model.",
     ),
-    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
-    input_shape: list[int] = typer.Option(
+    output_path: Path = typer_Argument(..., help=OUTPUT_PATH_HELP),
+    input_shape: list[int] = typer_Option(
         ...,
         "--input-shape",
         help="Input shape as repeated ints. Example: --input-shape 1 3 224 224",
     ),
-    opset_version: int = typer.Option(
+    opset_version: int = typer_Option(
         14, "--opset-version", help="ONNX opset version."
     ),
-    input_names: list[str] | None = typer.Option(
+    input_names: list[str] | None = typer_Option(
         None, "--input-name", help="Input tensor name (repeatable)."
     ),
-    output_names: list[str] | None = typer.Option(
+    output_names: list[str] | None = typer_Option(
         None, "--output-name", help="Output tensor name (repeatable)."
     ),
-    dynamic_batch: bool = typer.Option(
+    dynamic_batch: bool = typer_Option(
         False, "--dynamic-batch", help="Mark batch axis (dim 0) as dynamic."
     ),
-    allow_unsafe: bool = typer.Option(
+    allow_unsafe: bool = typer_Option(
         False,
         "--allow-unsafe",
         help=(
@@ -301,16 +309,16 @@ def pytorch_cmd(
             "(torch.load fallback)."
         ),
     ),
-    optimize: bool = typer.Option(
+    optimize: bool = typer_Option(
         False,
         "--optimize",
         help=OPTIMIZE_HELP,
     ),
-    quantize_dynamic: bool = typer.Option(
+    quantize_dynamic: bool = typer_Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
-    parity_input: Path | None = typer.Option(
+    metadata: list[str] | None = typer_Option(None, "--metadata", help=METADATA_HELP),
+    parity_input: Path | None = typer_Option(
         None,
         "--parity-input",
         exists=True,
@@ -361,72 +369,61 @@ def pytorch_cmd(
     try:
         from onnx_converter.api import convert_torch_file_to_onnx
 
-        kwargs: dict[str, Any] = {
-            "model_path": model_path,
-            "output_path": output_path,
-            "input_shape": tuple(input_shape),
-            "opset_version": opset_version,
-            "allow_unsafe": allow_unsafe,
-        }
-        if input_names:
-            kwargs["input_names"] = input_names
-        if output_names:
-            kwargs["output_names"] = output_names
-        if dynamic_batch:
-            kwargs["dynamic_batch"] = True
-        if optimize:
-            kwargs["optimize"] = True
-        if quantize_dynamic:
-            kwargs["quantize_dynamic"] = True
-        if metadata_payload:
-            kwargs["metadata"] = metadata_payload
-        if parity_input is not None:
-            kwargs["parity_input_path"] = parity_input
-
         out = convert_torch_file_to_onnx(
-            **kwargs,
+            model_path=model_path,
+            output_path=output_path,
+            input_shape=tuple(input_shape),
+            opset_version=opset_version,
+            allow_unsafe=allow_unsafe,
+            input_names=input_names,
+            output_names=output_names,
+            dynamic_batch=dynamic_batch,
+            optimize=optimize,
+            quantize_dynamic=quantize_dynamic,
+            metadata=metadata_payload or None,
+            parity_input_path=parity_input,
         )
-        typer.echo(f"[green]✓ Saved:[/green] {out}")
+        typer_echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
         # Unexpected crash: still show a clean message; debug prints traceback.
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("tensorflow")
 def tensorflow_cmd(
-    ctx: typer.Context,
-    model_path: Path = typer.Argument(
+    ctx: typer_Context,
+    model_path: Path = typer_Argument(
         ...,
         exists=True,
         help="Path to a SavedModel directory or a Keras .h5 file.",
     ),
-    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
-    opset_version: int = typer.Option(
+    output_path: Path = typer_Argument(..., help=OUTPUT_PATH_HELP),
+    opset_version: int = typer_Option(
         14, "--opset-version", help="ONNX opset version."
     ),
-    optimize: bool = typer.Option(
+    optimize: bool = typer_Option(
         False,
         "--optimize",
         help=OPTIMIZE_HELP,
     ),
-    quantize_dynamic: bool = typer.Option(
+    quantize_dynamic: bool = typer_Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
-    parity_input: Path | None = typer.Option(
+    metadata: list[str] | None = typer_Option(None, "--metadata", help=METADATA_HELP),
+    parity_input: Path | None = typer_Option(
         None,
         "--parity-input",
         exists=True,
         readable=True,
         help=PARITY_INPUT_HELP,
     ),
-    parity_atol: float = typer.Option(
+    parity_atol: float = typer_Option(
         1e-5, "--parity-atol", help="Absolute tolerance for parity check."
     ),
-    parity_rtol: float = typer.Option(1e-4, "--parity-rtol", help=PARITY_RTOL_HELP),
-    validate: bool = typer.Option(
+    parity_rtol: float = typer_Option(1e-4, "--parity-rtol", help=PARITY_RTOL_HELP),
+    validate: bool = typer_Option(
         False, "--validate", help="Validate resulting ONNX with onnx + onnxruntime."
     ),
 ) -> None:
@@ -467,50 +464,44 @@ def tensorflow_cmd(
     try:
         from onnx_converter.api import convert_tf_path_to_onnx
 
-        kwargs: dict[str, Any] = {
-            "model_path": model_path,
-            "output_path": output_path,
-            "opset_version": opset_version,
-        }
-        if optimize:
-            kwargs["optimize"] = True
-        if quantize_dynamic:
-            kwargs["quantize_dynamic"] = True
-        if metadata_payload:
-            kwargs["metadata"] = metadata_payload
-        if parity_input is not None:
-            kwargs["parity_input_path"] = parity_input
-            kwargs["parity_atol"] = parity_atol
-            kwargs["parity_rtol"] = parity_rtol
-
-        out = convert_tf_path_to_onnx(**kwargs)
+        out = convert_tf_path_to_onnx(
+            model_path=model_path,
+            output_path=output_path,
+            opset_version=opset_version,
+            optimize=optimize,
+            quantize_dynamic=quantize_dynamic,
+            metadata=metadata_payload or None,
+            parity_input_path=parity_input,
+            parity_atol=parity_atol,
+            parity_rtol=parity_rtol,
+        )
         _validate_if_requested(out, validate)
-        typer.echo(f"[green]✓ Saved:[/green] {out}")
+        typer_echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("sklearn")
 def sklearn_cmd(
-    ctx: typer.Context,
-    model_path: Path = typer.Argument(
+    ctx: typer_Context,
+    model_path: Path = typer_Argument(
         ...,
         exists=True,
         readable=True,
         help="Path to .joblib/.skops/.pkl model.",
     ),
-    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
-    n_features: int = typer.Option(
+    output_path: Path = typer_Argument(..., help=OUTPUT_PATH_HELP),
+    n_features: int = typer_Option(
         ..., "--n-features", min=1, help="Number of input features."
     ),
-    custom_converter_module: str | None = typer.Option(
+    custom_converter_module: str | None = typer_Option(
         None,
         "--custom-converter-module",
         help="Python module or file path that registers custom skl2onnx converters.",
     ),
-    allow_unsafe: bool = typer.Option(
+    allow_unsafe: bool = typer_Option(
         False,
         "--allow-unsafe",
         help=(
@@ -518,27 +509,27 @@ def sklearn_cmd(
             "Prefer .skops."
         ),
     ),
-    optimize: bool = typer.Option(
+    optimize: bool = typer_Option(
         False,
         "--optimize",
         help=OPTIMIZE_HELP,
     ),
-    quantize_dynamic: bool = typer.Option(
+    quantize_dynamic: bool = typer_Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
-    parity_input: Path | None = typer.Option(
+    metadata: list[str] | None = typer_Option(None, "--metadata", help=METADATA_HELP),
+    parity_input: Path | None = typer_Option(
         None,
         "--parity-input",
         exists=True,
         readable=True,
         help="Path to .npy/.npz/.csv/.txt feature matrix for parity check.",
     ),
-    parity_atol: float = typer.Option(
+    parity_atol: float = typer_Option(
         1e-5, "--parity-atol", help="Absolute tolerance for parity check."
     ),
-    parity_rtol: float = typer.Option(1e-4, "--parity-rtol", help=PARITY_RTOL_HELP),
-    validate: bool = typer.Option(
+    parity_rtol: float = typer_Option(1e-4, "--parity-rtol", help=PARITY_RTOL_HELP),
+    validate: bool = typer_Option(
         False, "--validate", help="Validate resulting ONNX with onnx + onnxruntime."
     ),
 ) -> None:
@@ -589,78 +580,72 @@ def sklearn_cmd(
     try:
         from onnx_converter.api import convert_sklearn_file_to_onnx
 
-        kwargs: dict[str, Any] = {
-            "model_path": model_path,
-            "output_path": output_path,
-            "n_features": n_features,
-            "allow_unsafe": allow_unsafe,
-        }
-        if optimize:
-            kwargs["optimize"] = True
-        if quantize_dynamic:
-            kwargs["quantize_dynamic"] = True
-        if metadata_payload:
-            kwargs["metadata"] = metadata_payload
-        if parity_input is not None:
-            kwargs["parity_input_path"] = parity_input
-            kwargs["parity_atol"] = parity_atol
-            kwargs["parity_rtol"] = parity_rtol
-
-        out = convert_sklearn_file_to_onnx(**kwargs)
+        out = convert_sklearn_file_to_onnx(
+            model_path=model_path,
+            output_path=output_path,
+            n_features=n_features,
+            allow_unsafe=allow_unsafe,
+            optimize=optimize,
+            quantize_dynamic=quantize_dynamic,
+            metadata=metadata_payload or None,
+            parity_input_path=parity_input,
+            parity_atol=parity_atol,
+            parity_rtol=parity_rtol,
+        )
         _validate_if_requested(out, validate)
-        typer.echo(f"[green]✓ Saved:[/green] {out}")
+        typer_echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("custom")
 def custom_cmd(
-    ctx: typer.Context,
-    model_path: Path = typer.Argument(
+    ctx: typer_Context,
+    model_path: Path = typer_Argument(
         ...,
         exists=True,
         readable=True,
         help="Path to model artifact handled by a plugin.",
     ),
-    output_path: Path = typer.Argument(..., help=OUTPUT_PATH_HELP),
-    model_type: str | None = typer.Option(
+    output_path: Path = typer_Argument(..., help=OUTPUT_PATH_HELP),
+    model_type: str | None = typer_Option(
         None,
         "--model-type",
         help="Optional model family hint (e.g. autosklearn).",
     ),
-    plugin_name: str | None = typer.Option(
+    plugin_name: str | None = typer_Option(
         None, "--plugin-name", help="Explicit plugin name."
     ),
-    plugin_module: list[str] | None = typer.Option(
+    plugin_module: list[str] | None = typer_Option(
         None,
         "--plugin-module",
         help="Plugin module import path or file path (repeatable).",
     ),
-    n_features: int | None = typer.Option(
+    n_features: int | None = typer_Option(
         None, "--n-features", help="Input features (used by sklearn-like plugins)."
     ),
-    allow_unsafe: bool = typer.Option(
+    allow_unsafe: bool = typer_Option(
         False, "--allow-unsafe", help="Allow unsafe pickle-based model loading."
     ),
-    optimize: bool = typer.Option(
+    optimize: bool = typer_Option(
         False,
         "--optimize",
         help=OPTIMIZE_HELP,
     ),
-    quantize_dynamic: bool = typer.Option(
+    quantize_dynamic: bool = typer_Option(
         False, "--quantize-dynamic", help=QUANTIZE_HELP
     ),
-    metadata: list[str] | None = typer.Option(None, "--metadata", help=METADATA_HELP),
-    parity_input: Path | None = typer.Option(
+    metadata: list[str] | None = typer_Option(None, "--metadata", help=METADATA_HELP),
+    parity_input: Path | None = typer_Option(
         None,
         "--parity-input",
         exists=True,
         readable=True,
         help=PARITY_INPUT_HELP,
     ),
-    option: list[str] | None = typer.Option(
+    option: list[str] | None = typer_Option(
         None,
         "--option",
         help="Plugin option KEY=VALUE (repeatable).",
@@ -676,7 +661,7 @@ def custom_cmd(
     option_payload["allow_unsafe"] = allow_unsafe
     option_payload["optimize"] = optimize
     option_payload["quantize_dynamic"] = quantize_dynamic
-    option_payload["metadata"] = metadata_payload
+    option_payload["metadata"] = cast(dict[str, OptionValue], metadata_payload)
     if parity_input is not None:
         option_payload["parity_input_path"] = parity_input
 
@@ -691,11 +676,11 @@ def custom_cmd(
             plugin_modules=plugin_module,
             options=option_payload,
         )
-        typer.echo(f"[green]✓ Saved:[/green] {out}")
+        typer_echo(f"[green]✓ Saved:[/green] {out}")
     except ConversionError as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
     except Exception as exc:
-        raise typer.Exit(code=_print_conversion_error(exc, debug)) from exc
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
 @app.command("doctor")
@@ -714,22 +699,22 @@ def doctor_cmd() -> None:
         "skl2onnx",
     ]
 
-    typer.echo(f"Python: {sys.version.split()[0]}")
+    typer_echo(f"Python: {sys_version.split()[0]}")
     for module in modules:
         try:
             version = metadata.version(module)
-            typer.echo(f"{module}: {version}")
+            typer_echo(f"{module}: {version}")
         except metadata.PackageNotFoundError:
-            typer.echo(f"{module}: <not installed>")
+            typer_echo(f"{module}: <not installed>")
 
-    py_ver = tuple(sys.version_info[:2])
+    py_ver = tuple(sys_version_info[:2])
     try:
         tf_version = metadata.version("tensorflow")
     except metadata.PackageNotFoundError:
         tf_version = None
 
     if py_ver >= (3, 12) and tf_version is None:
-        typer.echo(
+        typer_echo(
             "[yellow]Note:[/yellow] TensorFlow wheels may require "
             "Python 3.11 for some versions."
         )
@@ -738,9 +723,9 @@ def doctor_cmd() -> None:
         from onnx_converter.plugins.registry import create_default_registry
 
         registry = create_default_registry()
-        typer.echo(f"plugins: {', '.join(registry.names())}")
+        typer_echo(f"plugins: {', '.join(registry.names())}")
     except Exception:
-        typer.echo("plugins: <unavailable>")
+        typer_echo("plugins: <unavailable>")
 
 
 if __name__ == "__main__":
