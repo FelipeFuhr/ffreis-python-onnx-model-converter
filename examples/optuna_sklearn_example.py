@@ -5,10 +5,19 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import numpy as np
-import onnx
-import onnxruntime as ort
-import optuna
+from numpy import abs as np_abs
+from numpy import array as np_array
+from numpy import array_equal as np_array_equal
+from numpy import asarray as np_asarray
+from numpy import float32 as np_float32
+from numpy import max as np_max
+from numpy import ndarray as np_ndarray
+from onnx import checker as onnx_checker
+from onnx import load as onnx_load
+from onnxruntime import InferenceSession as ort_InferenceSession
+from optuna import Trial as optuna_Trial
+from optuna import create_study as optuna_create_study
+from optuna import samplers as optuna_samplers
 from skl2onnx.common.data_types import FloatTensorType
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
@@ -20,13 +29,13 @@ from sklearn.preprocessing import StandardScaler
 from onnx_converter import convert_sklearn_to_onnx
 
 
-def _to_prob_matrix(raw_output: object, class_labels: np.ndarray) -> np.ndarray:
+def _to_prob_matrix(raw_output: object, class_labels: np_ndarray) -> np_ndarray:
     if isinstance(raw_output, list) and raw_output and isinstance(raw_output[0], dict):
-        return np.array(
+        return np_array(
             [[row[int(cls)] for cls in class_labels] for row in raw_output],
-            dtype=np.float32,
+            dtype=np_float32,
         )
-    return np.asarray(raw_output, dtype=np.float32)
+    return np_asarray(raw_output, dtype=np_float32)
 
 
 def _build_pipeline(c_value: float, memory: str | None = None) -> Pipeline:
@@ -63,15 +72,15 @@ def main() -> None:
         stratify=y,
     )
 
-    def objective(trial: optuna.Trial) -> float:
+    def objective(trial: optuna_Trial) -> float:
         c_value = trial.suggest_float("C", 1e-2, 10.0, log=True)
         pipeline = _build_pipeline(c_value, memory=str(cache_dir))
         pipeline.fit(X_train, y_train)
         preds = pipeline.predict(X_test)
         return accuracy_score(y_test, preds)
 
-    sampler = optuna.samplers.TPESampler(seed=42)
-    study = optuna.create_study(direction="maximize", sampler=sampler)
+    sampler = optuna_samplers.TPESampler(seed=42)
+    study = optuna_create_study(direction="maximize", sampler=sampler)
     study.optimize(objective, n_trials=12, show_progress_bar=False)
 
     best_c = float(study.best_params["C"])
@@ -89,21 +98,21 @@ def main() -> None:
 
     if not onnx_path.exists():
         raise SystemExit("FAIL: ONNX file was not created.")
-    onnx.checker.check_model(onnx.load(str(onnx_path)))
+    onnx_checker.check_model(onnx_load(str(onnx_path)))
 
     sklearn_pred = final_model.predict(X_test)
-    sklearn_proba = final_model.predict_proba(X_test).astype(np.float32)
+    sklearn_proba = final_model.predict_proba(X_test).astype(np_float32)
 
-    session = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
+    session = ort_InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
     output_names = [output.name for output in session.get_outputs()]
-    onnx_outputs = session.run(output_names, {input_name: X_test.astype(np.float32)})
+    onnx_outputs = session.run(output_names, {input_name: X_test.astype(np_float32)})
 
-    onnx_pred = np.asarray(onnx_outputs[0])
+    onnx_pred = np_asarray(onnx_outputs[0])
     onnx_proba = _to_prob_matrix(onnx_outputs[1], final_model.classes_)
 
-    labels_equal = np.array_equal(sklearn_pred, onnx_pred)
-    max_abs_diff = float(np.max(np.abs(sklearn_proba - onnx_proba)))
+    labels_equal = np_array_equal(sklearn_pred, onnx_pred)
+    max_abs_diff = float(np_max(np_abs(sklearn_proba - onnx_proba)))
 
     print("--- Comparison ---")
     print(f"Test samples: {len(X_test)}")

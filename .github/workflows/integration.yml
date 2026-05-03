@@ -38,8 +38,8 @@ jobs:
       - name: Require uv.lock
         run: test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
 
-      - name: Install deps (dev + all)
-        run: uv sync --extra dev --extra all
+      - name: Install deps (dev + all + server + grpc)
+        run: uv sync --extra dev --extra all --extra server --extra grpc --extra sklearn
 
       - name: Run integration tests
         run: |
@@ -75,7 +75,7 @@ jobs:
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: "3.13"
+          python-version: "3.12"
 
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
         with:
@@ -90,6 +90,7 @@ jobs:
       - name: Run TensorFlow integration tests
         run: |
           uv run pytest -q tests/integration_tests -k tensorflow \
+            --ignore=tests/integration_tests/test_grpc_parity.py \
             --cov=onnx_converter \
             --cov-report=xml:coverage-tf.xml \
             --cov-report=term \

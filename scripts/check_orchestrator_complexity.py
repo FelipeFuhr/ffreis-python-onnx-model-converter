@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-import ast
+from ast import FunctionDef as ast_FunctionDef
+from ast import parse as ast_parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,10 +14,10 @@ MAX_STATEMENTS = 60
 
 def main() -> None:
     """Fail when orchestrator functions exceed the statement threshold."""
-    tree = ast.parse(TARGET.read_text(encoding="utf-8"))
+    tree = ast_parse(TARGET.read_text(encoding="utf-8"))
     violations: list[str] = []
     for node in tree.body:
-        if isinstance(node, ast.FunctionDef):
+        if isinstance(node, ast_FunctionDef):
             stmt_count = len(node.body)
             if stmt_count > MAX_STATEMENTS:
                 violations.append(f"{node.name}: {stmt_count} statements")
