@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
+from numpy import array as np_array
+from numpy import float32 as np_float32
 from skl2onnx import update_registered_converter
 from skl2onnx.algebra.onnx_ops import OnnxMul
 from skl2onnx.common.data_types import FloatTensorType
@@ -83,7 +84,7 @@ def _converter(scope: Any, operator: Any, container: Any) -> None:
         ONNX graph container.
     """
     op = operator.raw_operator
-    factor = np.array([op.factor], dtype=np.float32)
+    factor = np_array([op.factor], dtype=np_float32)
     onnx_op = OnnxMul(
         operator.inputs[0],
         factor,

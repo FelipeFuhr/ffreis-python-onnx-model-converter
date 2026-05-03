@@ -5,15 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
 
-import onnx_converter.api as api_module
-import onnx_converter.infrastructure.postprocessing as post_module
+from onnx_converter import api as api_module
 from onnx_converter.application.options import PostprocessOptions
+from onnx_converter.infrastructure import postprocessing as post_module
 
 
 def test_api_file_wrappers_forward_and_return_output_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Forward API wrapper calls into use-case layer and return result.output_path."""
     recorded: dict[str, object] = {}
@@ -84,7 +84,7 @@ def test_api_file_wrappers_forward_and_return_output_path(
 
 
 def test_postprocessor_impl_runs_optional_steps(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Apply standard metadata and optional metadata/optimize/quantize steps."""
     calls: list[tuple[str, object]] = []

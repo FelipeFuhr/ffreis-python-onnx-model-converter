@@ -26,16 +26,17 @@ def validate_onnx_if_requested(output_path: Path, validate: bool) -> None:
         return
 
     try:
-        import onnx
-        import onnxruntime as ort
+        from onnx import checker as onnx_checker
+        from onnx import load as onnx_load
+        from onnxruntime import InferenceSession as ort_InferenceSession
     except Exception as exc:  # pragma: no cover - dependency guarded by CLI
         raise ConversionError(
             "Validation requires onnxruntime to be installed."
         ) from exc
 
     try:
-        model = onnx.load(str(output_path))
-        onnx.checker.check_model(model)
-        ort.InferenceSession(str(output_path))
+        model = onnx_load(str(output_path))
+        onnx_checker.check_model(model)
+        ort_InferenceSession(str(output_path))
     except Exception as exc:
         raise ConversionError(f"ONNX validation failed: {exc}") from exc

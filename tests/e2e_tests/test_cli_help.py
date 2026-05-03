@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-import subprocess
+from subprocess import run as subprocess_run
 
-import onnx_converter
+from onnx_converter import __version__ as onnx_converter___version__
 
 
 def test_package_import_smoke() -> None:
     """Ensure package can be imported in the test process."""
-    assert onnx_converter.__version__
+    assert onnx_converter___version__
 
 
 def test_cli_help_smoke() -> None:
     """Ensure the installed CLI entrypoint responds to --help."""
-    result = subprocess.run(
+    result = subprocess_run(
         ["convert-to-onnx", "--help"],
         capture_output=True,
         text=True,
@@ -27,7 +27,7 @@ def test_cli_help_smoke() -> None:
 
 def test_cli_sklearn_missing_model_path_fails_cleanly() -> None:
     """Ensure CLI returns a user-facing validation error for missing model path."""
-    result = subprocess.run(
+    result = subprocess_run(
         [
             "convert-to-onnx",
             "sklearn",

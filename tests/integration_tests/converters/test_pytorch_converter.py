@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
+from pytest import importorskip as pytest_importorskip
 
 
 def test_pytorch_convert(tmp_path: Path) -> None:
     """Convert a simple PyTorch module and verify ONNX output exists."""
-    torch = pytest.importorskip("torch")
-    pytest.importorskip("onnxscript")
-    pytest.importorskip("onnxruntime")
+    torch = pytest_importorskip("torch")
+    pytest_importorskip("onnxscript")
+    pytest_importorskip("onnxruntime")
 
     from onnx_converter.converters.pytorch_converter import convert_pytorch_to_onnx
 

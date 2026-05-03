@@ -1,7 +1,9 @@
 ARG PACKAGE_IMAGE=ffreis/onnx-converter-package
+ARG BASE_RUNNER_IMAGE=ffreis/base-runner
+
 FROM ${PACKAGE_IMAGE} AS package
 
-FROM ffreis/base-runner:local
+FROM ${BASE_RUNNER_IMAGE}
 
 USER root
 

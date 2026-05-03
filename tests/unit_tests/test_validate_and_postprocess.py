@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import builtins
-import sys
-import types
 from pathlib import Path
+from sys import modules as sys_modules
+from types import SimpleNamespace as types_SimpleNamespace
 
-import onnx
-import pytest
 from onnx import TensorProto, helper
+from onnx import checker as onnx_checker
+from onnx import load as onnx_load
+from onnx import save as onnx_save
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import raises as pytest_raises
 
 from onnx_converter.errors import ConversionError, PostprocessError
 from onnx_converter.postprocess import (
@@ -31,7 +33,7 @@ def _write_minimal_onnx(path: Path) -> None:
         [helper.make_tensor_value_info("y", TensorProto.FLOAT, [1, 1])],
     )
     model = helper.make_model(graph, producer_name="unit-test")
-    onnx.save(model, str(path))
+    onnx_save(model, str(path))
 
 
 def test_validate_skips_when_disabled(tmp_path: Path) -> None:
@@ -39,23 +41,23 @@ def test_validate_skips_when_disabled(tmp_path: Path) -> None:
     validate_onnx_if_requested(tmp_path / "does-not-matter.onnx", validate=False)
 
 
-def test_validate_wraps_dependency_error(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_validate_wraps_dependency_error(monkeypatch: pytest_MonkeyPatch) -> None:
     """Raise ConversionError when validation deps are unavailable."""
-    real_import = builtins.__import__
+    real_import = __import__
 
     def fake_import(name: str, *args: object, **kwargs: object) -> object:
         if name in {"onnx", "onnxruntime"}:
             raise ImportError("missing")
         return real_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.setattr("builtins.__import__", fake_import)
 
-    with pytest.raises(ConversionError, match="requires onnxruntime"):
+    with pytest_raises(ConversionError, match="requires onnxruntime"):
         validate_onnx_if_requested(Path("x.onnx"), validate=True)
 
 
 def test_validate_wraps_runtime_validation_error(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Raise ConversionError when ONNX checker/runtime validation fails."""
     model_path = tmp_path / "m.onnx"
@@ -65,16 +67,16 @@ def test_validate_wraps_runtime_validation_error(
         del path
         return object()
 
-    fake_ort = types.SimpleNamespace(InferenceSession=inference_session)
+    fake_ort = types_SimpleNamespace(InferenceSession=inference_session)
 
     def _raise_check_error(_: object) -> None:
         raise ValueError("broken")
 
-    monkeypatch.setitem(sys.modules, "onnxruntime", fake_ort)
-    monkeypatch.setattr(onnx, "load", lambda _: object())
-    monkeypatch.setattr(onnx.checker, "check_model", _raise_check_error)
+    monkeypatch.setitem(sys_modules, "onnxruntime", fake_ort)
+    monkeypatch.setattr("onnx.load", lambda _: object())
+    monkeypatch.setattr(onnx_checker, "check_model", _raise_check_error)
 
-    with pytest.raises(ConversionError, match="ONNX validation failed"):
+    with pytest_raises(ConversionError, match="ONNX validation failed"):
         validate_onnx_if_requested(model_path, validate=True)
 
 
@@ -86,7 +88,7 @@ def test_add_onnx_metadata_merges_existing_keys(tmp_path: Path) -> None:
     add_onnx_metadata(model_path, {"team": "ml", "version": "1"})
     add_onnx_metadata(model_path, {"version": "2"})
 
-    reloaded = onnx.load(str(model_path))
+    reloaded = onnx_load(str(model_path))
     values = {entry.key: entry.value for entry in reloaded.metadata_props}
     assert values["team"] == "ml"
     assert values["version"] == "2"
@@ -105,7 +107,7 @@ def test_add_standard_metadata_writes_conversion_fields(tmp_path: Path) -> None:
     )
 
     values = {
-        entry.key: entry.value for entry in onnx.load(str(model_path)).metadata_props
+        entry.key: entry.value for entry in onnx_load(str(model_path)).metadata_props
     }
     assert values["onnx_converter.framework"] == "sklearn"
     assert values["onnx_converter.source_path"] == "src.joblib"
@@ -114,48 +116,48 @@ def test_add_standard_metadata_writes_conversion_fields(tmp_path: Path) -> None:
 
 
 def test_optimize_onnx_graph_raises_when_dependency_missing(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Raise PostprocessError when onnxoptimizer import fails."""
-    real_import = builtins.__import__
+    real_import = __import__
 
     def fake_import(name: str, *args: object, **kwargs: object) -> object:
         if name == "onnxoptimizer":
             raise ImportError("missing")
         return real_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.setattr("builtins.__import__", fake_import)
 
-    with pytest.raises(PostprocessError, match="onnxoptimizer is not installed"):
+    with pytest_raises(PostprocessError, match="onnxoptimizer is not installed"):
         optimize_onnx_graph(tmp_path / "x.onnx")
 
 
 def test_optimize_onnx_graph_uses_optimizer(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Optimize and save model with injected onnxoptimizer module."""
     model_path = tmp_path / "m.onnx"
     _write_minimal_onnx(model_path)
 
-    fake_module = types.SimpleNamespace(optimize=lambda model: model)
-    monkeypatch.setitem(sys.modules, "onnxoptimizer", fake_module)
+    fake_module = types_SimpleNamespace(optimize=lambda model: model)
+    monkeypatch.setitem(sys_modules, "onnxoptimizer", fake_module)
 
     optimize_onnx_graph(model_path)
     assert model_path.exists()
 
 
 def test_quantize_onnx_dynamic_raises_when_dependency_missing(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest_MonkeyPatch, tmp_path: Path
 ) -> None:
     """Raise PostprocessError when onnxruntime quantization import fails."""
-    real_import = builtins.__import__
+    real_import = __import__
 
     def fake_import(name: str, *args: object, **kwargs: object) -> object:
         if name.startswith("onnxruntime"):
             raise ImportError("missing")
         return real_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.setattr("builtins.__import__", fake_import)
 
-    with pytest.raises(PostprocessError, match="onnxruntime is not installed"):
+    with pytest_raises(PostprocessError, match="onnxruntime is not installed"):
         quantize_onnx_dynamic(tmp_path / "x.onnx")

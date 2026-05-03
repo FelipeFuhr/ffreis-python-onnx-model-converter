@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import sys
-import types
 from collections.abc import Callable
 from pathlib import Path
+from sys import modules as sys_modules
+from types import SimpleNamespace as types_SimpleNamespace
 
-import pytest
+from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import raises as pytest_raises
 
-import onnx_converter
 from onnx_converter import api as api_module
 from onnx_converter.errors import ConversionError
 
@@ -59,11 +59,11 @@ class _MockPostprocess:
 
 
 def _install_dummy_torch(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest_MonkeyPatch,
     jit_load: Callable[[str], object],
     load: Callable[..., object],
 ) -> None:
-    dummy_torch = types.SimpleNamespace()
+    dummy_torch = types_SimpleNamespace()
 
     class _Jit:
         @staticmethod
@@ -79,11 +79,11 @@ def _install_dummy_torch(
 
     dummy_torch.load = _load
 
-    monkeypatch.setitem(sys.modules, "torch", dummy_torch)
+    monkeypatch.setitem(sys_modules, "torch", dummy_torch)
 
 
 def test_convert_torch_file_prefers_torchscript(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest_MonkeyPatch
 ) -> None:
     """Prefer TorchScript loading over torch.load when available."""
     model_path = tmp_path / "model.pt"
@@ -108,7 +108,7 @@ def test_convert_torch_file_prefers_torchscript(
         assert kwargs["input_shape"] == (1, 3)
         return str(output_path)
 
-    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    monkeypatch.setattr("onnx_converter.convert_pytorch_to_onnx", fake_convert)
     mock_converter_dependencies(monkeypatch, framework="torch")
 
     result = api_module.convert_torch_file_to_onnx(
@@ -124,7 +124,7 @@ def test_convert_torch_file_prefers_torchscript(
 
 
 def test_convert_torch_file_requires_allow_unsafe(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest_MonkeyPatch
 ) -> None:
     """Raise conversion error when only unsafe loading path is available."""
     model_path = tmp_path / "model.pt"
@@ -145,10 +145,10 @@ def test_convert_torch_file_requires_allow_unsafe(
     def fake_convert(**kwargs: object) -> str:
         return str(output_path)
 
-    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    monkeypatch.setattr("onnx_converter.convert_pytorch_to_onnx", fake_convert)
     mock_converter_dependencies(monkeypatch, framework="torch")
 
-    with pytest.raises(ConversionError):
+    with pytest_raises(ConversionError):
         api_module.convert_torch_file_to_onnx(
             model_path=model_path,
             output_path=output_path,
@@ -159,7 +159,7 @@ def test_convert_torch_file_requires_allow_unsafe(
 
 
 def test_convert_torch_file_uses_torch_load_when_allowed(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest_MonkeyPatch
 ) -> None:
     """Use safe torch.load fallback when unsafe mode is enabled."""
     model_path = tmp_path / "model.pt"
@@ -183,7 +183,7 @@ def test_convert_torch_file_uses_torch_load_when_allowed(
     def fake_convert(**kwargs: object) -> str:
         return str(output_path)
 
-    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    monkeypatch.setattr("onnx_converter.convert_pytorch_to_onnx", fake_convert)
     mock_converter_dependencies(monkeypatch, framework="torch")
 
     result = api_module.convert_torch_file_to_onnx(
@@ -199,7 +199,7 @@ def test_convert_torch_file_uses_torch_load_when_allowed(
 
 
 def test_convert_torch_file_falls_back_to_unsafe_only_when_allowed(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest_MonkeyPatch
 ) -> None:
     """Attempt safe load first, then unsafe load when explicitly allowed."""
     model_path = tmp_path / "model.pt"
@@ -225,7 +225,7 @@ def test_convert_torch_file_falls_back_to_unsafe_only_when_allowed(
     def fake_convert(**kwargs: object) -> str:
         return str(output_path)
 
-    monkeypatch.setattr(onnx_converter, "convert_pytorch_to_onnx", fake_convert)
+    monkeypatch.setattr("onnx_converter.convert_pytorch_to_onnx", fake_convert)
     mock_converter_dependencies(monkeypatch, framework="torch")
 
     result = api_module.convert_torch_file_to_onnx(
