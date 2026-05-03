@@ -2,7 +2,7 @@
 # Do not edit manually; run: uv run python scripts/generate_requirements.py
 joblib>=1.5.3
 numpy>=1.26.4
-onnx>=1.17.0,<1.20; python_version < '3.13'
+onnx>=1.17.0,<1.22; python_version < '3.13'
 onnx>=1.20.1; python_version >= '3.13'
 onnxoptimizer>=0.4.2
 onnxruntime>=1.24.1
