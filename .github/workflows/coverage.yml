@@ -15,42 +15,9 @@ concurrency:
 
 jobs:
   coverage:
-    name: Unit Coverage
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b
-        with:
-          enable-cache: true
-
-      - name: Require uv.lock
-        run: |
-          set -euo pipefail
-          test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
-
-      - name: Install deps (dev + cli + server + grpc)
-        run: |
-          uv sync --extra dev --extra cli --extra server --extra grpc
-
-      - name: Generate coverage (Makefile)
-        run: |
-          set -euo pipefail
-          ./scripts/generate_grpc_stubs.sh
-          make coverage
-          test -s coverage.xml
-
-      - name: Upload coverage to Codecov
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
-        with:
-          files: ./coverage.xml
-          flags: unit
-          name: unit-coverage
-          fail_ci_if_error: false
-          verbose: true
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-coverage.yml@1ce012b023b91e4c293846af4cfd93062d36d1be
+    with:
+      python-version: "3.13"
+      uv-extras: "dev cli server grpc"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

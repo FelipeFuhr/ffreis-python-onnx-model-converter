@@ -20,9 +20,9 @@ jobs:
         component: [python, container]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         if: ${{ matrix.component == 'python' }}
         with:
           python-version: "3.13"
@@ -59,3 +59,22 @@ jobs:
         run: |
           set -euo pipefail
           PYTHON_VERSION=3.13 make build
+
+      - name: Install Trivy
+        if: ${{ matrix.component == 'container' }}
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Scan image for vulnerabilities
+        if: ${{ matrix.component == 'container' }}
+        run: |
+          podman save -o /tmp/cli.tar ffreis/onnx-converter-cli
+          trivy image \
+            --input /tmp/cli.tar \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL \
+            --format table

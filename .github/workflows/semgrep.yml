@@ -16,33 +16,4 @@ concurrency:
 
 jobs:
   semgrep:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Python (for Semgrep CLI)
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-      - name: Install Semgrep
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          pip install semgrep
-
-      - name: Run Semgrep (SARIF)
-        run: |
-          set -euo pipefail
-          semgrep scan --config auto --sarif --output semgrep.sarif
-          test -s semgrep.sarif
-
-      - name: Upload Semgrep SARIF
-        if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false) }}
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: semgrep.sarif
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-semgrep.yml@1ce012b023b91e4c293846af4cfd93062d36d1be

@@ -10,43 +10,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   matrix-build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.14", "3.13", "3.11", "3.10"]
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python }}
-
-      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b
-        with:
-          enable-cache: true
-
-      - name: Require lock
-        run: test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
-
-      - name: Install deps (dev + cli)
-        run: uv sync --extra dev --extra cli
-
-      - name: Run tests
-        run: uv run pytest -q tests/unit_tests
-
-      # Equivalent to `cargo build --release`
-      - name: Build package artifacts
-        run: uv build
-
-      # CLI smoke test (like running built binary)
-      - name: CLI smoke test
-        run: |
-          set -euo pipefail
-          uv run python -c "import onnx_converter"
-          uv run convert-to-onnx --help
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-build.yml@1ce012b023b91e4c293846af4cfd93062d36d1be
+    with:
+      python-versions: '["3.14", "3.13", "3.11", "3.10"]'
+      uv-extras: "dev cli"
+      test-dir: "tests/unit_tests"

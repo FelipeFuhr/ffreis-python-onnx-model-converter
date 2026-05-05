@@ -10,29 +10,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b
-        with:
-          enable-cache: true
-
-      - name: Require uv.lock
-        run: test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
-
-      - name: Install deps (dev)
-        run: uv sync --extra dev
-
-      - name: Ruff
-        run: uv run ruff check src tests
-
-      - name: Mypy
-        run: uv run mypy src
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-lint.yml@1ce012b023b91e4c293846af4cfd93062d36d1be
+    with:
+      python-version: "3.13"
+      uv-extras: "dev"

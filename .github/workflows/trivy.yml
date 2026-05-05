@@ -34,7 +34,7 @@ jobs:
     env:
       TRIVY_SCAN_TIMEOUT: 30m
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Install Podman
         run: |
           set -euo pipefail
@@ -56,7 +56,7 @@ jobs:
             "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_INSTALL_REF}/contrib/install.sh" \
             | sudo sh -s -- -b /usr/local/bin
           trivy --version
-      - name: Scan images (sequential, OCI archives)
+      - name: Scan images (sequential, ephemeral OCI archives)
         run: |
           set -euo pipefail
           mkdir -p trivy-results
@@ -67,7 +67,7 @@ jobs:
 
           for image in "${images[@]}"; do
             name="${image##*/}"
-            archive="trivy-results/${name}.docker.tar"
+            archive="${RUNNER_TEMP:-/tmp}/${name}.docker.tar"
             rm -f "$archive"
             echo "[$(date -u +%FT%TZ)] exporting ${image} -> ${archive}"
             podman save -o "$archive" "$image"
@@ -127,6 +127,7 @@ jobs:
               --ignore-unfixed \
               --exit-code 1 \
               --format table
+            rm -f "$archive"
             echo "[$(date -u +%FT%TZ)] completed ${image}"
           done
           echo "[$(date -u +%FT%TZ)] all image scans completed"
