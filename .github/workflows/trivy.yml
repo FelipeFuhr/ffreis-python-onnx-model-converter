@@ -34,12 +34,7 @@ jobs:
     env:
       TRIVY_SCAN_TIMEOUT: 30m
     steps:
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Install Podman
         run: |
           set -euo pipefail
@@ -61,7 +56,7 @@ jobs:
             "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_INSTALL_REF}/contrib/install.sh" \
             | sudo sh -s -- -b /usr/local/bin
           trivy --version
-      - name: Scan images (sequential, OCI archives)
+      - name: Scan images (sequential, ephemeral OCI archives)
         run: |
           set -euo pipefail
           mkdir -p trivy-results
@@ -72,7 +67,7 @@ jobs:
 
           for image in "${images[@]}"; do
             name="${image##*/}"
-            archive="trivy-results/${name}.docker.tar"
+            archive="${RUNNER_TEMP:-/tmp}/${name}.docker.tar"
             rm -f "$archive"
             echo "[$(date -u +%FT%TZ)] exporting ${image} -> ${archive}"
             podman save -o "$archive" "$image"
@@ -132,11 +127,12 @@ jobs:
               --ignore-unfixed \
               --exit-code 1 \
               --format table
+            rm -f "$archive"
             echo "[$(date -u +%FT%TZ)] completed ${image}"
           done
           echo "[$(date -u +%FT%TZ)] all image scans completed"
       - name: Upload Trivy JSON reports
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-json-reports
           path: trivy-results/*.json

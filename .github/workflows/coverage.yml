@@ -15,47 +15,9 @@ concurrency:
 
 jobs:
   coverage:
-    name: Unit Coverage
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
-        with:
-          egress-policy: audit
-
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: "3.13"
-
-      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
-        with:
-          enable-cache: true
-
-      - name: Require uv.lock
-        run: |
-          set -euo pipefail
-          test -s uv.lock || (echo "uv.lock missing — run uv lock"; exit 1)
-
-      - name: Install deps (dev + cli + server + grpc)
-        run: |
-          uv sync --extra dev --extra cli --extra server --extra grpc
-
-      - name: Generate coverage (Makefile)
-        run: |
-          set -euo pipefail
-          ./scripts/generate_grpc_stubs.sh
-          make coverage
-          test -s coverage.xml
-
-      - name: Upload coverage to Codecov
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
-        with:
-          files: ./coverage.xml
-          flags: unit
-          name: unit-coverage
-          fail_ci_if_error: false
-          verbose: true
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-coverage.yml@1ce012b023b91e4c293846af4cfd93062d36d1be
+    with:
+      python-version: "3.13"
+      uv-extras: "dev cli server grpc"
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

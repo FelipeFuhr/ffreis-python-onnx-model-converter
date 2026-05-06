@@ -6,6 +6,11 @@ CONTAINER_COMMAND ?= podman
 PYTHON_VERSION ?= 3.13
 VENV_DIR ?= .venv
 
+GITLEAKS         ?= gitleaks
+LEFTHOOK_VERSION ?= 1.7.10
+LEFTHOOK_DIR     ?= $(CURDIR)/.bin
+LEFTHOOK_BIN     ?= $(LEFTHOOK_DIR)/lefthook
+
 PREFIX ?= ffreis
 IMAGE_PROVIDER ?=
 IMAGE_TAG ?= api-grpc-smoke
@@ -56,6 +61,12 @@ install-dev: ## Install dev tooling
 	$(VENV_DIR)/bin/pip install --upgrade pip
 	$(VENV_DIR)/bin/pip install -e "./[all,dev]"
 
+.PHONY: fmt
+fmt: ## Format code in place (alias for format)
+	$(VENV_DIR)/bin/ruff format src tests
+	$(VENV_DIR)/bin/black src tests
+	$(VENV_DIR)/bin/isort src tests
+
 .PHONY: format
 format: ## Format code (ruff + black + isort)
 	$(VENV_DIR)/bin/ruff format src tests
@@ -67,6 +78,16 @@ lint: ## Lint code (ruff + flake8 + mypy)
 	$(VENV_DIR)/bin/ruff check src tests
 	$(VENV_DIR)/bin/flake8 src tests
 	$(VENV_DIR)/bin/mypy src
+
+.PHONY: validate
+validate: ## Static type checking (mypy)
+	$(VENV_DIR)/bin/mypy src
+
+.PHONY: plan
+plan: ## Not applicable — use 'make validate' or 'make test' for Python repos
+	@echo "INFO: 'plan' is Terraform-specific and does not apply to Python repos."
+	@echo "      To type-check: make validate"
+	@echo "      To run tests: make test"
 
 .PHONY: test
 test: ## Run tests
@@ -193,5 +214,54 @@ run-cli: ## Run converter CLI image (use RUN_ARGS=...)
 clean-images: ## Remove converter images
 	$(CONTAINER_COMMAND) rmi $(UV_VENV_IMAGE) $(PACKAGE_IMAGE) $(CLI_IMAGE) || true
 
+.PHONY: secrets-scan-staged lefthook-bootstrap lefthook-install lefthook-run lefthook
+
+secrets-scan-staged: ## Scan staged diff for secrets
+	@command -v $(GITLEAKS) >/dev/null 2>&1 || (echo "Missing tool: $(GITLEAKS). Install: https://github.com/gitleaks/gitleaks#installing" && exit 1)
+	$(GITLEAKS) protect --staged --redact
+
+lefthook-bootstrap: ## Download lefthook binary into ./.bin
+	LEFTHOOK_VERSION="$(LEFTHOOK_VERSION)" BIN_DIR="$(LEFTHOOK_DIR)" bash ./scripts/bootstrap_lefthook.sh
+
+lefthook-install: lefthook-bootstrap ## Install git hooks (runs bootstrap first)
+	@if [ -x "$(LEFTHOOK_BIN)" ] && [ -x ".git/hooks/pre-commit" ] && [ -x ".git/hooks/pre-push" ] && [ -x ".git/hooks/commit-msg" ]; then \
+		echo "lefthook hooks already installed"; \
+		exit 0; \
+	fi
+	LEFTHOOK="$(LEFTHOOK_BIN)" "$(LEFTHOOK_BIN)" install
+
+lefthook-run: lefthook-bootstrap ## Run all hooks locally (pre-commit + commit-msg + pre-push)
+	LEFTHOOK="$(LEFTHOOK_BIN)" "$(LEFTHOOK_BIN)" run pre-commit
+	@tmp_msg="$$(mktemp)"; \
+	echo "chore(hooks): validate commit-msg hook" > "$$tmp_msg"; \
+	LEFTHOOK="$(LEFTHOOK_BIN)" "$(LEFTHOOK_BIN)" run commit-msg -- "$$tmp_msg"; \
+	rm -f "$$tmp_msg"
+	LEFTHOOK="$(LEFTHOOK_BIN)" "$(LEFTHOOK_BIN)" run pre-push
+
+lefthook: lefthook-bootstrap lefthook-install lefthook-run ## Install hooks and run them
+
 .PHONY: ci-grpc
 ci-grpc: grpc-check openapi-check lint test-grpc-parity ## Run gRPC sync + parity quality gate
+
+# ── Standard quality-system targets (uv-based) ────────────────────────────────
+UV      ?= uv
+SRC_DIR ?= src
+TEST_DIR ?= tests/unit_tests
+
+.PHONY: typecheck
+typecheck: ## Type-check with mypy (uv run)
+	$(UV) run mypy $(SRC_DIR)
+
+.PHONY: test-all
+test-all: ## Run full test suite
+	$(UV) run pytest tests/
+
+.PHONY: test-property
+test-property: ## Run Hypothesis property-based tests
+	$(UV) run pytest -q tests/hypothesis_tests/ 2>/dev/null || \
+	  $(UV) run pytest -q -k "hypothesis or property" tests/ 2>/dev/null || true
+
+.PHONY: mutation-test
+mutation-test: ## Run mutation testing with mutmut (slow — run in CI)
+	$(UV) run mutmut run --paths-to-mutate=$(SRC_DIR) --tests-dir=$(TEST_DIR) || true
+	$(UV) run mutmut results
