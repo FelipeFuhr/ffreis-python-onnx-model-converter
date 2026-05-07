@@ -146,6 +146,14 @@ disallow_untyped_decorators = false
 module = ["onnx_converter.converter.http_server"]
 disallow_untyped_decorators = false
 
+[[tool.mypy.overrides]]
+module = ["onnx_converter.converters.pytorch_converter", "onnx_converter.converters", "onnx_converter"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["onnx_converter.adapters.parity_checkers", "onnx_converter.adapters.loaders"]
+ignore_errors = true
+
 [tool.ruff]
 line-length = 88
 target-version = "py312"

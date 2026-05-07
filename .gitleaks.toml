@@ -25,28 +25,19 @@ severity    = "info"
     'arn:aws:[a-z0-9\-]+:[a-z0-9\-]*:999999999999:',
   ]
 
-# ── Global allowlist ──────────────────────────────────────────────────────────
-
-[[allowlist]]
-description = "Template placeholders — not real secrets"
+# ── Global allowlist (combined — gitleaks requires a single [allowlist] map) ─
+[allowlist]
+description = "Template placeholders, docs, fixtures, lock files, generated code"
 regexes = [
   'YOUR_[A-Z_]+',
   'REPLACE_ME',
   '<[A-Z_]+>',
   'example\.com',
-]
-
-[[allowlist]]
-description = "Well-known documentation placeholder account IDs"
-regexes = [
   '123456789012',
   '000000000000',
   '111111111111',
   '999999999999',
 ]
-
-[[allowlist]]
-description = "Test and fixture files — may contain example-like values by design"
 paths = [
   '.*_test\.go$',
   '.*_test\.py$',
@@ -57,20 +48,10 @@ paths = [
   '.*examples?/.*',
   '.*\.example$',
   '.*\.sample$',
-]
-
-[[allowlist]]
-description = "Documentation — prose naturally contains example-like patterns"
-paths = [
   '.*\.md$',
   '.*\.txt$',
   '.*\.rst$',
   'docs/.*',
-]
-
-[[allowlist]]
-description = "Dependency lock files — hashes are not secrets"
-paths = [
   'uv\.lock',
   'poetry\.lock',
   'Cargo\.lock',
@@ -78,11 +59,6 @@ paths = [
   'package-lock\.json',
   'yarn\.lock',
   'Pipfile\.lock',
-]
-
-[[allowlist]]
-description = "Generated protobuf files — binary encoding artifacts"
-paths = [
   '.*_pb2\.py$',
   '.*_pb2_grpc\.py$',
   '.*\.pb\.go$',
