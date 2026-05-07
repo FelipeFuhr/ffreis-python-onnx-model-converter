@@ -4,12 +4,22 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   labeler:
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-labeler.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-labeler.yml@01e2b12e992621fecf074b8a202f66044196f3bf
     with:
       rules-json: |-
         [
-          {"label": "ci", "title": "/ci/i"},
-          {"label": "infra", "title": "/infra/i"}
+          {"label": "ci", "patterns": [".github/workflows/**"]},
+          {"label": "python", "patterns": ["**/*.py", "pyproject.toml", "uv.lock"]},
+          {"label": "docs", "patterns": ["**/*.md"]}
         ]
