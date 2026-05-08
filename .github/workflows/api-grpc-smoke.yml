@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   api-grpc-smoke:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
