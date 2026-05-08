@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   labeler:
-    timeout-minutes: 15
     permissions:
       contents: read
       pull-requests: write
