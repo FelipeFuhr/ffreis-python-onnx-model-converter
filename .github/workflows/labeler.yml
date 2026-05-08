@@ -19,7 +19,8 @@ jobs:
     with:
       rules-json: |-
         [
-          {"label": "ci", "patterns": [".github/workflows/**"]},
+          {"label": "ci", "title": "/ci/i", "patterns": [".github/workflows/**"]},
+          {"label": "infra", "title": "/infra/i"},
           {"label": "python", "patterns": ["**/*.py", "pyproject.toml", "uv.lock"]},
           {"label": "docs", "patterns": ["**/*.md"]}
         ]
