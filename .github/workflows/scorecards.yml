@@ -17,8 +17,13 @@ on:
 # Declare default permissions as read only.
 permissions: read-all
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analysis:
+    timeout-minutes: 15
     name: Scorecard analysis
     runs-on: ubuntu-latest
     permissions:

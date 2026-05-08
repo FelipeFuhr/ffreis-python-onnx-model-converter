@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   build-all:
+    timeout-minutes: 30
     name: Build All (${{ matrix.component }})
     runs-on: ubuntu-latest
     strategy:

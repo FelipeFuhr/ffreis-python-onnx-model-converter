@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   architecture:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
 
     steps:

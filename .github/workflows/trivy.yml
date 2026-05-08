@@ -30,6 +30,7 @@ permissions:
 
 jobs:
   image-scan:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     env:
       TRIVY_SCAN_TIMEOUT: 30m

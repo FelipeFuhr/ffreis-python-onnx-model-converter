@@ -23,8 +23,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
+    timeout-minutes: 30
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
