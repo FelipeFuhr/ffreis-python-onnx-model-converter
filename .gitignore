@@ -72,3 +72,6 @@ htmlcov/
 # Generated gRPC stubs (generated on demand)
 src/converter_grpc/*_pb2.py
 src/converter_grpc/*_pb2_grpc.py
+
+scripts/hooks/
+scripts/bootstrap_lefthook.sh
