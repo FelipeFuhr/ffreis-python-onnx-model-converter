@@ -15,6 +15,27 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    # Skip heavy vuln scanners (trivy/grype/osv) on docs-only changes.
+    # gitleaks still runs on everything — secrets can hide in markdown too.
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: filter
+        with:
+          filters: |
+            code:
+              - '!**/*.md'
+              - '!docs/**'
+
   gitleaks:
     permissions:
       contents: read
@@ -27,6 +48,12 @@ jobs:
       upload-sarif: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
 
   osv:
+    needs: changes
+    if: |
+      always() && (
+        needs.changes.result == 'skipped' ||
+        needs.changes.outputs.code == 'true'
+      )
     permissions:
       contents: read
       actions: read
