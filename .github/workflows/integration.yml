@@ -37,6 +37,9 @@ jobs:
       - name: Install deps (dev + all + server + grpc)
         run: uv sync --extra dev --extra all --extra server --extra grpc --extra sklearn
 
+      - name: Generate gRPC stubs
+        run: ./scripts/generate_grpc_stubs.sh
+
       - name: Run integration tests
         run: |
           uv run pytest -q tests/integration_tests \
