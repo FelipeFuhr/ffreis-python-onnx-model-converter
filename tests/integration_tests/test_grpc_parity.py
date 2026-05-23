@@ -24,6 +24,8 @@ from onnx_converter.converter.core import ConversionOutcome, ConversionRequest
 from onnx_converter.converter.http_server import create_app
 
 try:
+    from grpc import StatusCode as grpc_StatusCode
+
     from converter_grpc.converter_pb2 import DESCRIPTOR as converter_pb2_DESCRIPTOR
     from converter_grpc.converter_pb2 import (
         ConvertMetadata as converter_pb2_ConvertMetadata,
@@ -34,8 +36,6 @@ try:
     from converter_grpc.converter_pb2 import (
         ConvertResult as converter_pb2_ConvertResult,
     )
-    from grpc import StatusCode as grpc_StatusCode
-
     from onnx_converter.converter.grpc_server import ConverterGrpcService
 except (ImportError, ModuleNotFoundError) as exc:
     pytest_skip(f"grpc parity dependencies unavailable: {exc}", allow_module_level=True)
