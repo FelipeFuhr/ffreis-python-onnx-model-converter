@@ -9,7 +9,7 @@ on:
 
 jobs:
   grpc-sync-and-parity:
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-run-commands.yml@main
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-run-commands.yml@v1.2.0
     with:
       setup-python: true
       python-version: "3.13"

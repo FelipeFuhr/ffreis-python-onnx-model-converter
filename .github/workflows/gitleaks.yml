@@ -7,7 +7,7 @@ on:
 
 jobs:
   gitleaks:
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-gitleaks.yml@main
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-gitleaks.yml@v1.2.0
     with:
       working-directory: .
       scan-history: true
