@@ -1,6 +1,6 @@
 remotes:
   - git_url: https://github.com/FelipeFuhr/ffreis-platform-standards
-    ref: 1b2afe64334b4aff11c7e3ebc5fa964041efa3b3
+    ref: 1d2cb70b8228d4aee82bd863ae95dcd689c8781a
     configs:
       - lefthook/base.yml
       - lefthook/python.yml
