@@ -25,11 +25,7 @@ from onnx_converter.adapters.parity_checkers import (
     TorchParityChecker,
 )
 from onnx_converter.application.options import ParityOptions
-from onnx_converter.errors import (
-    ParityError,
-    UnsafeLoadError,
-    UnsupportedModelError,
-)
+from onnx_converter.errors import ParityError, UnsafeLoadError, UnsupportedModelError
 
 
 def test_torch_loader_rejects_checkpoint_dict(
