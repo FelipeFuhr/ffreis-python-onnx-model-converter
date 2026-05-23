@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   matrix-build:
-    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-build.yml@1ce012b023b91e4c293846af4cfd93062d36d1be
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-build.yml@v1.0.1
     with:
       python-versions: '["3.14", "3.13", "3.11", "3.10"]'
       uv-extras: "dev cli"
