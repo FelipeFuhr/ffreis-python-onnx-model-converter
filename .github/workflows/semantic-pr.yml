@@ -5,4 +5,4 @@ on:
 
 jobs:
   semantic-pr:
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-semantic-pr.yml@main
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-semantic-pr.yml@v1.2.0

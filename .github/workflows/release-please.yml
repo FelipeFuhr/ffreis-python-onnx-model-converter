@@ -7,4 +7,4 @@ on:
 
 jobs:
   release-please:
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-release-please.yml@main
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-release-please.yml@v1.2.0
