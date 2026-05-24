@@ -10,4 +10,3 @@ jobs:
     uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-actionlint.yml@v1.2.0
     with:
       working-directory: .
-      fail-on-error: true
