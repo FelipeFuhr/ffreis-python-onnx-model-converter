@@ -21,10 +21,7 @@ permissions:
 
 jobs:
   hypothesis:
-<<<<<<< HEAD
     if: ${{ !github.event.pull_request.draft }}
-=======
->>>>>>> 0951930157686cb598bc4cd001d294323cf6f1c4
     uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-hypothesis.yml@v1.0.1
     with:
       python-version: "3.13"

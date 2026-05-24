@@ -26,28 +26,28 @@ severity    = "info"
   ]
 
 # ── Global allowlist ──────────────────────────────────────────────────────────
+#
+# Gitleaks v7 expects a single [allowlist] table (map). The v8 `[[allowlist]]`
+# multi-table form decodes as "expected a map, got 'slice'" under the
+# currently-installed binary. Merging the previous 6 logical groups into one
+# table preserves coverage; per-group reasoning is retained in inline comments.
 
-[[allowlist]]
-description = "Template placeholders — not real secrets"
+[allowlist]
+description = "Global allowlist: placeholders, doc files, lock files, test fixtures, generated code"
 regexes = [
+  # Template placeholders — not real secrets
   'YOUR_[A-Z_]+',
   'REPLACE_ME',
   '<[A-Z_]+>',
   'example\.com',
-]
-
-[[allowlist]]
-description = "Well-known documentation placeholder account IDs"
-regexes = [
+  # Well-known documentation placeholder account IDs
   '123456789012',
   '000000000000',
   '111111111111',
   '999999999999',
 ]
-
-[[allowlist]]
-description = "Test and fixture files — may contain example-like values by design"
 paths = [
+  # Test and fixture files — may contain example-like values by design
   '.*_test\.go$',
   '.*_test\.py$',
   '.*test_.*\.py$',
@@ -57,20 +57,12 @@ paths = [
   '.*examples?/.*',
   '.*\.example$',
   '.*\.sample$',
-]
-
-[[allowlist]]
-description = "Documentation — prose naturally contains example-like patterns"
-paths = [
+  # Documentation — prose naturally contains example-like patterns
   '.*\.md$',
   '.*\.txt$',
   '.*\.rst$',
   'docs/.*',
-]
-
-[[allowlist]]
-description = "Dependency lock files — hashes are not secrets"
-paths = [
+  # Dependency lock files — hashes are not secrets
   'uv\.lock',
   'poetry\.lock',
   'Cargo\.lock',
@@ -78,11 +70,7 @@ paths = [
   'package-lock\.json',
   'yarn\.lock',
   'Pipfile\.lock',
-]
-
-[[allowlist]]
-description = "Generated protobuf files — binary encoding artifacts"
-paths = [
+  # Generated protobuf files — binary encoding artifacts
   '.*_pb2\.py$',
   '.*_pb2_grpc\.py$',
   '.*\.pb\.go$',
