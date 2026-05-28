@@ -275,7 +275,7 @@ install-act: ## Download pinned act binary into .bin/
 		-o scripts/install_act.sh && chmod +x scripts/install_act.sh
 	@bash ./scripts/install_act.sh
 
-ci-local: ## Run workflows locally via act (GH Actions quota fallback). Args via ARGS=...
+ci-local-act: ## Run workflows locally via act (GH Actions quota fallback). Args via ARGS=...
 	@mkdir -p scripts
 	@curl -fsSL "$(PLATFORM_STANDARDS_RAW)/$(PLATFORM_STANDARDS_SHA)/scripts/run-ci-local.sh" \
 		-o scripts/run-ci-local.sh && chmod +x scripts/run-ci-local.sh
