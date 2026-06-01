@@ -45,7 +45,7 @@ jobs:
     with:
       working-directory: "."
       scan-history: true
-      upload-sarif: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+      upload-sarif: false
 
   osv:
     needs: changes
@@ -61,7 +61,7 @@ jobs:
     uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-osv-scanner.yml@v1.2.0
     with:
       working-directory: "."
-      upload-sarif: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+      upload-sarif: false
 
   codeql:
     if: ${{ github.event_name != 'pull_request' }}
