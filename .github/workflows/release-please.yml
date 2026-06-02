@@ -5,6 +5,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release-please:
     uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-release-please.yml@v1.2.0

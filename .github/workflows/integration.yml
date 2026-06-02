@@ -7,7 +7,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: "0 7 * * 1"
+    - cron: "30 10 22 * *"  # monthly scattered (was: 0 7 * * 1)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,7 +18,7 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     name: Integration (Secure Default)
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -63,7 +63,7 @@ jobs:
     if: ${{ !github.event.pull_request.draft }}
     name: Integration (TF Legacy)
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
