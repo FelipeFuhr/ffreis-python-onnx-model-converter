@@ -12,6 +12,7 @@ on:
       - "uv.lock"
       - ".github/workflows/grype.yml"
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [ main ]
     paths:
       - "container/**"
@@ -31,6 +32,7 @@ permissions:
 
 jobs:
   grype:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
     timeout-minutes: 30
     runs-on: ubuntu-latest
     env:
