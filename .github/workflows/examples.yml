@@ -22,7 +22,7 @@ on:
       - "Makefile"
       - ".github/workflows/examples.yml"
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: "38 18 22 * *"  # monthly scattered (was: 0 6 * * 1)
   workflow_dispatch:
 
 concurrency:
@@ -32,7 +32,7 @@ concurrency:
 jobs:
   examples:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -79,7 +79,7 @@ jobs:
   autosklearn-examples:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6

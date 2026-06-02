@@ -19,7 +19,7 @@ on:
       - "uv.lock"
       - ".github/workflows/mutation.yml"
   schedule:
-    - cron: "0 2 * * 0" # Sundays 02:00 UTC
+    - cron: "24 4 8 * *"  # monthly scattered (was: 0 2 * * 0)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

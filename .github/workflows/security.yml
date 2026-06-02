@@ -7,7 +7,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "0 9 * * 1" # Mondays 09:00 UTC
+    - cron: "38 1 8 * *"  # monthly scattered (was: 0 9 * * 1)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

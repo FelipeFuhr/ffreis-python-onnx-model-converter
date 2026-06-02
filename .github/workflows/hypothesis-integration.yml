@@ -10,7 +10,7 @@ on:
       - "Makefile"
       - ".github/workflows/hypothesis-integration.yml"
   schedule:
-    - cron: "45 10 * * 1"
+    - cron: "11 1 17 * *"  # monthly scattered (was: 45 10 * * 1)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -2,10 +2,15 @@ name: DevOps / Stale
 
 on:
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: "31 0 2 * *"  # monthly scattered (was: 0 6 * * 1)
   workflow_dispatch:
   push:
     branches: [main]
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   stale:

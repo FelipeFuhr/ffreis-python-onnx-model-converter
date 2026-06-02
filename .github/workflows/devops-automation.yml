@@ -2,7 +2,7 @@ name: DevOps / Automation
 
 on:
   schedule:
-    - cron: "0 3 * * 0" # Sundays 03:00 UTC
+    - cron: "19 8 20 * *"  # monthly scattered (was: 0 3 * * 0)
   workflow_dispatch:
   push:
     branches: [main]
