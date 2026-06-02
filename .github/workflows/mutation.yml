@@ -3,6 +3,7 @@ name: Mutation Testing (mutmut)
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
     paths:
       - "src/**"
