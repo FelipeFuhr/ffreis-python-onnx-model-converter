@@ -30,6 +30,8 @@ jobs:
       # with build_macos=true. Do NOT hardcode "macos-latest" back here — that
       # silently restores the 10x drain on every run (CI cost incident 2026-06).
       os-list: ${{ (github.event_name == 'workflow_dispatch' && inputs.build_macos) && '["ubuntu-latest","macos-latest"]' || '["ubuntu-latest"]' }}
+      # PR runs the primary version only (cost); full matrix on schedule/dispatch/push.
+      python: ${{ github.event_name == 'pull_request' && '["3.13"]' || '["3.13","3.11","3.10"]' }}
 
       python-versions: '["3.14", "3.13", "3.11", "3.10"]'
       uv-extras: "dev cli"
