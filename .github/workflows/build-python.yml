@@ -18,6 +18,7 @@ jobs:
   matrix-build:
     uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-build.yml@v1.0.1
     with:
+      os-list: '["ubuntu-latest"]'
       python-versions: '["3.14", "3.13", "3.11", "3.10"]'
       uv-extras: "dev cli"
       test-dir: "tests/unit_tests"
