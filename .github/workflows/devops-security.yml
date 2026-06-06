@@ -44,7 +44,7 @@ jobs:
       security-events: write
     # Consolidated fs-security bundle: Trivy(fs) + Grype(fs) + gitleaks in ONE job
     # (replaces the gitleaks job here + the standalone gitleaks/trivy-fs/grype-fs/secret-scan workflows).
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-security-fs.yml@503674eb96658628d0938c23a44d226803021705 # v1.3.0
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-security-fs.yml@caa797cc7baec52e99f21b86f532a4b7c88cf4fa # fix/grype-install-outside-scan-path
     with:
       working-directory: "."
       scan-history: true
@@ -72,7 +72,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-codeql.yml@d9792d01b442d7f2d3d2c6855cb312d885594e0f # v1.2.1
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-codeql.yml@caa797cc7baec52e99f21b86f532a4b7c88cf4fa # fix/grype-install-outside-scan-path
     with:
       languages: "python"
       source-root: "."
