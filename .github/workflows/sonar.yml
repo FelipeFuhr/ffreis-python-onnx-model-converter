@@ -29,9 +29,8 @@ jobs:
     if: ${{ !github.event.pull_request.draft && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false) }}
     permissions:
       contents: read
-    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-sonar.yml@e05d6dd81831750853e8f325f2d43574c1c2a7a2 # main
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-sonarcloud.yml@9ed72155ff7384758b2bd36bd97ba5371ae285c2 # main
     with:
       working-directory: "."
-      python-version: "3.13"
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
