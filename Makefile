@@ -277,6 +277,6 @@ install-act: ## Download pinned act binary into .bin/
 
 ci-local-act: ## Run workflows locally via act (GH Actions quota fallback). Args via ARGS=...
 	@mkdir -p scripts
-	@curl -fsSL "$(PLATFORM_STANDARDS_RAW)/$(PLATFORM_STANDARDS_SHA)/scripts/run-ci-local.sh" \
+	@curl -fsSL "https://raw.githubusercontent.com/FelipeFuhr/ffreis-platform-ci-local/v1.0.0/scripts/run-ci-local.sh" \
 		-o scripts/run-ci-local.sh && chmod +x scripts/run-ci-local.sh
-	@PATH="$(CURDIR)/.bin:$(PATH)" bash ./scripts/run-ci-local.sh $(ARGS)
+	@CI_LOCAL_FINDINGS_REF=v1.0.0 PATH="$(CURDIR)/.bin:$(PATH)" bash ./scripts/run-ci-local.sh $(ARGS)
