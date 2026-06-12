@@ -15,6 +15,8 @@ concurrency:
 
 jobs:
   grpc-sync-and-parity:
+    permissions:
+      contents: read
     uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-run-commands.yml@v1.2.0
     with:
       setup-python: true

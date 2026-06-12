@@ -13,6 +13,8 @@ concurrency:
 
 jobs:
   shellcheck:
+    permissions:
+      contents: read
     uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-shellcheck.yml@v1.2.0
     with:
       working-directory: .
