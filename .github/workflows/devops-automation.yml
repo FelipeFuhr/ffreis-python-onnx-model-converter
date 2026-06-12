@@ -16,7 +16,9 @@ concurrency:
 
 jobs:
   scorecard:
-    if: vars.SCORECARD_ENABLED == 'true' && github.event_name != 'pull_request'
+    if: |
+      (vars.FLEET_SPOT_CI != 'true' || github.event_name == 'workflow_dispatch') &&
+      vars.SCORECARD_ENABLED == 'true' && github.event_name != 'pull_request'
     permissions:
       contents: read
       actions: read
@@ -26,8 +28,11 @@ jobs:
     with:
       upload-sarif: true
 
+      runner: ${{ (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && '["ubuntu-latest"]' || '["self-hosted","spot","linux","x64"]' }}
   stale:
-    if: vars.STALE_ENABLED == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    if: |
+      (vars.FLEET_SPOT_CI != 'true' || github.event_name == 'workflow_dispatch') &&
+      vars.STALE_ENABLED == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       issues: write
@@ -36,6 +41,7 @@ jobs:
     with:
       only: "both"
 
+      runner: ${{ (github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && '["ubuntu-latest"]' || '["self-hosted","spot","linux","x64"]' }}
   release-please:
     if: vars.RELEASE_PLEASE_ENABLED == 'true' && github.event_name == 'push'
     permissions:
