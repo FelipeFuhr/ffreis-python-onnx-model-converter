@@ -2,6 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# shellcheck disable=SC1091
 source "$(dirname "$0")/../lib/common.sh"
 
 has_error=0

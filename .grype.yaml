@@ -1,0 +1,24 @@
+# Grype ignore policy.
+#
+# Keep this file small and time-bound:
+# - Prefer fixing vulnerabilities over ignoring them.
+# - Always include a statement and expiry comment.
+# - Scope ignores to specific packages whenever possible.
+#
+# Reference: https://github.com/anchore/grype#specifying-matches-to-ignore
+
+ignore:
+  # CVE-2026-45447 affects OpenSSL 3.5.3-1ubuntu2 (openssl-provider-legacy and
+  # libssl3t64) found inside the onnx-converter-uv-venv container image layers.
+  # These are Ubuntu system packages bundled in the base image — not Python
+  # runtime dependencies. The CVE has no fixed version available in Ubuntu 25.10
+  # at this time. Suppressed until an Ubuntu package update is released.
+  # Expiry: 2026-12-31
+  - vulnerability: CVE-2026-45447
+    package:
+      name: openssl-provider-legacy
+      type: deb
+  - vulnerability: CVE-2026-45447
+    package:
+      name: libssl3t64
+      type: deb
