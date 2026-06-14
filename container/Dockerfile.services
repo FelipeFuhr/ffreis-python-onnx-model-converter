@@ -18,8 +18,15 @@ COPY scripts /app/scripts
 COPY src /app/src
 COPY examples /app/examples
 
-RUN uv venv "${VIRTUAL_ENV}" --python 3.13 \
+# scan-fix(docker:S7031): merged consecutive RUN instructions into one layer
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* \
+    && uv venv "${VIRTUAL_ENV}" --python 3.13 \
     && ./scripts/generate_grpc_stubs.sh \
-    && uv pip install --python "${VIRTUAL_ENV}/bin/python" -e ".[server,grpc,sklearn]"
+    && uv pip install --python "${VIRTUAL_ENV}/bin/python" -e ".[server,grpc,sklearn]" \
+    && useradd --uid 1000 --create-home appuser \
+    && chown -R appuser:appuser /app /opt/venv
+USER appuser
 
 CMD ["python", "-m", "onnx_converter.converter.http_server"]
