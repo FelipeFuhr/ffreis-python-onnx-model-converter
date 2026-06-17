@@ -1,5 +1,7 @@
 name: DevOps / Release Please
 
+permissions: {}
+
 on:
   push:
     branches: [main]
