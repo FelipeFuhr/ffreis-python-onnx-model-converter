@@ -14,6 +14,10 @@ concurrency:
 
 jobs:
   stale:
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-stale.yml@v1.2.0
     with:
       only: "both"

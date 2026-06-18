@@ -12,4 +12,8 @@ concurrency:
 
 jobs:
   release-please:
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-release-please.yml@v1.2.0
