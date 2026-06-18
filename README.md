@@ -1,5 +1,9 @@
 # ONNX Model Converter
 
+<!-- ffreis-badges:start -->
+[![CI](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/FelipeFuhr/ffreis-badges/main/badges/ffreis-python-onnx-model-converter/ci.json)](https://github.com/FelipeFuhr/ffreis-python-onnx-model-converter/actions) [![License](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/FelipeFuhr/ffreis-badges/main/badges/ffreis-python-onnx-model-converter/license.json)](https://github.com/FelipeFuhr/ffreis-python-onnx-model-converter/blob/main/LICENSE)
+<!-- ffreis-badges:end -->
+
 Convert model artifacts from PyTorch, TensorFlow/Keras, and scikit-learn into ONNX with optional parity checks, post-processing, and plugin-based extension points.
 
 ## What this project does

@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from onnx import TensorProto, helper
 from onnx import save as onnx_save
 
 from onnx_converter.validate import validate_onnx_if_requested
+
+pytest.importorskip("onnxruntime")
 
 
 def _write_minimal_onnx(path: Path) -> None:

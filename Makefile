@@ -73,6 +73,12 @@ format: ## Format code (ruff + black + isort)
 	$(VENV_DIR)/bin/black src tests
 	$(VENV_DIR)/bin/isort src tests
 
+.PHONY: fmt-check
+fmt-check: ## Check formatting without modifying files (ruff + black + isort)
+	$(VENV_DIR)/bin/ruff format --check src tests
+	$(VENV_DIR)/bin/black --check src tests
+	$(VENV_DIR)/bin/isort --check-only src tests
+
 .PHONY: lint
 lint: ## Lint code (ruff + flake8 + mypy)
 	$(VENV_DIR)/bin/ruff check src tests
