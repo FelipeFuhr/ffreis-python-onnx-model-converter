@@ -20,6 +20,7 @@ def test_help_shows_commands() -> None:
     assert "pytorch" in result.output
     assert "tensorflow" in result.output
     assert "sklearn" in result.output
+    assert "merge" in result.output
 
 
 def test_pytorch_missing_deps(tmp_path: Path, monkeypatch: pytest_MonkeyPatch) -> None:
