@@ -148,9 +148,8 @@ def test_merge_prefix_applied_to_preprocessing_graph(
     input_names = [i.name for i in merged.graph.input]
     # The preprocessing graph's original input name was "input";
     # after prefixing it becomes "zscore_input".
-    assert any("zscore_input" in name for name in input_names), (
-        f"Expected 'zscore_input' in merged inputs {input_names}"
-    )
+    msg = f"Expected 'zscore_input' in merged inputs {input_names}"
+    assert any("zscore_input" in name for name in input_names), msg
 
 
 @pytest.mark.unit

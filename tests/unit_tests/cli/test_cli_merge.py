@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,15 @@ from onnx_converter.cli import cli as cli_module
 from onnx_converter.core.merge import MergeError
 
 runner = CliRunner()
+
+# scan-fix(ci:ansi-strip): Rich caches its Console colour state as a process-level
+# singleton. When FORCE_COLOR=1 is set in the GitHub Actions runner env and an
+# earlier test in the same pytest session invokes the Typer app without NO_COLOR,
+# the singleton is primed for colour output. Subsequent invocations then inject
+# ANSI escape codes around each character of flag names (e.g.
+# '\x1b[1m-\x1b[0m\x1b[1m-preprocessing\x1b[0m'), breaking plain-text assertions.
+# Stripping ANSI codes before asserting is more robust than env overrides alone.
+_ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
 
 
 # ---------------------------------------------------------------------------
@@ -240,10 +250,20 @@ def test_merge_cmd_surfaces_generic_error(
 def test_merge_cmd_help_output(tmp_path: Path) -> None:
     """Verify that ``merge --help`` lists expected flags."""
     # scan-fix(ci:terminal-width): force wide terminal so Rich does not truncate
-    # long option names (--preprocessing) in narrow act container environments
-    result = runner.invoke(cli_module.app, ["merge", "--help"], env={"COLUMNS": "200"})
+    # long option names (--preprocessing) in narrow act container environments.
+    # scan-fix(ci:ansi-color): NO_COLOR=1 + FORCE_COLOR=None prevent Rich from
+    # injecting ANSI escape codes. Additionally strip any residual ANSI because
+    # Rich caches its Console colour singleton at process level — an earlier test
+    # that ran without NO_COLOR can prime the singleton for colour output, making
+    # subsequent env overrides insufficient (see module-level _ANSI_ESCAPE).
+    result = runner.invoke(
+        cli_module.app,
+        ["merge", "--help"],
+        env={"COLUMNS": "200", "NO_COLOR": "1", "FORCE_COLOR": None},
+    )
+    plain_output = _ANSI_ESCAPE.sub("", result.output)
     assert result.exit_code == 0
-    assert "--preprocessing" in result.output
-    assert "--model" in result.output
-    assert "--output" in result.output
-    assert "--verify" in result.output
+    assert "--preprocessing" in plain_output
+    assert "--model" in plain_output
+    assert "--output" in plain_output
+    assert "--verify" in plain_output
