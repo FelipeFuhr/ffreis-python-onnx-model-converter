@@ -683,6 +683,124 @@ def custom_cmd(
         raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
 
 
+@app.command("merge")
+def merge_cmd(
+    ctx: typer_Context,
+    preprocessing: Path = typer_Option(
+        ...,
+        "--preprocessing",
+        exists=True,
+        readable=True,
+        help="Path to the preprocessing ONNX graph.",
+    ),
+    model: Path = typer_Option(
+        ...,
+        "--model",
+        exists=True,
+        readable=True,
+        help="Path to the model ONNX graph.",
+    ),
+    output: Path = typer_Option(
+        ...,
+        "--output",
+        help="Destination path for the merged ONNX artifact.",
+    ),
+    prefix: str = typer_Option(
+        "pre_",
+        "--prefix",
+        help="Name prefix applied to all nodes in the preprocessing graph.",
+    ),
+    verify: bool = typer_Option(
+        False,
+        "--verify",
+        help=(
+            "Run a parity check: assert chained ORT sessions match the merged "
+            "graph output on a random float32 batch.  Requires --verify-shape."
+        ),
+    ),
+    verify_shape: list[int] | None = typer_Option(
+        None,
+        "--verify-shape",
+        help=(
+            "Input batch shape for --verify (repeatable ints). "
+            "Example: --verify-shape 4 --verify-shape 8 for shape (4, 8)."
+        ),
+    ),
+) -> None:
+    """Merge a preprocessing ONNX graph with a model ONNX graph.
+
+    The preprocessing graph's outputs become the model graph's inputs,
+    producing a single self-contained inference artifact.
+
+    Parameters
+    ----------
+    ctx : typer.Context
+        Typer context containing global options.
+    preprocessing : Path
+        Path to the preprocessing ONNX graph.
+    model : Path
+        Path to the model ONNX graph.
+    output : Path
+        Destination path for the merged ONNX output.
+    prefix : str, default ``"pre_"``
+        Prefix applied to node/tensor names in the preprocessing graph to
+        prevent name collisions.
+    verify : bool, default ``False``
+        Whether to verify numerical parity between chained and merged graphs.
+    verify_shape : list[int] | None, default ``None``
+        Input shape for the parity verification batch.  Required when
+        ``--verify`` is set.
+
+    Notes
+    -----
+    - Requires ``onnx>=1.13`` (already satisfied by the core dependency).
+    - ``--verify`` additionally requires ``onnxruntime`` (``[runtime]`` extra)
+      and ``--verify-shape`` to specify the batch shape.
+    """
+    debug: bool = bool(ctx.obj.get("debug", False))
+
+    if verify and not verify_shape:
+        raise typer_BadParameter(
+            "--verify-shape is required when --verify is set. "
+            "Example: --verify-shape 1 --verify-shape 4"
+        )
+    if verify:
+        _require_deps(
+            [MissingDep("onnxruntime", "runtime", "merge parity verification")]
+        )
+
+    try:
+        from onnx_converter.core.merge import MergeError, merge_onnx_models
+
+        merge_onnx_models(
+            preprocessing_path=preprocessing,
+            model_path=model,
+            output_path=output,
+            prefix=prefix,
+        )
+        typer_echo(f"[green]✓ Merged:[/green] {output}")
+
+        if verify:
+            import numpy as _np  # noqa: PLC0415 — deferred; only when --verify
+
+            from onnx_converter.core.merge import verify_merge_parity
+
+            shape = tuple(verify_shape or [])
+            sample = _np.random.default_rng(0).random(shape).astype(_np.float32)
+            verify_merge_parity(
+                preprocessing_path=preprocessing,
+                model_path=model,
+                merged_path=output,
+                sample_input=sample,
+            )
+            typer_echo("[green]✓ Parity verified.[/green]")
+
+    except MergeError as exc:
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
+    except Exception as exc:
+        raise typer_Exit(code=_print_conversion_error(exc, debug)) from exc
+
+
 @app.command("doctor")
 def doctor_cmd() -> None:
     """Print installed toolchain versions and compatibility notes."""
