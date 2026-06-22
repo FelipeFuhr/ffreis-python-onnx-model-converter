@@ -22,3 +22,19 @@ jobs:
     uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-security.yml@v1.0.1
     with:
       python-version: "3.13"
+      # scan-fix(pip-audit:architectural): onnx 1.17.0 is the last version compatible with
+      # protobuf<4 (required by tf2onnx on Python <3.13). onnx>=1.18 requires protobuf>=4.25.1
+      # which conflicts with tf2onnx. pip-audit scans the full lockfile so it flags the
+      # Python <3.13 resolution even on a Python 3.13 runner. Suppress until tf2onnx
+      # drops the protobuf<4 constraint or we drop the Python <3.13 tf path.
+      # protobuf 3.20.3 CVEs: also unfixable in the 3.x series; 4.25.8+ is the fix track.
+      ignore-vulns: >-
+        PYSEC-2026-104,
+        PYSEC-2026-103,
+        PYSEC-2025-148,
+        CVE-2026-34446,
+        GHSA-q56x-g2fj-4rj6,
+        CVE-2026-27489,
+        CVE-2026-34445,
+        CVE-2025-4565,
+        CVE-2026-0994

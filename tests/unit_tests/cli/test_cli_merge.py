@@ -206,9 +206,42 @@ def test_merge_cmd_surfaces_merge_error(
 
 
 @pytest.mark.unit
+def test_merge_cmd_surfaces_generic_error(
+    tmp_path: Path, monkeypatch: pytest_MonkeyPatch
+) -> None:
+    """An unexpected exception from the core layer produces a non-zero exit."""
+    pre_path, model_path = _make_toy_graphs(tmp_path)
+    output_path = tmp_path / "merged.onnx"
+
+    def fake_merge(**_: object) -> None:
+        raise ValueError("unexpected core failure")
+
+    import onnx_converter.core.merge as merge_module
+
+    monkeypatch.setattr(merge_module, "merge_onnx_models", fake_merge)
+
+    result = runner.invoke(
+        cli_module.app,
+        [
+            "merge",
+            "--preprocessing",
+            str(pre_path),
+            "--model",
+            str(model_path),
+            "--output",
+            str(output_path),
+        ],
+    )
+
+    assert result.exit_code != 0
+
+
+@pytest.mark.unit
 def test_merge_cmd_help_output(tmp_path: Path) -> None:
     """Verify that ``merge --help`` lists expected flags."""
-    result = runner.invoke(cli_module.app, ["merge", "--help"])
+    # scan-fix(ci:terminal-width): force wide terminal so Rich does not truncate
+    # long option names (--preprocessing) in narrow act container environments
+    result = runner.invoke(cli_module.app, ["merge", "--help"], env={"COLUMNS": "200"})
     assert result.exit_code == 0
     assert "--preprocessing" in result.output
     assert "--model" in result.output

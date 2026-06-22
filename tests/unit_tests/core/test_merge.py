@@ -263,6 +263,77 @@ def test_merge_parity_detects_shape_mismatch_at_inference(tmp_path: Path) -> Non
 
 
 # ---------------------------------------------------------------------------
+# merge_onnx_models — exception handlers (mock-based)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+def test_merge_raises_on_compose_failure(
+    toy_graphs: tuple[Path, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """MergeError wraps exceptions raised by onnx.compose.merge_models."""
+    pre_path, model_path = toy_graphs
+
+    import onnx.compose as _compose
+
+    monkeypatch.setattr(
+        _compose,
+        "merge_models",
+        lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("compose boom")),
+    )
+
+    with pytest.raises(MergeError, match="onnx.compose.merge_models failed"):
+        merge_onnx_models(pre_path, model_path, tmp_path / "merged.onnx")
+
+
+@pytest.mark.unit
+def test_merge_raises_on_checker_failure(
+    toy_graphs: tuple[Path, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """MergeError wraps exceptions raised by onnx.checker.check_model.
+
+    onnx.compose.merge_models calls check_model internally before returning.
+    We let that internal call succeed (call 0) and fail on the explicit call
+    in merge_onnx_models (call 1).
+    """
+    pre_path, model_path = toy_graphs
+
+    original_check = onnx.checker.check_model
+    call_count: list[int] = [0]
+
+    def _raise_on_second(*a: object, **kw: object) -> None:
+        call_count[0] += 1
+        if call_count[0] <= 1:
+            original_check(*a, **kw)  # type: ignore[arg-type]
+        else:
+            raise RuntimeError("checker boom")
+
+    monkeypatch.setattr(onnx.checker, "check_model", _raise_on_second)
+
+    with pytest.raises(MergeError, match="Merged model failed ONNX checker validation"):
+        merge_onnx_models(pre_path, model_path, tmp_path / "merged.onnx")
+
+
+@pytest.mark.unit
+def test_merge_raises_on_save_failure(
+    toy_graphs: tuple[Path, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """MergeError wraps exceptions raised by onnx.save."""
+    pre_path, model_path = toy_graphs
+
+    import onnx as _onnx
+
+    monkeypatch.setattr(
+        _onnx,
+        "save",
+        lambda *a, **kw: (_ for _ in ()).throw(OSError("disk full")),
+    )
+
+    with pytest.raises(MergeError, match="Failed to save merged model"):
+        merge_onnx_models(pre_path, model_path, tmp_path / "merged.onnx")
+
+
+# ---------------------------------------------------------------------------
 # verify_merge_parity — error cases
 # ---------------------------------------------------------------------------
 
