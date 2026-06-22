@@ -160,6 +160,15 @@ force-exclude = true
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "D", "ANN"]
 
+[tool.ruff.lint.isort]
+# scan-fix(ruff:I001): pin both packages as first-party so ruff's import-section
+# detection is stable regardless of whether the generated converter_grpc stubs
+# (converter_pb2.py / converter_pb2_grpc.py) are present on disk.  The stubs are
+# produced by generate_grpc_stubs.sh and are git-ignored; they are absent in
+# lint-only CI runs, causing ruff to classify converter_grpc as third-party and
+# therefore expect a different blank-line layout than when the stubs exist locally.
+known-first-party = ["onnx_converter", "converter_grpc"]
+
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
