@@ -15,6 +15,20 @@ and scikit-learn models to ONNX. Plugin-based for custom model families.
 - **AutoSklearn has separate dependency pins** (ASKL1 vs ASKL2 conflict resolver
   incompatibilities). Keep in `examples/docker/` only; do not add to main dependencies.
 
+- **HuggingFace export uses `optimum.exporters.onnx` behind the `[hf]` extra (D2).**
+  `converters/hf_converter.py` (`convert_hf_to_onnx` + `verify_hf_onnx_parity`)
+  lazy-imports optimum/transformers — multi-GB, kept off the core deps (same isolation
+  policy as `tf_legacy`). `optimum.main_export` auto-detects the task from
+  `model.config.model_type`. The module is **coverage-omitted** (extra absent in the
+  baseline run) and its integration test uses `importorskip`; a typed `DependencyError`
+  is raised at call time when optimum is missing.
+
+- **Lint gate is `make lint` (ruff + flake8 + mypy), NOT `make fmt-check`.** `check`
+  = `grpc-check lint test-unit` — it does **not** run `fmt-check`. `isort` (in
+  `fmt-check`) is configured `force_single_line` which *conflicts* with ruff's import
+  combining; ruff is authoritative. Make imports ruff-clean (combined); do not split
+  them to satisfy isort, or `make lint` will fail.
+
 - **Plugin discovery via entry points.** New model families can be added as plugins
   without modifying the core. Do not add framework-specific adapters to `core/`.
 
