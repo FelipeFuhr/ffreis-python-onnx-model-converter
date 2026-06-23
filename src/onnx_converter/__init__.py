@@ -142,6 +142,90 @@ def convert_sklearn_to_onnx(
     )
 
 
+def convert_xgboost_to_onnx(
+    model: ModelArtifact,
+    output_path: str,
+    n_features: int,
+    initial_types: list[tuple[str, SklearnInitialTypeLike]] | None = None,
+    target_opset: int | None = None,
+    **kwargs: OptionValue,
+) -> str:
+    """Convert an XGBoost classifier or regressor to ONNX.
+
+    Parameters
+    ----------
+    model
+        Trained XGBoost ``XGBClassifier`` or ``XGBRegressor`` instance.
+    output_path : str
+        Destination path for the ONNX output.
+    n_features : int
+        Number of input features.
+    initial_types : list, optional
+        ``onnxmltools``-style input type declarations.
+    target_opset : int, optional
+        ONNX opset version override.
+    **kwargs : OptionValue
+        Additional converter options.
+
+    Returns
+    -------
+    str
+        Path to the generated ONNX file.
+    """
+    from .converters.xgboost_converter import convert_xgboost_to_onnx as _impl
+
+    return _impl(
+        model=model,
+        output_path=output_path,
+        n_features=n_features,
+        initial_types=initial_types,
+        target_opset=target_opset,
+        **kwargs,
+    )
+
+
+def convert_lightgbm_to_onnx(
+    model: ModelArtifact,
+    output_path: str,
+    n_features: int,
+    initial_types: list[tuple[str, SklearnInitialTypeLike]] | None = None,
+    target_opset: int | None = None,
+    **kwargs: OptionValue,
+) -> str:
+    """Convert a LightGBM classifier or regressor to ONNX.
+
+    Parameters
+    ----------
+    model
+        Trained LightGBM ``LGBMClassifier`` or ``LGBMRegressor`` instance.
+    output_path : str
+        Destination path for the ONNX output.
+    n_features : int
+        Number of input features.
+    initial_types : list, optional
+        ``onnxmltools``-style input type declarations.
+    target_opset : int, optional
+        ONNX opset version override.
+    **kwargs : OptionValue
+        Additional converter options.
+
+    Returns
+    -------
+    str
+        Path to the generated ONNX file.
+    """
+    from .converters.lightgbm_converter import convert_lightgbm_to_onnx as _impl
+
+    return _impl(
+        model=model,
+        output_path=output_path,
+        n_features=n_features,
+        initial_types=initial_types,
+        target_opset=target_opset,
+        **kwargs,
+    )
+
+
 def convert_custom_file_to_onnx(
     model_path: Path,
     output_path: Path | None = None,
@@ -178,5 +262,7 @@ __all__ = [
     "convert_pytorch_to_onnx",
     "convert_tensorflow_to_onnx",
     "convert_sklearn_to_onnx",
+    "convert_xgboost_to_onnx",
+    "convert_lightgbm_to_onnx",
     "convert_custom_file_to_onnx",
 ]
