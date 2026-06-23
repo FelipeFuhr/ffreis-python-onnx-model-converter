@@ -140,8 +140,48 @@ def convert_sklearn_to_onnx(
     )
 
 
+def convert_hf_to_onnx(
+    model_name_or_path: str,
+    output_dir: str,
+    *,
+    task: str = "auto",
+    opset: int | None = None,
+    device: str = "cpu",
+) -> str:
+    """Convert a HuggingFace Transformers model to ONNX via lazy backend import.
+
+    Parameters
+    ----------
+    model_name_or_path : str
+        HuggingFace Hub model id or local model directory.
+    output_dir : str
+        Directory the ONNX artifact(s) are written to.
+    task : str, default="auto"
+        Export task; ``"auto"`` infers it from ``model.config.model_type``.
+    opset : int | None, default=None
+        Optional ONNX opset override.
+    device : str, default="cpu"
+        Device used during export tracing.
+
+    Returns
+    -------
+    str
+        Path to the produced ONNX model file.
+    """
+    from .hf_converter import convert_hf_to_onnx as _impl
+
+    return _impl(
+        model_name_or_path,
+        output_dir,
+        task=task,
+        opset=opset,
+        device=device,
+    )
+
+
 __all__ = [
     "convert_pytorch_to_onnx",
     "convert_tensorflow_to_onnx",
     "convert_sklearn_to_onnx",
+    "convert_hf_to_onnx",
 ]

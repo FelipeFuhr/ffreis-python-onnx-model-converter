@@ -63,6 +63,13 @@ tf_example = [
 optuna = [
     "optuna>=4.7.0",
 ]
+# HuggingFace Transformers export path (D2). Multi-GB install kept isolated as its
+# own extra (mirrors the tf_legacy isolation policy) — the hf_converter lazy-imports
+# optimum/transformers, so the core package never requires them.
+hf = [
+    "optimum>=1.20.0",
+    "transformers>=4.40.0",
+]
 dev = [
     "hypothesis>=6.0.0",
     "pytest>=9.0.3",
@@ -205,6 +212,11 @@ omit = [
     # core logic that is always exercised.
     "*/onnx_converter/converter/grpc_server.py",
     "*/onnx_converter/converter/http_server.py",
+    # scan-fix(coverage:optional-extras): the HuggingFace converter requires the
+    # optimum/transformers stack (the multi-GB [hf] extra) which is NOT installed in
+    # the baseline test run. Its tests use importorskip and are skipped when the extra
+    # is absent — omitting here keeps the 92% gate meaningful for always-exercised code.
+    "*/onnx_converter/converters/hf_converter.py",
 ]
 
 [tool.coverage.report]
