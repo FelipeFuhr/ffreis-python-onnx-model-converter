@@ -5,14 +5,14 @@ from __future__ import annotations
 from collections.abc import Callable
 from inspect import signature as inspect_signature
 from pathlib import Path
-from typing import Protocol, cast
+from typing import Protocol
+from typing import cast
 
-from onnx_converter.errors import (
-    DependencyError,
-    UnsafeLoadError,
-    UnsupportedModelError,
-)
-from onnx_converter.types import ModelArtifact, OptionValue
+from onnx_converter.errors import DependencyError
+from onnx_converter.errors import UnsafeLoadError
+from onnx_converter.errors import UnsupportedModelError
+from onnx_converter.types import ModelArtifact
+from onnx_converter.types import OptionValue
 
 
 class _TorchLoadModule(Protocol):

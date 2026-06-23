@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Protocol, cast
+from typing import Protocol
+from typing import cast
 
 from numpy import asarray as np_asarray
 from numpy import float32 as np_float32
@@ -11,12 +12,11 @@ from numpy import ndarray as np_ndarray
 
 from onnx_converter.application.options import ParityOptions
 from onnx_converter.errors import ParityError
-from onnx_converter.parity import (
-    check_sklearn_parity,
-    check_tensor_parity,
-    load_parity_input,
-)
-from onnx_converter.types import ModelArtifact, OptionMap
+from onnx_converter.parity import check_sklearn_parity
+from onnx_converter.parity import check_tensor_parity
+from onnx_converter.parity import load_parity_input
+from onnx_converter.types import ModelArtifact
+from onnx_converter.types import OptionMap
 
 
 class TorchParityChecker:

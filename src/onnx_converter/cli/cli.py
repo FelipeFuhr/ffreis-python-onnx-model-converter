@@ -40,8 +40,10 @@ from typer import Option as typer_Option
 from typer import Typer as typer_Typer
 from typer import echo as typer_echo
 
-from onnx_converter.errors import ConversionError, PluginError
-from onnx_converter.types import MutableOptionMap, OptionValue
+from onnx_converter.errors import ConversionError
+from onnx_converter.errors import PluginError
+from onnx_converter.types import MutableOptionMap
+from onnx_converter.types import OptionValue
 
 app = typer_Typer(
     name="convert-to-onnx",
@@ -770,7 +772,8 @@ def merge_cmd(
         )
 
     try:
-        from onnx_converter.core.merge import MergeError, merge_onnx_models
+        from onnx_converter.core.merge import MergeError
+        from onnx_converter.core.merge import merge_onnx_models
 
         merge_onnx_models(
             preprocessing_path=preprocessing,

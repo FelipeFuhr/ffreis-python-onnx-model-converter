@@ -13,7 +13,8 @@ from types import ModuleType
 from pydantic import ValidationError
 
 from onnx_converter.errors import PluginError
-from onnx_converter.plugins.base import ConverterPlugin, PluginOptions
+from onnx_converter.plugins.base import ConverterPlugin
+from onnx_converter.plugins.base import PluginOptions
 from onnx_converter.plugins.builtins import SklearnFilePlugin
 from onnx_converter.schemas import PluginResolutionConfig
 

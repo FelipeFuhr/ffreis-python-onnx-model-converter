@@ -10,7 +10,8 @@ from typing import Any
 import pytest
 
 from onnx_converter.application import use_cases
-from onnx_converter.application.use_cases import ConversionResult, convert_custom_file
+from onnx_converter.application.use_cases import ConversionResult
+from onnx_converter.application.use_cases import convert_custom_file
 
 
 class FakePlugin:

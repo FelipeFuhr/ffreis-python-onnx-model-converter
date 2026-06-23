@@ -6,20 +6,20 @@ from pathlib import Path
 from sys import modules as sys_modules
 from types import SimpleNamespace as types_SimpleNamespace
 
-from onnx import TensorProto, helper
+from onnx import TensorProto
 from onnx import checker as onnx_checker
+from onnx import helper
 from onnx import load as onnx_load
 from onnx import save as onnx_save
 from pytest import MonkeyPatch as pytest_MonkeyPatch
 from pytest import raises as pytest_raises
 
-from onnx_converter.errors import ConversionError, PostprocessError
-from onnx_converter.postprocess import (
-    add_onnx_metadata,
-    add_standard_metadata,
-    optimize_onnx_graph,
-    quantize_onnx_dynamic,
-)
+from onnx_converter.errors import ConversionError
+from onnx_converter.errors import PostprocessError
+from onnx_converter.postprocess import add_onnx_metadata
+from onnx_converter.postprocess import add_standard_metadata
+from onnx_converter.postprocess import optimize_onnx_graph
+from onnx_converter.postprocess import quantize_onnx_dynamic
 from onnx_converter.validate import validate_onnx_if_requested
 
 

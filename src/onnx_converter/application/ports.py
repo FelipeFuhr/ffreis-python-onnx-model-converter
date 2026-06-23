@@ -6,8 +6,10 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Protocol
 
-from onnx_converter.application.options import ParityOptions, PostprocessOptions
-from onnx_converter.types import ModelArtifact, OptionMap
+from onnx_converter.application.options import ParityOptions
+from onnx_converter.application.options import PostprocessOptions
+from onnx_converter.types import ModelArtifact
+from onnx_converter.types import OptionMap
 
 
 class ModelLoader(Protocol):

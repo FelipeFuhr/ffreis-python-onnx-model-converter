@@ -9,11 +9,9 @@ from types import ModuleType as types_ModuleType
 from pytest import MonkeyPatch as pytest_MonkeyPatch
 from pytest import raises as pytest_raises
 
-from onnx_converter.adapters.converters import (
-    SklearnModelConverter,
-    TensorflowModelConverter,
-    TorchModelConverter,
-)
+from onnx_converter.adapters.converters import SklearnModelConverter
+from onnx_converter.adapters.converters import TensorflowModelConverter
+from onnx_converter.adapters.converters import TorchModelConverter
 from onnx_converter.errors import UnsupportedModelError
 
 

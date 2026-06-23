@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Protocol, cast
+from typing import Protocol
+from typing import TypeAlias
+from typing import cast
 
 from numpy import abs as np_abs
 from numpy import allclose as np_allclose
@@ -20,8 +22,10 @@ from numpy.typing import NDArray as npt_NDArray
 
 from onnx_converter.errors import ParityError
 
-FloatArray = npt_NDArray[np_float32]
-LabelArray = npt_NDArray[np_int64]
+# scan-fix(mypy:valid-type): explicit TypeAlias annotation required when
+# from __future__ import annotations is active; bare assignment is not a type alias.
+FloatArray: TypeAlias = npt_NDArray[np_float32]
+LabelArray: TypeAlias = npt_NDArray[np_int64]
 
 
 class _PredictorProtocol(Protocol):

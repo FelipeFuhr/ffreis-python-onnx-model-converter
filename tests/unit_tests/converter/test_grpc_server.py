@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, cast
+from typing import Protocol
+from typing import cast
 
 from pytest import CaptureFixture as pytest_CaptureFixture
 from pytest import MonkeyPatch as pytest_MonkeyPatch
