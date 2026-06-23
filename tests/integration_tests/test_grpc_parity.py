@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from os import getenv as os_getenv
-from typing import Protocol, cast, no_type_check
+from typing import Protocol
+from typing import cast
+from typing import no_type_check
 
 from pytest import MonkeyPatch as pytest_MonkeyPatch
 from pytest import mark as pytest_mark
@@ -15,12 +17,15 @@ try:
     from fastapi.testclient import TestClient
     from httpx import ASGITransport as httpx_ASGITransport
     from httpx import AsyncClient as httpx_AsyncClient
-    from hypothesis import HealthCheck, given, settings
+    from hypothesis import HealthCheck
+    from hypothesis import given
+    from hypothesis import settings
     from hypothesis import strategies as st
 except (ImportError, ModuleNotFoundError) as exc:
     pytest_skip(f"grpc parity dependencies unavailable: {exc}", allow_module_level=True)
 
-from onnx_converter.converter.core import ConversionOutcome, ConversionRequest
+from onnx_converter.converter.core import ConversionOutcome
+from onnx_converter.converter.core import ConversionRequest
 from onnx_converter.converter.http_server import create_app
 
 try:

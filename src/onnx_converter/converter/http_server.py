@@ -8,21 +8,23 @@ from importlib import import_module as importlib_import_module
 from logging import getLogger as logging_getLogger
 from os import getenv as os_getenv
 from types import ModuleType
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING
+from typing import Protocol
+from typing import cast
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+from pydantic import ConfigDict
 
-from onnx_converter.converter.core import (
-    ConversionRequest,
-    Framework,
-    convert_artifact_bytes,
-)
+from onnx_converter.converter.core import ConversionRequest
+from onnx_converter.converter.core import Framework
+from onnx_converter.converter.core import convert_artifact_bytes
 from onnx_converter.errors import ConversionError
 
 logger = logging_getLogger(__name__)
 
 if TYPE_CHECKING:
-    from fastapi import FastAPI, UploadFile
+    from fastapi import FastAPI
+    from fastapi import UploadFile
     from fastapi.responses import Response
 else:
 

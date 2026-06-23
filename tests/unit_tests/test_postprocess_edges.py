@@ -8,12 +8,14 @@ from pathlib import Path
 from sys import modules as sys_modules
 from types import SimpleNamespace
 
-from onnx import TensorProto, helper
+from onnx import TensorProto
+from onnx import helper
 from onnx import load as onnx_load
 from onnx import save as onnx_save
 from pytest import MonkeyPatch as pytest_MonkeyPatch
 
-from onnx_converter.postprocess import add_onnx_metadata, quantize_onnx_dynamic
+from onnx_converter.postprocess import add_onnx_metadata
+from onnx_converter.postprocess import quantize_onnx_dynamic
 
 
 def _write_minimal_onnx(path: Path) -> None:

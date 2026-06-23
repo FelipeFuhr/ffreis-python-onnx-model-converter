@@ -6,12 +6,10 @@ from pathlib import Path
 from typing import cast
 
 from onnx_converter.errors import UnsupportedModelError
-from onnx_converter.types import (
-    ModelArtifact,
-    OptionMap,
-    SklearnInitialTypeLike,
-    TensorSpecLike,
-)
+from onnx_converter.types import ModelArtifact
+from onnx_converter.types import OptionMap
+from onnx_converter.types import SklearnInitialTypeLike
+from onnx_converter.types import TensorSpecLike
 
 
 class TorchModelConverter:

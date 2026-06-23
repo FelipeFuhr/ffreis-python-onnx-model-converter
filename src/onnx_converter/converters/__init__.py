@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from onnx_converter.types import (
-    ModelArtifact,
-    OptionValue,
-    SklearnInitialTypeLike,
-    TensorSpecLike,
-)
+from onnx_converter.types import ModelArtifact
+from onnx_converter.types import OptionValue
+from onnx_converter.types import SklearnInitialTypeLike
+from onnx_converter.types import TensorSpecLike
 
 __version__ = "0.1.0"
 

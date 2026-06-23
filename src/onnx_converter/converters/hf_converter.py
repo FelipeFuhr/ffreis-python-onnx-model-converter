@@ -17,7 +17,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from onnx_converter.errors import ConversionError, DependencyError, ParityError
+from onnx_converter.errors import ConversionError
+from onnx_converter.errors import DependencyError
+from onnx_converter.errors import ParityError
 
 _OPTIMUM_HINT = "install with `pip install 'optimum[exporters]' transformers`"
 
@@ -130,7 +132,8 @@ def verify_hf_onnx_parity(
         import numpy as np
         import onnxruntime as ort
         import torch
-        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+        from transformers import AutoModelForSequenceClassification
+        from transformers import AutoTokenizer
     except ImportError as exc:
         raise DependencyError(
             f"transformers + onnxruntime required for HF parity checks; {_OPTIMUM_HINT}"

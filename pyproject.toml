@@ -53,6 +53,20 @@ sklearn = [
     # recommended for safer sklearn serialization:
     "skops>=0.13.0; python_version >= '3.11'",
 ]
+xgboost = [
+    # onnxmltools bridges XGBoost -> ONNX; skl2onnx provides FloatTensorType.
+    "xgboost>=2.0",
+    "onnxmltools>=1.12.0",
+    "skl2onnx>=1.20.0; python_version >= '3.11'",
+    "onnxruntime>=1.24.1",
+]
+lightgbm = [
+    # onnxmltools bridges LightGBM -> ONNX; skl2onnx provides FloatTensorType.
+    "lightgbm>=4.0",
+    "onnxmltools>=1.12.0",
+    "skl2onnx>=1.20.0; python_version >= '3.11'",
+    "onnxruntime>=1.24.1",
+]
 
 # TensorFlow example-only dependency set pinned for compatibility.
 tf_example = [
@@ -107,6 +121,17 @@ all = [
 ]
 
 [dependency-groups]
+dev = [
+    "lightgbm>=4.6.0",
+    "onnxmltools>=1.16.0",
+    "onnxruntime>=1.24.3",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.1.0",
+    "scikit-learn>=1.7.2",
+    "skl2onnx>=1.20.0",
+    "xgboost>=3.2.0",
+]
 
 [project.scripts]
 # Typer app entrypoint (recommended)
@@ -175,13 +200,20 @@ select = ["E", "F", "I", "UP", "B", "D", "ANN"]
 # lint-only CI runs, causing ruff to classify converter_grpc as third-party and
 # therefore expect a different blank-line layout than when the stubs exist locally.
 known-first-party = ["onnx_converter", "converter_grpc"]
+# scan-fix(ruff:I001): match isort's force_single_line = true so ruff lint and
+# isort agree on import style and don't cycle each other's fixes.
+force-single-line = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "src/onnx_converter/cli/cli.py" = ["B008"]
+# scan-fix(ruff:UP040): TypeAlias annotation is needed here for mypy compat when
+# from __future__ import annotations is active; the Python 3.12 `type` keyword
+# syntax is not yet compatible with numpy's NDArray generic in strict mypy mode.
 "src/onnx_converter/types.py" = ["UP040"]
+"src/onnx_converter/parity.py" = ["UP040"]
 "examples/**/*.py" = ["D", "ANN"]
 "scripts/**/*.py" = ["D", "ANN"]
 

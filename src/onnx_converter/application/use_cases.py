@@ -2,48 +2,39 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable
+from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
 
 from pydantic import ValidationError
 
-from onnx_converter.adapters.converters import (
-    SklearnModelConverter,
-    TensorflowModelConverter,
-    TorchModelConverter,
-)
-from onnx_converter.adapters.loaders import (
-    SklearnModelLoader,
-    TensorflowModelLoader,
-    TorchModelLoader,
-)
-from onnx_converter.adapters.parity_checkers import (
-    SklearnParityChecker,
-    TensorflowParityChecker,
-    TorchParityChecker,
-)
-from onnx_converter.application.options import (
-    ConversionOptions,
-    ParityOptions,
-    PostprocessOptions,
-)
-from onnx_converter.application.ports import (
-    ModelConverter,
-    ModelLoader,
-    OnnxPostProcessor,
-    ParityChecker,
-)
+from onnx_converter.adapters.converters import SklearnModelConverter
+from onnx_converter.adapters.converters import TensorflowModelConverter
+from onnx_converter.adapters.converters import TorchModelConverter
+from onnx_converter.adapters.loaders import SklearnModelLoader
+from onnx_converter.adapters.loaders import TensorflowModelLoader
+from onnx_converter.adapters.loaders import TorchModelLoader
+from onnx_converter.adapters.parity_checkers import SklearnParityChecker
+from onnx_converter.adapters.parity_checkers import TensorflowParityChecker
+from onnx_converter.adapters.parity_checkers import TorchParityChecker
+from onnx_converter.application.options import ConversionOptions
+from onnx_converter.application.options import ParityOptions
+from onnx_converter.application.options import PostprocessOptions
+from onnx_converter.application.ports import ModelConverter
+from onnx_converter.application.ports import ModelLoader
+from onnx_converter.application.ports import OnnxPostProcessor
+from onnx_converter.application.ports import ParityChecker
 from onnx_converter.application.results import ConversionResult
 from onnx_converter.errors import ConversionError
 from onnx_converter.infrastructure.postprocessing import OnnxPostProcessorImpl
 from onnx_converter.plugins.registry import create_default_registry
-from onnx_converter.schemas import (
-    SklearnFileConversionConfig,
-    TensorflowFileConversionConfig,
-    TorchFileConversionConfig,
-)
-from onnx_converter.types import MutableOptionMap, OptionMap, OptionValue
+from onnx_converter.schemas import SklearnFileConversionConfig
+from onnx_converter.schemas import TensorflowFileConversionConfig
+from onnx_converter.schemas import TorchFileConversionConfig
+from onnx_converter.types import MutableOptionMap
+from onnx_converter.types import OptionMap
+from onnx_converter.types import OptionValue
 
 
 def convert_torch_file(

@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable
+from collections.abc import Mapping
 from pathlib import Path
 
-from onnx_converter.application.use_cases import (
-    build_conversion_options,
-    convert_custom_file,
-    convert_sklearn_file,
-    convert_tensorflow_file,
-    convert_torch_file,
-)
+from onnx_converter.application.use_cases import build_conversion_options
+from onnx_converter.application.use_cases import convert_custom_file
+from onnx_converter.application.use_cases import convert_sklearn_file
+from onnx_converter.application.use_cases import convert_tensorflow_file
+from onnx_converter.application.use_cases import convert_torch_file
 from onnx_converter.types import OptionMap
 
 

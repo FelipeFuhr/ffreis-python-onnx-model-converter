@@ -5,7 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from onnx import TensorProto, helper
+from onnx import TensorProto
+from onnx import helper
 from onnx import save as onnx_save
 
 from onnx_converter.validate import validate_onnx_if_requested

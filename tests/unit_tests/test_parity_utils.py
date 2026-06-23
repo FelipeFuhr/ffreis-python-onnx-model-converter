@@ -20,13 +20,11 @@ from pytest import MonkeyPatch as pytest_MonkeyPatch
 from pytest import raises as pytest_raises
 
 from onnx_converter.errors import ParityError
-from onnx_converter.parity import (
-    _probabilities_to_matrix,
-    _run_onnx_first_output,
-    check_sklearn_parity,
-    check_tensor_parity,
-    load_parity_input,
-)
+from onnx_converter.parity import _probabilities_to_matrix
+from onnx_converter.parity import _run_onnx_first_output
+from onnx_converter.parity import check_sklearn_parity
+from onnx_converter.parity import check_tensor_parity
+from onnx_converter.parity import load_parity_input
 
 
 def test_load_parity_input_from_npy(tmp_path: Path) -> None:

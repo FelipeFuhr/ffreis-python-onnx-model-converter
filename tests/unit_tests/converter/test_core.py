@@ -9,7 +9,8 @@ from pytest import mark as pytest_mark
 from pytest import raises as pytest_raises
 
 from onnx_converter.converter import core
-from onnx_converter.converter.core import ConversionRequest, digest_bytes
+from onnx_converter.converter.core import ConversionRequest
+from onnx_converter.converter.core import digest_bytes
 from onnx_converter.errors import ConversionError
 
 

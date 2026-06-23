@@ -7,11 +7,9 @@ from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from onnx_converter.api import (
-    convert_sklearn_file_to_onnx,
-    convert_tf_path_to_onnx,
-    convert_torch_file_to_onnx,
-)
+from onnx_converter.api import convert_sklearn_file_to_onnx
+from onnx_converter.api import convert_tf_path_to_onnx
+from onnx_converter.api import convert_torch_file_to_onnx
 from onnx_converter.errors import ConversionError
 from onnx_converter.types import FrameworkKind
 

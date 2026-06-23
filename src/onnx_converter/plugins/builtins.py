@@ -9,11 +9,13 @@ from pydantic import ValidationError
 from onnx_converter.adapters.converters import SklearnModelConverter
 from onnx_converter.adapters.loaders import SklearnModelLoader
 from onnx_converter.adapters.parity_checkers import SklearnParityChecker
-from onnx_converter.application.options import ParityOptions, PostprocessOptions
+from onnx_converter.application.options import ParityOptions
+from onnx_converter.application.options import PostprocessOptions
 from onnx_converter.errors import PluginError
 from onnx_converter.infrastructure.postprocessing import OnnxPostProcessorImpl
 from onnx_converter.schemas import SklearnPluginOptions
-from onnx_converter.types import MutableOptionMap, OptionMap
+from onnx_converter.types import MutableOptionMap
+from onnx_converter.types import OptionMap
 
 
 class SklearnFilePlugin:
