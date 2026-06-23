@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import Literal
+from typing import Protocol
 
 FrameworkKind = Literal["pytorch", "tensorflow", "sklearn"]
 

@@ -10,7 +10,9 @@ from pydantic import ValidationError
 
 from onnx_converter.errors import ConversionError
 from onnx_converter.schemas import SklearnConversionConfig
-from onnx_converter.types import ModelArtifact, OptionValue, SklearnInitialTypeLike
+from onnx_converter.types import ModelArtifact
+from onnx_converter.types import OptionValue
+from onnx_converter.types import SklearnInitialTypeLike
 
 
 def convert_xgboost_to_onnx(

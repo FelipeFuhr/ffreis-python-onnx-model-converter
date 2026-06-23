@@ -15,7 +15,8 @@ causes a clear skip rather than a collection failure.
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -23,9 +24,7 @@ import pytest
 class TestXgboostConverterImportGuard:
     """Validate the ConversionError raised when onnxmltools is missing."""
 
-    def test_missing_onnxmltools_raises_conversion_error(
-        self, tmp_path: Path
-    ) -> None:
+    def test_missing_onnxmltools_raises_conversion_error(self, tmp_path: Path) -> None:
         """A missing onnxmltools import must surface as ConversionError."""
         from onnx_converter.errors import ConversionError
 
@@ -50,9 +49,7 @@ class TestXgboostConverterValidation:
 
     def test_invalid_n_features_raises(self, tmp_path: Path) -> None:
         """n_features <= 0 must raise ConversionError immediately."""
-        from onnx_converter.converters.xgboost_converter import (
-            convert_xgboost_to_onnx,
-        )
+        from onnx_converter.converters.xgboost_converter import convert_xgboost_to_onnx
         from onnx_converter.errors import ConversionError
 
         mock_model = MagicMock()
@@ -67,9 +64,7 @@ class TestXgboostConverterValidation:
 
     def test_negative_n_features_raises(self, tmp_path: Path) -> None:
         """Negative n_features must also raise ConversionError."""
-        from onnx_converter.converters.xgboost_converter import (
-            convert_xgboost_to_onnx,
-        )
+        from onnx_converter.converters.xgboost_converter import convert_xgboost_to_onnx
         from onnx_converter.errors import ConversionError
 
         mock_model = MagicMock()
@@ -122,9 +117,7 @@ class TestXgboostConverterHappyPath:
 
     def test_classifier_produces_onnx_file(self, tmp_path: Path) -> None:
         """XGBClassifier export must produce a non-empty ONNX file."""
-        from onnx_converter.converters.xgboost_converter import (
-            convert_xgboost_to_onnx,
-        )
+        from onnx_converter.converters.xgboost_converter import convert_xgboost_to_onnx
 
         model = self._make_classifier()
         out = convert_xgboost_to_onnx(
@@ -137,9 +130,7 @@ class TestXgboostConverterHappyPath:
 
     def test_regressor_produces_onnx_file(self, tmp_path: Path) -> None:
         """XGBRegressor export must produce a non-empty ONNX file."""
-        from onnx_converter.converters.xgboost_converter import (
-            convert_xgboost_to_onnx,
-        )
+        from onnx_converter.converters.xgboost_converter import convert_xgboost_to_onnx
 
         model = self._make_regressor()
         out = convert_xgboost_to_onnx(
@@ -166,9 +157,7 @@ class TestXgboostConverterHappyPath:
         """The produced ONNX file must load without error under ONNX Runtime."""
         import onnxruntime as ort
 
-        from onnx_converter.converters.xgboost_converter import (
-            convert_xgboost_to_onnx,
-        )
+        from onnx_converter.converters.xgboost_converter import convert_xgboost_to_onnx
 
         model = self._make_regressor()
         out = convert_xgboost_to_onnx(
@@ -185,9 +174,7 @@ class TestXgboostConverterHappyPath:
         import onnxruntime as ort
         from xgboost import XGBRegressor
 
-        from onnx_converter.converters.xgboost_converter import (
-            convert_xgboost_to_onnx,
-        )
+        from onnx_converter.converters.xgboost_converter import convert_xgboost_to_onnx
 
         rng = np.random.default_rng(0)
         X = rng.standard_normal((40, 6)).astype(np.float32)
@@ -208,6 +195,5 @@ class TestXgboostConverterHappyPath:
         onnx_preds = sess.run(None, {input_name: X_test})[0].flatten()
 
         max_diff = float(np.max(np.abs(xgb_preds - onnx_preds)))
-        assert np.allclose(xgb_preds, onnx_preds, atol=1e-4), (
-            f"XGBoost/ONNX parity failed: max diff = {max_diff}"
-        )
+        err_msg = f"XGBoost/ONNX parity failed: max diff = {max_diff}"
+        assert np.allclose(xgb_preds, onnx_preds, atol=1e-4), err_msg

@@ -14,18 +14,16 @@ from numpy import save as np_save
 from pytest import MonkeyPatch as pytest_MonkeyPatch
 from pytest import raises as pytest_raises
 
-from onnx_converter.adapters.loaders import (
-    SklearnModelLoader,
-    TensorflowModelLoader,
-    TorchModelLoader,
-)
-from onnx_converter.adapters.parity_checkers import (
-    SklearnParityChecker,
-    TensorflowParityChecker,
-    TorchParityChecker,
-)
+from onnx_converter.adapters.loaders import SklearnModelLoader
+from onnx_converter.adapters.loaders import TensorflowModelLoader
+from onnx_converter.adapters.loaders import TorchModelLoader
+from onnx_converter.adapters.parity_checkers import SklearnParityChecker
+from onnx_converter.adapters.parity_checkers import TensorflowParityChecker
+from onnx_converter.adapters.parity_checkers import TorchParityChecker
 from onnx_converter.application.options import ParityOptions
-from onnx_converter.errors import ParityError, UnsafeLoadError, UnsupportedModelError
+from onnx_converter.errors import ParityError
+from onnx_converter.errors import UnsafeLoadError
+from onnx_converter.errors import UnsupportedModelError
 
 
 def test_torch_loader_rejects_checkpoint_dict(

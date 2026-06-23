@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
+from collections.abc import Sequence
 from pathlib import Path
 
-from onnx_converter.types import (
-    ModelArtifact,
-    OptionMap,
-    OptionValue,
-    SklearnInitialTypeLike,
-    TensorSpecLike,
-)
+from onnx_converter.types import ModelArtifact
+from onnx_converter.types import OptionMap
+from onnx_converter.types import OptionValue
+from onnx_converter.types import SklearnInitialTypeLike
+from onnx_converter.types import TensorSpecLike
 
 __version__ = "0.1.0"
 

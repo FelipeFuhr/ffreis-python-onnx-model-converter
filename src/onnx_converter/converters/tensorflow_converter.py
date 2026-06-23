@@ -11,7 +11,8 @@ from tensorflow import float32 as tf_float32
 from tensorflow import keras as tf_keras
 from tf2onnx import convert as tf2onnx_convert
 
-from onnx_converter.types import OptionValue, TensorSpecLike
+from onnx_converter.types import OptionValue
+from onnx_converter.types import TensorSpecLike
 
 
 def _ensure_output_dir(output_path: str) -> None:

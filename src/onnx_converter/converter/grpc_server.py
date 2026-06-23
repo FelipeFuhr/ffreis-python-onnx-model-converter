@@ -3,24 +3,25 @@
 from __future__ import annotations
 
 import argparse
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
+from collections.abc import Iterator
 from concurrent import futures
 from importlib import import_module as importlib_import_module
 from logging import getLogger as logging_getLogger
 from os import getenv as os_getenv
 from types import ModuleType
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING
+from typing import Protocol
+from typing import cast
 
 try:
     import grpc
 except ModuleNotFoundError:  # pragma: no cover
     grpc = None
 
-from onnx_converter.converter.core import (
-    ConversionRequest,
-    Framework,
-    convert_artifact_bytes,
-)
+from onnx_converter.converter.core import ConversionRequest
+from onnx_converter.converter.core import Framework
+from onnx_converter.converter.core import convert_artifact_bytes
 from onnx_converter.errors import ConversionError
 
 logger = logging_getLogger(__name__)

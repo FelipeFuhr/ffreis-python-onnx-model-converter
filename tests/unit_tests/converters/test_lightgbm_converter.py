@@ -14,7 +14,8 @@ causes a clear skip rather than a collection failure.
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -22,9 +23,7 @@ import pytest
 class TestLightgbmConverterImportGuard:
     """Validate the ConversionError raised when onnxmltools is missing."""
 
-    def test_missing_onnxmltools_raises_conversion_error(
-        self, tmp_path: Path
-    ) -> None:
+    def test_missing_onnxmltools_raises_conversion_error(self, tmp_path: Path) -> None:
         """A missing onnxmltools import must surface as ConversionError."""
         from onnx_converter.errors import ConversionError
 
@@ -216,6 +215,5 @@ class TestLightgbmConverterHappyPath:
         )
 
         max_diff = float(np.max(np.abs(lgb_preds - onnx_preds)))
-        assert np.allclose(lgb_preds, onnx_preds, atol=1e-4), (
-            f"LightGBM/ONNX parity failed: max diff = {max_diff}"
-        )
+        err_msg = f"LightGBM/ONNX parity failed: max diff = {max_diff}"
+        assert np.allclose(lgb_preds, onnx_preds, atol=1e-4), err_msg

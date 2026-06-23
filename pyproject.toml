@@ -193,13 +193,20 @@ select = ["E", "F", "I", "UP", "B", "D", "ANN"]
 # lint-only CI runs, causing ruff to classify converter_grpc as third-party and
 # therefore expect a different blank-line layout than when the stubs exist locally.
 known-first-party = ["onnx_converter", "converter_grpc"]
+# scan-fix(ruff:I001): match isort's force_single_line = true so ruff lint and
+# isort agree on import style and don't cycle each other's fixes.
+force-single-line = true
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "src/onnx_converter/cli/cli.py" = ["B008"]
+# scan-fix(ruff:UP040): TypeAlias annotation is needed here for mypy compat when
+# from __future__ import annotations is active; the Python 3.12 `type` keyword
+# syntax is not yet compatible with numpy's NDArray generic in strict mypy mode.
 "src/onnx_converter/types.py" = ["UP040"]
+"src/onnx_converter/parity.py" = ["UP040"]
 "examples/**/*.py" = ["D", "ANN"]
 "scripts/**/*.py" = ["D", "ANN"]
 

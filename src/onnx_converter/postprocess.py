@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import datetime, timezone
+from datetime import datetime
+from datetime import timezone
 from pathlib import Path
 
 from onnx import load as onnx_load
@@ -63,7 +64,8 @@ def optimize_onnx_graph(output_path: Path) -> None:
 def quantize_onnx_dynamic(output_path: Path) -> None:
     """Apply dynamic quantization in-place using onnxruntime tools."""
     try:
-        from onnxruntime.quantization import QuantType, quantize_dynamic
+        from onnxruntime.quantization import QuantType
+        from onnxruntime.quantization import quantize_dynamic
     except Exception as exc:
         raise PostprocessError(
             "Dynamic quantization requested but onnxruntime is not installed."

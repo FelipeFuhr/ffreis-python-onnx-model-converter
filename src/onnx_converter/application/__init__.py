@@ -2,20 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable
+from collections.abc import Mapping
 from pathlib import Path
 
-from onnx_converter.application.options import (
-    ConversionOptions,
-    ParityOptions,
-    PostprocessOptions,
-)
-from onnx_converter.application.ports import (
-    ModelConverter,
-    ModelLoader,
-    OnnxPostProcessor,
-    ParityChecker,
-)
+from onnx_converter.application.options import ConversionOptions
+from onnx_converter.application.options import ParityOptions
+from onnx_converter.application.options import PostprocessOptions
+from onnx_converter.application.ports import ModelConverter
+from onnx_converter.application.ports import ModelLoader
+from onnx_converter.application.ports import OnnxPostProcessor
+from onnx_converter.application.ports import ParityChecker
 from onnx_converter.application.results import ConversionResult
 from onnx_converter.types import OptionMap
 

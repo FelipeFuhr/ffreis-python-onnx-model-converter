@@ -10,12 +10,10 @@ from pytest import raises as pytest_raises
 
 from onnx_converter.errors import PluginError
 from onnx_converter.plugins import registry as registry_module
-from onnx_converter.plugins.registry import (
-    PluginRegistry,
-    _import_module_or_path,
-    _register_from_module,
-    create_default_registry,
-)
+from onnx_converter.plugins.registry import PluginRegistry
+from onnx_converter.plugins.registry import _import_module_or_path
+from onnx_converter.plugins.registry import _register_from_module
+from onnx_converter.plugins.registry import create_default_registry
 
 
 class _Plugin:

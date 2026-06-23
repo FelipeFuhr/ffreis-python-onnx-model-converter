@@ -5,14 +5,17 @@ from __future__ import annotations
 from argparse import ArgumentParser as argparse_ArgumentParser
 from argparse import Namespace as argparse_Namespace
 from types import SimpleNamespace as types_SimpleNamespace
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING
+from typing import Protocol
+from typing import cast
 
 from pytest import MonkeyPatch as pytest_MonkeyPatch
 from pytest import importorskip as pytest_importorskip
 from pytest import mark as pytest_mark
 from pytest import raises as pytest_raises
 
-from onnx_converter.converter.core import ConversionOutcome, ConversionRequest
+from onnx_converter.converter.core import ConversionOutcome
+from onnx_converter.converter.core import ConversionRequest
 from onnx_converter.errors import ConversionError
 
 if TYPE_CHECKING:

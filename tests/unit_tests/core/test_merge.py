@@ -21,11 +21,9 @@ import pytest
 from onnx import TensorProto
 from onnx import helper as onnx_helper
 
-from onnx_converter.core.merge import (
-    MergeError,
-    merge_onnx_models,
-    verify_merge_parity,
-)
+from onnx_converter.core.merge import MergeError
+from onnx_converter.core.merge import merge_onnx_models
+from onnx_converter.core.merge import verify_merge_parity
 
 # ---------------------------------------------------------------------------
 # Shared helpers

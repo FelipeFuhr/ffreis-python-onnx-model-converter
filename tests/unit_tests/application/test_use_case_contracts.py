@@ -6,12 +6,10 @@ from pathlib import Path
 
 from pytest import raises as pytest_raises
 
-from onnx_converter.application.use_cases import (
-    build_conversion_options,
-    convert_sklearn_file,
-    convert_tensorflow_file,
-    convert_torch_file,
-)
+from onnx_converter.application.use_cases import build_conversion_options
+from onnx_converter.application.use_cases import convert_sklearn_file
+from onnx_converter.application.use_cases import convert_tensorflow_file
+from onnx_converter.application.use_cases import convert_torch_file
 from onnx_converter.errors import ParityError
 
 
