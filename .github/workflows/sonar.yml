@@ -29,7 +29,7 @@ jobs:
     if: ${{ !github.event.pull_request.draft && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false) }}
     permissions:
       contents: read
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-sonarcloud.yml@9ed72155ff7384758b2bd36bd97ba5371ae285c2 # main
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-sonarcloud.yml@287f836a726a35af37bd24561fc687f66eaeb92f # v1.7.0
     with:
       working-directory: "."
     secrets:
