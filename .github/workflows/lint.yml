@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   lint:
-    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-lint.yml@v1.0.1
+    uses: ffreis-org/ffreis-workflows-python/.github/workflows/python-lint.yml@v1.0.1
     with:
       python-version: "3.13"
       uv-extras: "dev"

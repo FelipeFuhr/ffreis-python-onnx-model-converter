@@ -13,4 +13,4 @@ jobs:
   semantic-pr:
     permissions:
       contents: read
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-semantic-pr.yml@v1.2.0
+    uses: ffreis-org/ffreis-workflows-general/.github/workflows/general-semantic-pr.yml@v1.2.0
