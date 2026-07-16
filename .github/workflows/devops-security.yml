@@ -44,7 +44,7 @@ jobs:
       security-events: write
     # Consolidated fs-security bundle: Trivy(fs) + Grype(fs) + gitleaks in ONE job
     # (replaces the gitleaks job here + the standalone gitleaks/trivy-fs/grype-fs/secret-scan workflows).
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-security-fs.yml@474633563723ef7b055ca9af2c00564dd217d03e # post-v1.6.0: fix gitleaks comment grep
+    uses: ffreis-org/ffreis-workflows-general/.github/workflows/general-security-fs.yml@474633563723ef7b055ca9af2c00564dd217d03e # post-v1.6.0: fix gitleaks comment grep
     with:
       working-directory: "."
       scan-history: true
@@ -61,7 +61,7 @@ jobs:
       contents: read
       actions: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-osv-scanner.yml@18fd5efa47d47bdc4cc9418ea5b26f88246772f8 # post-v1.6.0: fix grype exit-on-error
+    uses: ffreis-org/ffreis-workflows-general/.github/workflows/general-osv-scanner.yml@18fd5efa47d47bdc4cc9418ea5b26f88246772f8 # post-v1.6.0: fix grype exit-on-error
     with:
       working-directory: "."
       upload-sarif: false
@@ -72,7 +72,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-codeql.yml@18fd5efa47d47bdc4cc9418ea5b26f88246772f8 # post-v1.6.0: fix grype exit-on-error
+    uses: ffreis-org/ffreis-workflows-general/.github/workflows/general-codeql.yml@18fd5efa47d47bdc4cc9418ea5b26f88246772f8 # post-v1.6.0: fix grype exit-on-error
     with:
       languages: "python"
       source-root: "."
