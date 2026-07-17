@@ -28,7 +28,7 @@ runtime = [
     "onnxoptimizer>=0.4.2",
 ]
 torch = [
-    "torch>=2.12.0",
+    "torch>=2.13.0",
     "torchvision>=0.21.0",
     "onnxscript>=0.6.2",
 ]
@@ -114,7 +114,7 @@ all = [
     "onnxoptimizer>=0.4.2",
     "typer>=0.23.1",
     "rich>=14.3.2",
-    "torch>=2.12.0",
+    "torch>=2.13.0",
     "torchvision>=0.21.0",
     "onnxscript>=0.6.2",
     "optuna>=4.7.0",
