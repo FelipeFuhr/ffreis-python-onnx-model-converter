@@ -11,4 +11,4 @@ concurrency:
 
 jobs:
   semgrep:
-    uses: ffreis-org/ffreis-workflows-python/.github/workflows/python-semgrep.yml@v1.0.1
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-semgrep.yml@v1.0.1
