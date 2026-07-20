@@ -18,6 +18,6 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
-    uses: ffreis-org/ffreis-workflows-general/.github/workflows/general-stale.yml@v1.2.0
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-stale.yml@v1.2.0
     with:
       only: "both"
