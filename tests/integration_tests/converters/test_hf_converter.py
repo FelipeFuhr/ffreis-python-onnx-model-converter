@@ -22,10 +22,8 @@ def test_hf_convert_and_parity(tmp_path: Path) -> None:
     pytest_importorskip("transformers")
     pytest_importorskip("onnxruntime")
 
-    from onnx_converter.converters.hf_converter import (
-        convert_hf_to_onnx,
-        verify_hf_onnx_parity,
-    )
+    from onnx_converter.converters.hf_converter import convert_hf_to_onnx
+    from onnx_converter.converters.hf_converter import verify_hf_onnx_parity
 
     onnx_path = convert_hf_to_onnx(
         _TINY_MODEL,
