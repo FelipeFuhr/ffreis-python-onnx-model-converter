@@ -3,10 +3,16 @@ name: DevOps / ShellCheck
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "**/*.sh"
+      - "Makefile"
   push:
     branches: [main, master]
 
 
+    paths:
+      - "**/*.sh"
+      - "Makefile"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
