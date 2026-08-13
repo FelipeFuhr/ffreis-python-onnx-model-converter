@@ -269,8 +269,11 @@ test-property: ## Run Hypothesis property-based tests
 
 .PHONY: mutation-test
 mutation-test: ## Run mutation testing with mutmut (slow — run in CI)
-	$(UV) run mutmut run --paths-to-mutate=$(SRC_DIR) --tests-dir=$(TEST_DIR) || true
+	$(UV) run mutmut run --paths-to-mutate=$(SRC_DIR) --tests-dir=$(TEST_DIR)
 	$(UV) run mutmut results
+
+.PHONY: mutation
+mutation: mutation-test ## Alias required by the lefthook release tier
 
 PLATFORM_STANDARDS_SHA ?= 3c787edb4e96ddea2e86b2add2c32139685e8db7  # v1.2.1
 PLATFORM_STANDARDS_RAW ?= https://raw.githubusercontent.com/FelipeFuhr/ffreis-platform-standards
