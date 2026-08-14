@@ -97,19 +97,19 @@ plan: ## Not applicable — use 'make validate' or 'make test' for Python repos
 
 .PHONY: test
 test: ## Run tests
-	$(VENV_DIR)/bin/pytest -q
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q
 
 .PHONY: test-unit
 test-unit: ## Run unit tests only
-	$(VENV_DIR)/bin/pytest -q tests/unit_tests
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q tests/unit_tests
 
 .PHONY: test-integration
 test-integration: ## Run integration tests only
-	$(VENV_DIR)/bin/pytest -q tests/integration_tests
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q tests/integration_tests
 
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests only
-	$(VENV_DIR)/bin/pytest -q tests/e2e_tests
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q tests/e2e_tests
 
 .PHONY: grpc-generate
 grpc-generate: ## Regenerate gRPC protobuf stubs
