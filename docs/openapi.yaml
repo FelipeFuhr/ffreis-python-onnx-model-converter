@@ -39,10 +39,9 @@ paths:
         required: true
       responses:
         '200':
-          description: Successful Response
+          description: ONNX model bytes
           content:
-            application/json:
-              schema: {}
+            application/octet-stream: {}
         '422':
           description: Validation Error
           content:
@@ -55,7 +54,7 @@ components:
       properties:
         artifact:
           type: string
-          format: binary
+          contentMediaType: application/octet-stream
           title: Artifact
         framework:
           type: string
