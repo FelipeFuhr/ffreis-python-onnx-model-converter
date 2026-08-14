@@ -61,7 +61,7 @@ jobs:
       contents: read
       actions: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-osv-scanner.yml@18fd5efa47d47bdc4cc9418ea5b26f88246772f8 # post-v1.6.0: fix grype exit-on-error
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-osv-scanner.yml@8159bd0c0a5acfa82c827072082a585e3fe11b54 # v1.9.3
     with:
       working-directory: "."
       upload-sarif: false
