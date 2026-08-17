@@ -35,7 +35,10 @@ jobs:
     uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-mutation.yml@v1.0.1
     with:
       python-version: "3.13"
-      uv-extras: "dev cli"
+      # scan-fix(ci:mutmut-baseline): baseline pytest run isn't scoped to
+      # tests/unit_tests only, so it also exercises the sklearn CLI roundtrip
+      # test -- needs the sklearn extra installed or the baseline run fails.
+      uv-extras: "dev cli sklearn"
       paths-to-mutate: "src"
       threshold: 80
 
