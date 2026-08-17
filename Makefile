@@ -97,19 +97,19 @@ plan: ## Not applicable — use 'make validate' or 'make test' for Python repos
 
 .PHONY: test
 test: ## Run tests
-	$(VENV_DIR)/bin/pytest -q
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q
 
 .PHONY: test-unit
 test-unit: ## Run unit tests only
-	$(VENV_DIR)/bin/pytest -q tests/unit_tests
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q tests/unit_tests
 
 .PHONY: test-integration
 test-integration: ## Run integration tests only
-	$(VENV_DIR)/bin/pytest -q tests/integration_tests
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q tests/integration_tests
 
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests only
-	$(VENV_DIR)/bin/pytest -q tests/e2e_tests
+	PATH="$(VENV_DIR)/bin:$$PATH" $(VENV_DIR)/bin/pytest -q tests/e2e_tests
 
 .PHONY: grpc-generate
 grpc-generate: ## Regenerate gRPC protobuf stubs
@@ -269,8 +269,11 @@ test-property: ## Run Hypothesis property-based tests
 
 .PHONY: mutation-test
 mutation-test: ## Run mutation testing with mutmut (slow — run in CI)
-	$(UV) run mutmut run --paths-to-mutate=$(SRC_DIR) --tests-dir=$(TEST_DIR) || true
+	$(UV) run mutmut run --paths-to-mutate=$(SRC_DIR) --tests-dir=$(TEST_DIR)
 	$(UV) run mutmut results
+
+.PHONY: mutation
+mutation: mutation-test ## Alias required by the lefthook release tier
 
 PLATFORM_STANDARDS_SHA ?= 3c787edb4e96ddea2e86b2add2c32139685e8db7  # v1.2.1
 PLATFORM_STANDARDS_RAW ?= https://raw.githubusercontent.com/FelipeFuhr/ffreis-platform-standards

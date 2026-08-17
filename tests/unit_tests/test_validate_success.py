@@ -22,7 +22,14 @@ def _write_minimal_onnx(path: Path) -> None:
         [helper.make_tensor_value_info("x", TensorProto.FLOAT, [1, 1])],
         [helper.make_tensor_value_info("y", TensorProto.FLOAT, [1, 1])],
     )
-    onnx_save(helper.make_model(graph, producer_name="t"), str(path))
+    onnx_save(
+        helper.make_model(
+            graph,
+            producer_name="t",
+            opset_imports=[helper.make_operatorsetid("", 26)],
+        ),
+        str(path),
+    )
 
 
 def test_validate_real_onnx_model_passes(tmp_path: Path) -> None:

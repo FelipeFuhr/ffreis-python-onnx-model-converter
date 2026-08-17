@@ -8,6 +8,7 @@ from sys import modules as sys_modules
 from types import SimpleNamespace as types_SimpleNamespace
 
 from pytest import MonkeyPatch as pytest_MonkeyPatch
+from pytest import fixture as pytest_fixture
 from pytest import raises as pytest_raises
 
 from onnx_converter.errors import ConversionError
@@ -17,6 +18,19 @@ def _reload_module(module_name: str) -> object:
     """Reload module to pick up monkeypatched dependency modules."""
     sys_modules.pop(module_name, None)
     return importlib_import_module(module_name)
+
+
+@pytest_fixture(autouse=True)
+def restore_real_converter_modules() -> object:
+    """Undo import-time dependency fakes before integration tests share modules."""
+    yield
+    for module_name in (
+        "onnx_converter.converters",
+        "onnx_converter.converters.pytorch_converter",
+        "onnx_converter.converters.sklearn_converter",
+        "onnx_converter.converters.tensorflow_converter",
+    ):
+        sys_modules.pop(module_name, None)
 
 
 def test_converters_namespace_wrappers(monkeypatch: pytest_MonkeyPatch) -> None:
