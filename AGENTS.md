@@ -35,7 +35,13 @@ and scikit-learn models to ONNX. Plugin-based for custom model families.
 - **Architecture boundary enforcement** via `make architecture-check`. The CLI layer
   must not import from `infrastructure/`. Violations fail CI.
 
-- **Coverage minimum is 90%** — stricter than other repos. Do not lower it.
+- **Coverage minimum is 92%** (`fail_under = 92` in `pyproject.toml`) — stricter
+  than other repos, and above the fleet-wide 75% floor. Do not lower it.
+
+- **Mutation testing (`mutation.yml`) requires `mutmut>=2.4,<3`.** mutmut v3
+  dropped `--paths-to-mutate`/`--tests-dir`, which `python-mutation.yml` (and
+  `make mutation-test`) still invoke. The old `>=2.0.0` pin silently resolved
+  to v3 and broke the scheduled mutation-testing workflow.
 
 - **Parity checks** validate that source model and ONNX Runtime outputs match within
   tolerance. These are optional locally but enforced in CI for supported frameworks.
