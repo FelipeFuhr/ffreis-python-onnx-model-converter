@@ -10,7 +10,12 @@ from skl2onnx import update_registered_converter
 from skl2onnx.algebra.onnx_ops import OnnxMul
 from skl2onnx.common.data_types import FloatTensorType
 from skl2onnx.common.utils import check_input_and_output_numbers
-from sklearn.base import BaseEstimator, TransformerMixin
+
+# scan-fix(ruff:I001): split combined import into single-symbol imports — this
+# repo's ruff config combines single-line imports; isort's force_single_line
+# conflicts with it (see AGENTS.md "Lint gate"), ruff is authoritative here.
+from sklearn.base import BaseEstimator
+from sklearn.base import TransformerMixin
 
 
 class MultiplyByConstant(BaseEstimator, TransformerMixin):
