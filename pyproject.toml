@@ -159,6 +159,13 @@ line_length = 88
 known_first_party = ["onnx_converter"]
 force_single_line = true
 skip_gitignore = true
+# scan-fix(lefthook:fmt-check): skip_gitignore alone isn't reliable for these
+# generated, gitignored gRPC stubs when isort runs under the lefthook
+# pre-commit hook (its git-env wrapping breaks isort's internal
+# `git check-ignore` call even though the files ARE gitignored — reproduced:
+# `make fmt-check` standalone passes, the identical command under lefthook
+# fails). skip_glob sidesteps git entirely with a plain path match.
+skip_glob = ["src/converter_grpc/*_pb2.py", "src/converter_grpc/*_pb2_grpc.py"]
 
 # flake8 config lives in .flake8 (flake8 7.x does not read pyproject.toml).
 
