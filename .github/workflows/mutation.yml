@@ -31,13 +31,25 @@ permissions:
 
 jobs:
   mutation:
-    if: ${{ !github.event.pull_request.draft }}
-    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-mutation.yml@8405bfc6e887b6e1af634a6ed104538ab98d3baf # main@8405bfc — post-v1.3.1, unreleased (release-please manifest is stale)
+    if: ${{ (!github.event.pull_request.draft) && (github.event_name != 'pull_request') }}
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-mutation.yml@6c507728c6d3dc346cbeb1fe19df72de018bd5b4 # v1.7.0
     with:
+      runner: '["ubuntu-latest"]'
       python-version: "3.13"
       # scan-fix(ci:mutmut-baseline): baseline pytest run isn't scoped to
       # tests/unit_tests only, so it also exercises the sklearn CLI roundtrip
       # test -- needs the sklearn extra installed or the baseline run fails.
+      uv-extras: "dev cli sklearn"
+      paths-to-mutate: "src"
+      threshold: 80
+
+  mutation-incremental:
+    if: ${{ (!github.event.pull_request.draft) && (github.event_name == 'pull_request') }}
+    uses: FelipeFuhr/ffreis-workflows-python/.github/workflows/python-mutation.yml@6c507728c6d3dc346cbeb1fe19df72de018bd5b4 # v1.7.0
+    with:
+      in-diff: true
+      runner: '["ubuntu-latest"]'
+      python-version: "3.13"
       uv-extras: "dev cli sklearn"
       paths-to-mutate: "src"
       threshold: 80
